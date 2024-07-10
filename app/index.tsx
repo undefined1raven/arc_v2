@@ -5,10 +5,12 @@ import RButton from '@/components/common/RButton';
 import { startAuthentication } from '@simplewebauthn/browser';
 import WebView from 'react-native-webview';
 import HomeScreen from './explore';
-import { Provider } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import store from './store';
 import RBox from '@/components/common/RBox';
 import Constants from 'expo-constants';
+import { UseSelector } from 'react-redux';
+import globalStyles, { GlobalStyleType } from '@/hooks/globalStyles';
 async function save(key, value) {
   await SecureStore.setItemAsync(key, value, { authenticationPrompt: 'Confirm your identity to continue', requireAuthentication: true });
 }
@@ -28,7 +30,6 @@ export default function App() {
   return (
     <Provider store={store}>
       <HomeScreen></HomeScreen>
-      <RBox borderRadius={0} top={0} height={Constants.statusBarHeight} backgroundColor='#BEB4FF' width="100%"></RBox>
     </Provider>
   );
 }

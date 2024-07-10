@@ -1,38 +1,75 @@
+import themeColors, { Themes, ThemeColorsType } from "@/app/config/colors";
 import { createSlice } from "@reduxjs/toolkit";
+import { ColorValueHex } from "@/components/common/CommonTypes";
+import { act } from "react-test-renderer";
+
+type PageBackgroundColorArrayType = ColorValueHex[];
+
+type GlobalStyleType = {
+    borderRadius: number,
+    borderRadius20: number,
+    borderRadius10: number,
+    largeDesktopFont: number,
+    veryLargeDesktopFont: number,
+    verySmallDesktopFont: number,
+    titleDesktopFont: number,
+    regularDesktopFont: number,
+    smallDesktopFont: number,
+    mediumDesktopFont: number,
+    footnoteDesktopFont: number,
+    veryLargeMobileFont: number,
+    largeMobileFont: number,
+    regularMobileFont: number,
+    mediumMobileFont: number,
+    smallMobileFont: number,
+    footnoteMobileFont: number
+    theme: Themes,
+    color: ColorValueHex,
+    colorAccent: ColorValueHex,
+    textColor: ColorValueHex,
+    textColorAccent: ColorValueHex,
+    textColorInactive: ColorValueHex,
+    colorInactive: ColorValueHex,
+    successColor: ColorValueHex,
+    successTextColor: ColorValueHex,
+    errorColor: ColorValueHex,
+    errorTextColor: ColorValueHex,
+    pageBackgroundColors: PageBackgroundColorArrayType,
+    statusBarColor: ColorValueHex
+}
+
+
 
 const globalStyle = createSlice({
     name: 'globalStyle',
     initialState: {
-        activeColor: '#2400FF',
-        activeLightColor: '#2958FF',
-        secondaryColor: '#100071',
-        inactiveColor: '#353535',
-        activeMono: '#BCB1FF',
-        secondaryMono: '#777777',
-        inactiveMono: '#353535',
-        errorColor: '#FF001F',
-        successColor: '#00FF75',
-        borderRadius: '3px',
-        borderRadius20: '20px',
-        borderRadius10: '10px',
-        largeDesktopFont: '27px',
-        veryLargeDesktopFont: '31px',
-        verySmallDesktopFont: '15px',
-        titleDesktopFont: '60px',
-        regularDesktopFont: '25px',
-        smallDesktopFont: '17px',
-        mediumDesktopFont: '21px',
-        footnoteDesktopFont: '12px',
-        veryLargeMobileFont: '31px',
-        largeMobileFont: '19px',
-        regularMobileFont: '16px',
-        mediumMobileFont: '14px',
-        smallMobileFont: '10px',
-        footnoteMobileFont: '8px',
+        borderRadius: 3,
+        borderRadius20: 20,
+        borderRadius10: 10,
+        largeDesktopFont: 27,
+        veryLargeDesktopFont: 30,
+        verySmallDesktopFont: 15,
+        titleDesktopFont: 60,
+        regularDesktopFont: 25,
+        smallDesktopFont: 12,
+        mediumDesktopFont: 21,
+        footnoteDesktopFont: 12,
+        veryLargeMobileFont: 31,
+        largeMobileFont: 19,
+        regularMobileFont: 16,
+        mediumMobileFont: 14,
+        smallMobileFont: 10,
+        footnoteMobileFont: 8,
         theme: 'light',
+        ...themeColors.light
     },
-    reducers: {}
+    reducers: {
+        updateGlobalStyle: (state, action) => {
+            return { ...state, ...action.payload }
+        }
+    },
 })
 
-
+export type { GlobalStyleType, PageBackgroundColorArrayType }
+export const { updateGlobalStyle } = globalStyle.actions;
 export default globalStyle.reducer;

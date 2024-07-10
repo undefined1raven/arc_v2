@@ -6,67 +6,46 @@ import FigmaImporter from '../../fn/figmaImporter'
 import FigmaImportConfig from '../../fn/FigmaImportConfig'
 import Animated, { Easing, withSpring, withTiming } from 'react-native-reanimated';
 import { useSharedValue } from 'react-native-reanimated';
+import store from "@/app/store";
+import globalStyles, { GlobalStyleType } from "@/hooks/globalStyles";
+import { useSelector } from "react-redux";
+import { BlurView } from "expo-blur";
 type RButtonProps = {
     id?: string,
-    children: any,
-    onClick?: Function,
-    text: string,
+    children?: any,
+    text?: string,
     figmaImport?: object,
-    label?: string,
-    borderWidth: number,
-    androidRippleColor: ColorValueHex,
-    className?: string | string[], color?: ColorValueHex, borderColor?: ColorValueHex, backgroundColor?: ColorValueHex, width?: number | string, height?: number | string, top?: number | string, left?: number | string, mobileFontSize?: number | FontSize, align?: AlignType, opacity?: number, style?: object, blur?: number, borderRadius?: number, alignPadding?: number | string, hoverOpacityMax?: string, hoverOpacityMin?: string, horizontalCenter?: boolean, verticalCenter?: boolean, figmaImportConfig?: object, mouseEnter?: Function, mouseLeave?: Function, transitions?: string | object, isSelected?: boolean, onLongPress?: Function
+    borderWidth?: number,
+    color?: ColorValueHex,
+    borderColor?: ColorValueHex,
+    backgroundColor?: ColorValueHex,
+    width?: number | string,
+    height?: number | string,
+    top?: number | string,
+    left?: number | string,
+    fontSize?: number | FontSize,
+    align?: AlignType,
+    opacity?: number,
+    style?: object,
+    blur?: number,
+    borderRadius?: number,
+    alignPadding?: number | string,
+    horizontalCenter?: boolean,
+    verticalCenter?: boolean,
+    figmaImportConfig?: object,
+    transitions?: string | object,
 }
 
 
 
-export default function RBox(props: RButtonProps) {
+export default function RLabel(props: RButtonProps) {
     //Internal state
-    const [isMouseHovering, setIsMouseHovering] = useState(false);
-    const alignToPadding = { start: 'left', end: 'right', right: 'right', left: 'left' };
     const { height, width } = useWindowDimensions();
-
-    let align = props.align ? props.align : 'center';
-    let hoverOpacityMax = props.hoverOpacityMax ? props.hoverOpacityMax : '20';
-    let hoverOpacityMin = props.hoverOpacityMin ? props.hoverOpacityMin : '00';
-    let backgroundColorActual = props.backgroundColor ? props.backgroundColor : '#000000';
-
-    function parsePresetTop() {
-        if (props.figmaImport) {
-            const figmaTop = props.figmaImport?.mobile?.top;
-            if (figmaTop !== undefined) {
-                const figmaTopNumber = parseFloat(figmaTop);
-                const figmaTopStr = figmaTop.toString();
-                if (isNaN(figmaTopNumber) === false) {
-                    const strLen = figmaTopStr.length;
-                    if (figmaTopStr[strLen - 1] === '%') {
-                        return parseFloat((figmaTopNumber * 100 / height).toFixed(2))
-                    } else {
-                        return figmaTopNumber
-
-                    }
-                }
-            }
-        }
-        const manualTop = props.top;
-        if (manualTop) {
-            const manualTopStr = manualTop.toString();
-            const manualTopNumber = parseFloat(manualTopStr);
-            if (isNaN(manualTopNumber) === false) {
-                const strLen = manualTopStr.length;
-                if (manualTopStr[strLen - 1] === '%') {
-                    return parseFloat((manualTopNumber * 100 / height).toFixed(2))
-
-                } else {
-                    return manualTopNumber
-                }
-            }
-        }
-        return 0;
-    }
-
-    const xx = useSharedValue(parsePresetTop() - 10);
-
+    const p50Width = 0.5 * width;
+    const p50Height = 0.5 * height;
+    store.subscribe(() => { });
+    const globalStyle: GlobalStyleType = useSelector(store => store.globalStyle);
+    const labelRef = useRef(null);
     function getVal(value: any, defaultVal: any) {
         if (value !== undefined) {
             return value;
@@ -85,38 +64,53 @@ export default function RBox(props: RButtonProps) {
             return {}
         }
     }
-
-    const textColor = useThemeColor({}, 'textColorPrimary');
-    const backgroundColor = useThemeColor({}, 'colorPrimary');
-    const buttonRef = useRef(null);
-
+    const [componentWidth, setComponentWidth] = useState(0);
+    const [componentHeight, setComponentHeight] = useState(0);
     useEffect(() => {
-        console.log(getFigmaImportValues())
-        const buttonTop = buttonRef.current.measure((w, h, px, py, fx, fy) => {
-            xx.value = withTiming(fy + 10, { easing: Easing.out(Easing.quad), duration: 200 })
+        labelRef.current.measure((width, height, px, py, fx, fy) => {
+            setComponentWidth(width);
+            setComponentHeight(height);
         })
-    }, [buttonRef])
-
+        console.log(width)
+    }, [labelRef])
     return (
         <Animated.View
-            ref={buttonRef}
+            ref={labelRef}
+            id={getVal(props.id, undefined)}
             style={{
                 position: 'absolute',
+                display: 'flex',
                 borderRadius: getVal(props.borderRadius, 5),
-                borderColor: getVal(props.borderColor, backgroundColor),
+                borderColor: getVal(props.borderColor, globalStyle.color),
                 borderWidth: getVal(props.borderWidth, 0),
-                backgroundColor: `${backgroundColorActual}`,
+                backgroundColor: getVal(props.backgroundColor, `${globalStyle.color}00`),
                 alignContent: 'center',
                 justifyContent: 'center',
                 width: getVal(props.width, 0),
                 left: getVal(props.left, 0),
                 top: getVal(props.top, 0),
                 height: getVal(props.height, 44),
+                opacity: getVal(props.opacity, 1),
+                transform: `translateX(${props.horizontalCenter == true ? (componentWidth * -0.5).toString() + 'px' : '0px'}) translateY(${props.verticalCenter == true ? (componentHeight * -0.5).toString() + 'px' : '0px'})`,
                 ...getFigmaImportValues(),
                 ...props.style,
             }}
         >
-            <Text style={{ color: getVal(props.color, '#ffffff') }}>{props.text}</Text>
+            <BlurView style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} intensity={getVal(props.blur, 0)}>
+                <Text style={{
+                    display: 'flex',
+                    color: getVal(props.color, globalStyle.textColor),
+                    fontSize: getVal(props.fontSize, globalStyle.regularMobileFont),
+                    justifyContent: getVal(props.align, 'center'),
+                    textAlign: getVal(props.align, 'center'),
+                    alignItems: getVal(props.align, 'center'),
+                    paddingLeft: getVal(props.align === 'left' || props.align === 'right' ? (props.alignPadding ? props.alignPadding : '2%') : '0%', '0%'),
+                    paddingRight: getVal(props.align === 'right' || props.align === 'end' ? (props.alignPadding ? props.alignPadding : '2%') : '0%', '0%'),
+
+                }}
+                >{props.text}</Text>
+                {props.children}
+            </BlurView>
         </Animated.View>
 
     );

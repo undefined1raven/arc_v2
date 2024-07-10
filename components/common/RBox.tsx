@@ -6,14 +6,18 @@ import FigmaImporter from '../../fn/figmaImporter'
 import FigmaImportConfig from '../../fn/FigmaImportConfig'
 import Animated, { Easing, withSpring, withTiming } from 'react-native-reanimated';
 import { useSharedValue } from 'react-native-reanimated';
+import store from "@/app/store";
+import globalStyles, { GlobalStyleType } from "@/hooks/globalStyles";
+import { useSelector } from "react-redux";
+
 type RButtonProps = {
     id?: string,
-    children: any,
+    children?: any,
     onClick?: Function,
     figmaImport?: object,
     label?: string,
-    borderWidth: number,
-    androidRippleColor: ColorValueHex,
+    borderWidth?: number,
+    androidRippleColor?: ColorValueHex,
     className?: string | string[], color?: ColorValueHex, borderColor?: ColorValueHex, backgroundColor?: ColorValueHex, width?: number | string, height?: number | string, top?: number | string, left?: number | string, mobileFontSize?: number | FontSize, align?: AlignType, opacity?: number, style?: object, blur?: number, borderRadius?: number, alignPadding?: number | string, hoverOpacityMax?: string, hoverOpacityMin?: string, horizontalCenter?: boolean, verticalCenter?: boolean, figmaImportConfig?: object, mouseEnter?: Function, mouseLeave?: Function, transitions?: string | object, isSelected?: boolean, onLongPress?: Function
 }
 

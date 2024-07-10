@@ -6,6 +6,11 @@ import FigmaImporter from '../../fn/figmaImporter'
 import FigmaImportConfig from '../../fn/FigmaImportConfig'
 import Animated, { Easing, withSpring, withTiming } from 'react-native-reanimated';
 import { useSharedValue } from 'react-native-reanimated';
+import store from "@/app/store";
+import globalStyles, { GlobalStyleType } from "@/hooks/globalStyles";
+import { useSelector } from "react-redux";
+
+
 type RButtonProps = {
     id?: string,
     onClick?: Function,
@@ -19,6 +24,9 @@ type RButtonProps = {
 
 export default function RButton(props: RButtonProps) {
     //Internal state
+    store.subscribe(() => { });
+    const globalStyle: GlobalStyleType = useSelector(store => store.globalStyle);
+
     const [isMouseHovering, setIsMouseHovering] = useState(false);
     const alignToPadding = { start: 'left', end: 'right', right: 'right', left: 'left' };
     const { height, width } = useWindowDimensions();
@@ -26,7 +34,7 @@ export default function RButton(props: RButtonProps) {
     let align = props.align ? props.align : 'center';
     let hoverOpacityMax = props.hoverOpacityMax ? props.hoverOpacityMax : '20';
     let hoverOpacityMin = props.hoverOpacityMin ? props.hoverOpacityMin : '00';
-    let backgroundColorActual = props.backgroundColor ? props.backgroundColor : '#000000';
+    let backgroundColorActual = props.backgroundColor ? props.backgroundColor : globalStyle.color;
     const [backgroundOpacityActual, setBackgroundOpacityActual] = useState(hoverOpacityMin);
 
     function parsePresetTop() {
@@ -92,8 +100,7 @@ export default function RButton(props: RButtonProps) {
         }
     }
 
-    const textColor = useThemeColor({}, 'activeMono');
-    const backgroundColor = useThemeColor({}, 'colorPrimary');
+    const textColor = props.color ? props.color : globalStyle.textColor;
     const buttonRef = useRef(null);
     useEffect(() => {
         console.log(parsePresetTop())
@@ -109,8 +116,8 @@ export default function RButton(props: RButtonProps) {
             ref={buttonRef}
             style={{
                 position: 'absolute',
-                borderRadius: getVal(props.borderRadius, 5),
-                borderColor: getVal(props.borderColor, backgroundColor),
+                borderRadius: getVal(props.borderRadius, globalStyle.borderRadius),
+                borderColor: getVal(props.borderColor, globalStyle.color),
                 borderWidth: 1,
                 backgroundColor: `${backgroundColorActual}${backgroundOpacityActual}`,
                 alignContent: 'center',
@@ -129,7 +136,7 @@ export default function RButton(props: RButtonProps) {
                 onPressIn={() => setIsMouseHovering(true)}
                 onLongPress={(e) => { props.onLongPress?.call(e); setIsMouseHovering(false); }}
                 onPressOut={(e) => { props.onClick?.call(e); setIsMouseHovering(false); }}>
-                <Text style={{ textAlign: 'center', justifyContent: 'center', alignContent: 'center', top: 'auto', fontSize: 18, color: getVal(props.color, textColor) }}>{props.label}</Text>
+                <Text style={{ textAlign: 'center', justifyContent: 'center', alignContent: 'center', top: 'auto', fontSize: 18, color: getVal(props.color, globalStyle.textColor) }}>{props.label}</Text>
             </Pressable>
         </Animated.View >
 
