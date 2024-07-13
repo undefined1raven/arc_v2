@@ -9,34 +9,45 @@ import { useSharedValue } from 'react-native-reanimated';
 import store from "@/app/store";
 import globalStyles, { GlobalStyleType } from "@/hooks/globalStyles";
 import { useSelector } from "react-redux";
+import { GestureHandlerRootView, TextInput } from "react-native-gesture-handler";
 
 type RButtonProps = {
     id?: string,
     children?: any,
+    textAlignVertical: 'center' | 'top' | 'bottom',
+    readOnly?: boolean,
     onClick?: Function,
+    onInput: Function,
+    fontSize: number,
     figmaImport?: object,
+    maxLength: number,
     label?: string,
+    multiline?: boolean,
+    placeholderTextColor: ColorValueHex,
+    cursorColor?: ColorValueHex,
     borderWidth?: number,
+    returnKeyType: 'done' | 'go' | 'next' | 'search' | 'send',
+    childrenStyle?: object,
+    secureTextEntry?: boolean,
     androidRippleColor?: ColorValueHex,
-    className?: string | string[], color?: ColorValueHex, borderColor?: ColorValueHex, backgroundColor?: ColorValueHex, width?: number | string, height?: number | string, top?: number | string, left?: number | string, mobileFontSize?: number | FontSize, align?: AlignType, opacity?: number, style?: object, blur?: number, borderRadius?: number, alignPadding?: number | string, hoverOpacityMax?: string, hoverOpacityMin?: string, horizontalCenter?: boolean, verticalCenter?: boolean, figmaImportConfig?: object, mouseEnter?: Function, mouseLeave?: Function, transitions?: string | object, isSelected?: boolean, onLongPress?: Function
+    className?: string | string[], color?: ColorValueHex, borderColor?: ColorValueHex, backgroundColor?: ColorValueHex, width?: number | string, height?: number | string, top?: number | string, left?: number | string, mobileFontSize?: number | FontSize, align?: AlignType, opacity?: number, style?: object, blur?: number, borderRadius?: number,
+    alignPadding?: number | string, hoverOpacityMax?: string, hoverOpacityMin?: string, horizontalCenter?: boolean, verticalCenter?: boolean, figmaImportConfig?: object, mouseEnter?: Function, mouseLeave?: Function, transitions?: string | object, isSelected?: boolean, onLongPress?: Function
 }
 
 
 
-export default function RBox(props: RButtonProps) {
+export default function RTextInput(props: RButtonProps) {
     //Internal state
-    const [isMouseHovering, setIsMouseHovering] = useState(false);
-    const alignToPadding = { start: 'left', end: 'right', right: 'right', left: 'left' };
     const { height, width } = useWindowDimensions();
-
     store.subscribe(() => { });
     const globalStyle: GlobalStyleType = useSelector(store => store.globalStyle);
-
 
     let align = props.align ? props.align : 'center';
     let hoverOpacityMax = props.hoverOpacityMax ? props.hoverOpacityMax : '20';
     let hoverOpacityMin = props.hoverOpacityMin ? props.hoverOpacityMin : '00';
-    let backgroundColorActual = props.backgroundColor ? props.backgroundColor : '#000000';
+    let backgroundColorActual = props.backgroundColor ? props.backgroundColor :
+        globalStyle.color;
+    const [backgroundOpacityActual, setBackgroundOpacityActual] = useState(hoverOpacityMin);
 
     function parsePresetTop() {
         if (props.figmaImport) {
@@ -93,8 +104,6 @@ export default function RBox(props: RButtonProps) {
         }
     }
 
-    const textColor = useThemeColor({}, 'textColorPrimary');
-    const backgroundColor = useThemeColor({}, 'colorPrimary');
     const buttonRef = useRef(null);
 
     useEffect(() => {
@@ -109,12 +118,12 @@ export default function RBox(props: RButtonProps) {
             style={{
                 position: 'absolute',
                 borderRadius: getVal(props.borderRadius, 5),
-                borderColor: getVal(props.borderColor, backgroundColor),
-                borderWidth: getVal(props.borderWidth, 0),
-                backgroundColor: `${backgroundColorActual}`,
+                borderColor: getVal(props.borderColor, globalStyle.color),
+                borderWidth: getVal(props.borderWidth, 1),
+                backgroundColor: `${backgroundColorActual}${backgroundOpacityActual}`,
                 alignContent: 'center',
                 justifyContent: 'center',
-                width: getVal(props.width, 0),
+                width: getVal(props.width, 80),
                 left: getVal(props.left, 0),
                 top: getVal(props.top, 0),
                 height: getVal(props.height, 44),
@@ -122,8 +131,40 @@ export default function RBox(props: RButtonProps) {
                 ...props.style,
             }}
         >
+            <GestureHandlerRootView style={{ position: 'absolute', width: '100%', height: '100%', left: 0, top: 0, padding: 0, margin: 0 }}>
+                <TextInput
+                    placeholderTextColor={getVal(props.placeholderTextColor, globalStyle.colorInactive)}
+                    onFocus={() => { setBackgroundOpacityActual(hoverOpacityMax); }}
+                    onBlur={() => { setBackgroundOpacityActual(hoverOpacityMin); }}
+                    multiline={getVal(props.multiline, false)}
+                    returnKeyType={getVal(props.returnKeyType, 'done')}
+                    maxLength={getVal(props.maxLength, 10000)}
+                    readOnly={getVal(props.readOnly, false)}
+                    textAlignVertical={getVal(props.textAlignVertical, 'center')}
+                    cursorColor={getVal(props.cursorColor, globalStyle.textColor)}
+                    onChangeText={(e) => { props.onInput(e); }}
+                    placeholder={props.label}
+                    secureTextEntry={getVal(props.secureTextEntry, false)} style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        left: 0,
+                        top: 0,
+                        padding: 0,
+                        margin: 0,
+                        color: getVal(props.color, globalStyle.textColor),
+                        display: 'flex',
+                        fontSize: getVal(props.fontSize, globalStyle.regularMobileFont),
+                        justifyContent: getVal(props.align, 'left'),
+                        textAlign: getVal(props.align, 'left'),
+                        alignItems: getVal(props.align, 'left'),
+                        paddingLeft: getVal(props.align === 'left' || props.align === 'right' ? (props.alignPadding ? props.alignPadding : '2%') : '0%', '2%'),
+                        paddingRight: getVal(props.align === 'right' || props.align === 'end' ? (props.alignPadding ? props.alignPadding : '2%') : '0%', '2%'),
+                        ...props.childrenStyle,
+                    }}></TextInput>
+            </GestureHandlerRootView>
             {props.children}
-        </Animated.View>
+        </Animated.View >
 
     );
 }

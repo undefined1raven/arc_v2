@@ -9,6 +9,9 @@ import { useSharedValue } from 'react-native-reanimated';
 import store from "@/app/store";
 import globalStyles, { GlobalStyleType } from "@/hooks/globalStyles";
 import { useSelector } from "react-redux";
+import RBox from "./RBox";
+import RButton from "./RButton";
+import { globalTransitionConfig } from "@/app/config/defaultTransitionConfig";
 
 type RButtonProps = {
     id?: string,
@@ -16,6 +19,7 @@ type RButtonProps = {
     onClick?: Function,
     figmaImport?: object,
     label?: string,
+    onStateChange: Function,
     borderWidth?: number,
     androidRippleColor?: ColorValueHex,
     className?: string | string[], color?: ColorValueHex, borderColor?: ColorValueHex, backgroundColor?: ColorValueHex, width?: number | string, height?: number | string, top?: number | string, left?: number | string, mobileFontSize?: number | FontSize, align?: AlignType, opacity?: number, style?: object, blur?: number, borderRadius?: number, alignPadding?: number | string, hoverOpacityMax?: string, hoverOpacityMin?: string, horizontalCenter?: boolean, verticalCenter?: boolean, figmaImportConfig?: object, mouseEnter?: Function, mouseLeave?: Function, transitions?: string | object, isSelected?: boolean, onLongPress?: Function
@@ -23,19 +27,15 @@ type RButtonProps = {
 
 
 
-export default function RBox(props: RButtonProps) {
+export default function RToggleSwitch(props: RButtonProps) {
     //Internal state
-    const [isMouseHovering, setIsMouseHovering] = useState(false);
+    const thumbWidth = 35;
+    const [state, setState] = useState(false);
     const alignToPadding = { start: 'left', end: 'right', right: 'right', left: 'left' };
     const { height, width } = useWindowDimensions();
-
+    const toggleThumbLeft = useSharedValue(0)
     store.subscribe(() => { });
     const globalStyle: GlobalStyleType = useSelector(store => store.globalStyle);
-
-
-    let align = props.align ? props.align : 'center';
-    let hoverOpacityMax = props.hoverOpacityMax ? props.hoverOpacityMax : '20';
-    let hoverOpacityMin = props.hoverOpacityMin ? props.hoverOpacityMin : '00';
     let backgroundColorActual = props.backgroundColor ? props.backgroundColor : '#000000';
 
     function parsePresetTop() {
@@ -72,8 +72,6 @@ export default function RBox(props: RButtonProps) {
         return 0;
     }
 
-    const xx = useSharedValue(parsePresetTop() - 10);
-
     function getVal(value: any, defaultVal: any) {
         if (value !== undefined) {
             return value;
@@ -97,11 +95,13 @@ export default function RBox(props: RButtonProps) {
     const backgroundColor = useThemeColor({}, 'colorPrimary');
     const buttonRef = useRef(null);
 
+
     useEffect(() => {
-        const buttonTop = buttonRef.current.measure((w, h, px, py, fx, fy) => {
-            xx.value = withTiming(fy + 10, { easing: Easing.out(Easing.quad), duration: 200 })
-        })
-    }, [buttonRef])
+        if (props.onStateChange) {
+            props.onStateChange.call(state);
+        }
+        toggleThumbLeft.value = state ? 100 - thumbWidth : 0;
+    }, [state])
 
     return (
         <Animated.View
@@ -111,7 +111,7 @@ export default function RBox(props: RButtonProps) {
                 borderRadius: getVal(props.borderRadius, 5),
                 borderColor: getVal(props.borderColor, backgroundColor),
                 borderWidth: getVal(props.borderWidth, 0),
-                backgroundColor: `${backgroundColorActual}`,
+                backgroundColor: `${backgroundColorActual}00`,
                 alignContent: 'center',
                 justifyContent: 'center',
                 width: getVal(props.width, 0),
@@ -122,7 +122,24 @@ export default function RBox(props: RButtonProps) {
                 ...props.style,
             }}
         >
-            {props.children}
+            <RButton
+                backgroundColor={state ? globalStyle.color : globalStyle.colorInactive}
+                hoverOpacityMin="80"
+                hoverOpacityMax="80"
+                borderColor="#00000000"
+                androidRippleColor="#00000000"
+                style={{ position: 'absolute', width: '100%', height: '100%', left: 0, top: 0 }}
+                onClick={() => {
+                    setState((prev) => {
+                        return !prev;
+                    });
+                }} label="">
+                {props.children}
+                <RBox
+                    style={{ position: 'absolute', width: `${thumbWidth}%`, height: '100%', top: 0 }}
+                    left={'0%'}
+                    backgroundColor={state ? globalStyle.color : globalStyle.colorAccent}></RBox>
+            </RButton>
         </Animated.View>
 
     );

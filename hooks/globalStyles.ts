@@ -43,7 +43,7 @@ type GlobalStyleType = {
 const globalStyle = createSlice({
     name: 'globalStyle',
     initialState: {
-        borderRadius: 3,
+        borderRadius: 5,
         borderRadius20: 20,
         borderRadius10: 10,
         largeDesktopFont: 27,

@@ -102,9 +102,7 @@ export default function RButton(props: RButtonProps) {
 
     const textColor = props.color ? props.color : globalStyle.textColor;
     const buttonRef = useRef(null);
-    useEffect(() => {
-        console.log(parsePresetTop())
-    }, [])
+
     useEffect(() => {
         const buttonTop = buttonRef.current.measure((w, h, px, py, fx, fy) => {
             xx.value = withTiming(fy + 5, { easing: Easing.out(Easing.quad), duration: 200 })
@@ -130,6 +128,7 @@ export default function RButton(props: RButtonProps) {
                 ...props.style,
             }}
         >
+            {props.children}
             <Pressable
                 android_ripple={{ color: props.androidRippleColor ? props.androidRippleColor : '#11111110' }}
                 style={{ width: '100%', height: '100%' }}

@@ -9,6 +9,7 @@ import { useSharedValue } from 'react-native-reanimated';
 import store from "@/app/store";
 import globalStyles, { GlobalStyleType } from "@/hooks/globalStyles";
 import { useSelector } from "react-redux";
+import { fontController } from '../../fn/fontController';
 import { BlurView } from "expo-blur";
 type RButtonProps = {
     id?: string,
@@ -53,6 +54,7 @@ export default function RLabel(props: RButtonProps) {
             return defaultVal;
         }
     }
+
     function getFigmaImportValues() {
         if (props.figmaImport) {
             if (Object.keys(props.figmaImport).length > 0) {
@@ -71,7 +73,6 @@ export default function RLabel(props: RButtonProps) {
             setComponentWidth(width);
             setComponentHeight(height);
         })
-        console.log(width)
     }, [labelRef])
     return (
         <Animated.View
@@ -80,13 +81,14 @@ export default function RLabel(props: RButtonProps) {
             style={{
                 position: 'absolute',
                 display: 'flex',
+                alignSelf: 'center',
                 borderRadius: getVal(props.borderRadius, 5),
                 borderColor: getVal(props.borderColor, globalStyle.color),
                 borderWidth: getVal(props.borderWidth, 0),
                 backgroundColor: getVal(props.backgroundColor, `${globalStyle.color}00`),
                 alignContent: 'center',
                 justifyContent: 'center',
-                width: getVal(props.width, 0),
+                width: getVal(props.width, 100),
                 left: getVal(props.left, 0),
                 top: getVal(props.top, 0),
                 height: getVal(props.height, 44),
@@ -100,7 +102,7 @@ export default function RLabel(props: RButtonProps) {
                 <Text style={{
                     display: 'flex',
                     color: getVal(props.color, globalStyle.textColor),
-                    fontSize: getVal(props.fontSize, globalStyle.regularMobileFont),
+                    fontSize: fontController(getVal(props.fontSize, globalStyle.regularMobileFont)),
                     justifyContent: getVal(props.align, 'center'),
                     textAlign: getVal(props.align, 'center'),
                     alignItems: getVal(props.align, 'center'),
