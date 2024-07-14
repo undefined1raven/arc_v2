@@ -11,6 +11,12 @@ import RBox from '@/components/common/RBox';
 import Constants from 'expo-constants';
 import { UseSelector } from 'react-redux';
 import globalStyles, { GlobalStyleType } from '@/hooks/globalStyles';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { CreateAccountMain } from '@/components/CreateAccount/CreateAccountMain';
+
+const Stack = createNativeStackNavigator();
+
 async function save(key, value) {
   await SecureStore.setItemAsync(key, value, { authenticationPrompt: 'Confirm your identity to continue', requireAuthentication: true });
 }
@@ -29,7 +35,17 @@ export default function App() {
   const [value, onChangeValue] = React.useState('Your value here');
   return (
     <Provider store={store}>
-      <HomeScreen></HomeScreen>
+      <Stack.Navigator
+        screenOptions={{ headerShown: false }}>
+        <Stack.Screen
+          name="dded"
+          component={HomeScreen}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="alp"
+          component={CreateAccountMain}
+        ></Stack.Screen>
+      </Stack.Navigator>
     </Provider>
   );
 }

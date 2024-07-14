@@ -36,7 +36,7 @@ export default function RBox(props: RButtonProps) {
     let align = props.align ? props.align : 'center';
     let hoverOpacityMax = props.hoverOpacityMax ? props.hoverOpacityMax : '20';
     let hoverOpacityMin = props.hoverOpacityMin ? props.hoverOpacityMin : '00';
-    let backgroundColorActual = props.backgroundColor ? props.backgroundColor : '#000000';
+    let backgroundColorActual = props.backgroundColor ? props.backgroundColor : (globalStyle.color + '00')
 
     function parsePresetTop() {
         if (props.figmaImport) {
@@ -111,7 +111,7 @@ export default function RBox(props: RButtonProps) {
                 borderRadius: getVal(props.borderRadius, 5),
                 borderColor: getVal(props.borderColor, backgroundColor),
                 borderWidth: getVal(props.borderWidth, 0),
-                backgroundColor: `${backgroundColorActual}`,
+                backgroundColor: backgroundColorActual,
                 alignContent: 'center',
                 justifyContent: 'center',
                 width: getVal(props.width, 0),
