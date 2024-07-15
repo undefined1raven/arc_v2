@@ -1,9 +1,5 @@
 import { Image, StyleSheet, Platform, View, useWindowDimensions, Button } from 'react-native';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import { useEffect, useState } from 'react';
 import { WebView } from 'react-native-webview'
 import * as SecureStore from 'expo-secure-store';
@@ -22,9 +18,10 @@ import RLabel from '@/components/common/RLabel';
 import RTextInput from '@/components/common/RTextInput';
 import RToggleSwitch from '@/components/common/RToggleSwitch';
 import { CreateAccountMain } from '@/components/CreateAccount/CreateAccountMain';
-import { CommonComponents } from '@/components/common/CommonComponents';
-
-export default function HomeScreen({ navigation }) {
+import { WithBackground } from '@/components/common/CommonComponents';
+import { StatusBar } from 'expo-status-bar';
+import Animated, { FadeInUp, Easing } from 'react-native-reanimated';
+export default function CreateOnlineAccount({ navigation }) {
   const { height, width } = useWindowDimensions();
   const dispatch = useDispatch();
   const globalStyle: GlobalStyleType = useSelector((store) => store.globalStyle);
@@ -32,22 +29,28 @@ export default function HomeScreen({ navigation }) {
 
 
   return (
-    <View style={{ ...styles.container }}>
-      <CommonComponents></CommonComponents>
-      <CreateAccountMain></CreateAccountMain>
+    <Animated.View
+      entering={FadeInUp.delay(5).duration(150).easing(Easing.inOut(Easing.ease)).withInitialValues({ transform: [{ translateY: -2 }] })}
+      style={{ ...styles.container, backgroundColor: globalStyle.statusBarColor }}>
+      <StatusBar backgroundColor={globalStyle.statusBarColor}></StatusBar>
+      <LinearGradient
+        colors={globalStyle.pageBackgroundColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.3, y: 0.7 }}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+      />
       <RButton onClick={() => {
         navigation.navigate('alp', { name: 'alp' })
 
-      }} figmaImport={{ mobile: { top: 430, left: 5, width: 350, height: 40 } }} label='xx'></RButton>
-    </View>
+      }} figmaImport={{ mobile: { top: 430, left: 5, width: 350, height: 40 } }} label='ccs'></RButton>
+    </Animated.View>
 
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    top: Constants.statusBarHeight,
+    top: 0,
     left: '0%',
     backgroundColor: '#00000000',
     width: '100%',

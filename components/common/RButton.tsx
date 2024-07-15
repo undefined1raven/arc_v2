@@ -12,6 +12,8 @@ import { useSelector } from "react-redux";
 import { useFonts } from "expo-font";
 import { Oxanium_400Regular } from "@expo-google-fonts/oxanium";
 import { IBMPlexMono_400Regular } from "@expo-google-fonts/ibm-plex-mono";
+import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
+import RLabel from "./RLabel";
 
 
 type RButtonProps = {
@@ -20,6 +22,7 @@ type RButtonProps = {
     fontType?: 'mono' | 'regular',
     figmaImport?: object,
     label?: string,
+    transitionDuration?: number,
     transitionIndex?: number,
     verticalAlign?: 'top' | 'bottom' | 'center',
     androidRippleColor: ColorValueHex,
@@ -138,6 +141,7 @@ export default function RButton(props: RButtonProps) {
         >
 
             <Animated.View
+                // entering={globalEnteringConfig(getVal(props.transitionDuration, 150), undefined, getVal(props.transitionIndex, 0))}
                 ref={buttonRef}
                 style={{
                     position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
@@ -157,11 +161,11 @@ export default function RButton(props: RButtonProps) {
                     onPressIn={() => setIsMouseHovering(true)}
                     onLongPress={(e) => { props.onLongPress?.call(e); setIsMouseHovering(false); }}
                     onPressOut={(e) => { props.onClick?.call(e); setIsMouseHovering(false); }}>
-                    <Text style={{
-                        top: 0,
-                        textAlignVertical: getVal(props.verticalAlign, 'top'),
-                        alignItems: 'center', textAlign: 'center', justifyContent: 'center', alignContent: 'center', fontSize: 18, color: getVal(props.color, globalStyle.textColor), fontFamily: currentFontFamiliy
-                    }}>{props.label}</Text>
+                    <RLabel text={props.label} verticalAlign={getVal(props.verticalAlign, 'center')} width="100%" height="100%" left={0} top={0} style={{
+                        fontSize: getVal(props.mobileFontSize, 18),
+                        color: getVal(props.color, globalStyle.textColor),
+                        fontFamily: currentFontFamiliy
+                    }}></RLabel>
                 </Pressable>
             </Animated.View>
         </View>

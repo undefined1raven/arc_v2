@@ -1,7 +1,6 @@
 import { Pressable, View, Text, Button, useWindowDimensions } from "react-native";
 import { AlignType, ColorValueHex, FontSize } from "./CommonTypes";
 import { useEffect, useRef, useState } from "react";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import FigmaImporter from '../../fn/figmaImporter'
 import FigmaImportConfig from '../../fn/FigmaImportConfig'
 import Animated, { Easing, withSpring, withTiming } from 'react-native-reanimated';
@@ -9,6 +8,7 @@ import { useSharedValue } from 'react-native-reanimated';
 import store from "@/app/store";
 import globalStyles, { GlobalStyleType } from "@/hooks/globalStyles";
 import { useSelector } from "react-redux";
+import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
 
 type RButtonProps = {
     id?: string,
@@ -16,6 +16,8 @@ type RButtonProps = {
     onClick?: Function,
     figmaImport?: object,
     label?: string,
+    transitionDuration?: number,
+    transitionIndex?: number,
     borderWidth?: number,
     androidRippleColor?: ColorValueHex,
     className?: string | string[], color?: ColorValueHex, borderColor?: ColorValueHex, backgroundColor?: ColorValueHex, width?: number | string, height?: number | string, top?: number | string, left?: number | string, mobileFontSize?: number | FontSize, align?: AlignType, opacity?: number, style?: object, blur?: number, borderRadius?: number, alignPadding?: number | string, hoverOpacityMax?: string, hoverOpacityMin?: string, horizontalCenter?: boolean, verticalCenter?: boolean, figmaImportConfig?: object, mouseEnter?: Function, mouseLeave?: Function, transitions?: string | object, isSelected?: boolean, onLongPress?: Function
@@ -93,8 +95,6 @@ export default function RBox(props: RButtonProps) {
         }
     }
 
-    const textColor = useThemeColor({}, 'textColorPrimary');
-    const backgroundColor = useThemeColor({}, 'colorPrimary');
     const buttonRef = useRef(null);
 
     useEffect(() => {
@@ -105,15 +105,18 @@ export default function RBox(props: RButtonProps) {
 
     return (
         <Animated.View
+            // entering={globalEnteringConfig(getVal(props.transitionDuration, 150), undefined, getVal(props.transitionIndex, 0))}
             ref={buttonRef}
             style={{
                 position: 'absolute',
+                display: 'flex',
                 borderRadius: getVal(props.borderRadius, 5),
-                borderColor: getVal(props.borderColor, backgroundColor),
+                borderColor: getVal(props.borderColor, globalStyle.color),
                 borderWidth: getVal(props.borderWidth, 0),
                 backgroundColor: backgroundColorActual,
                 alignContent: 'center',
                 justifyContent: 'center',
+                alignItems: 'center',
                 width: getVal(props.width, 0),
                 left: getVal(props.left, 0),
                 top: getVal(props.top, 0),
