@@ -37,11 +37,7 @@ async function getValueFor(key) {
 export default function App() {
   const [key, onChangeKey] = React.useState('Your key here');
   const [value, onChangeValue] = React.useState('Your value here');
-  const forFade = {
-    cardStyle: {
-      backgroundColor: 'transparent',
-    },
-  };
+
   return (
     <Provider store={store}>
       <StatusBar backgroundColor={'#ffffff'}></StatusBar>

@@ -16,6 +16,7 @@ import { ARCLogoMini } from '@/components/common/deco/ARCLogoMini';
 import { ARCLogo } from '@/components/common/deco/ARCLogo';
 import { CrossedOutNetworkDeco } from '@/components/common/deco/CrossedOutNetworkDeco';
 import { NetworkDeco } from '@/components/common/deco/NetworkDeco';
+import { ArrowDeco } from '@/components/common/deco/ArrowDeco';
 
 export default function CreateAccountMain({ navigation }) {
   const globalStyle: GlobalStyleType = useSelector((store) => store.globalStyle);
@@ -58,12 +59,18 @@ export default function CreateAccountMain({ navigation }) {
               <RBox figmaImportConfig={buttonContainerSize} figmaImport={{ mobile: { top: 14, left: 22, width: 10, height: 13 } }}>
                 <NetworkDeco width="100%" height="100%" color={globalStyle.color} style={{ top: 5, left: 0 }}></NetworkDeco>
               </RBox>
+              <RBox figmaImportConfig={buttonContainerSize} figmaImport={{ mobile: { top: 122, left: 209, width: 47, height: 29 } }}>
+                <ArrowDeco></ArrowDeco>
+              </RBox>
             </RButton>
             <RButton transitionIndex={4} figmaImport={{ mobile: { left: 50, width: 260, height: 155, top: 334 } }}>
               <RLabel figmaImportConfig={buttonContainerSize} figmaImport={{ mobile: { top: 41, left: 17, width: '90%', height: 25 } }} fontSize={globalStyle.largeMobileFont} align='left' verticalCenter={true} text='Offline Account'></RLabel>
               <RLabel figmaImportConfig={buttonContainerSize} figmaImport={{ mobile: { top: 64, left: 17, width: '80%', height: 50 } }} fontSize={12} align='left' verticalCenter={true} text='This mode lets you store all your data on your current device requiring a back-up file to log into any other devices'></RLabel>
               <RBox figmaImportConfig={buttonContainerSize} figmaImport={{ mobile: { top: 14, left: 22, width: 10, height: 13 } }}>
                 <CrossedOutNetworkDeco width="100%" height="100%" color={globalStyle.color} style={{ top: 5, left: 0 }}></CrossedOutNetworkDeco>
+              </RBox>
+              <RBox figmaImportConfig={buttonContainerSize} figmaImport={{ mobile: { top: 122, left: 209, width: 47, height: 29 } }}>
+                <ArrowDeco></ArrowDeco>
               </RBox>
             </RButton>
             <RLabel figmaImport={{ mobile: { top: 508, left: 50, width: 260, height: 38 } }} text='You can switch between these modes at any time' verticalAlign='center' fontSize={globalStyle.smallMobileFont} backgroundColor={globalStyle.color + '20'}></RLabel>
