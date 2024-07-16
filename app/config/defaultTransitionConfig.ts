@@ -11,7 +11,7 @@ function getVal(value: any, defaultVal: any) {
 }
 
 function globalEnteringConfig(duration?: number, delay?: number, transitionIndex?: number) {
-    return FadeInDown.delay(getVal(delay, 40) * getVal(transitionIndex, 0)).duration(getVal(duration, 150)).easing(Easing.inOut(Easing.ease)).withInitialValues({ transform: [{ translateY: -2 }] })
+    return FadeInDown.delay(getVal(delay, 40) * getVal(transitionIndex, 0)).duration(getVal(duration, 50)).easing(Easing.inOut(Easing.ease)).withInitialValues({ transform: [{ translateY: -2 }] })
 }
 
 export { globalTransitionConfig, globalEnteringConfig, getVal };

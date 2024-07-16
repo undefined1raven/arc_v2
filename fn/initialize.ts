@@ -1,17 +1,27 @@
 import * as SecureStore from 'expo-secure-store';
+import * as SQLite from 'expo-sqlite';
+import { clearTempCredentials } from './clearTempCredentials';
+import { createUsersTable } from './dbOps';
 
-type InitializeReturnType = { status: 'success' | 'error', auth: boolean, hasCache: boolean, error?: string };
+type InitializeReturnType = { status: 'success' | 'failed', auth?: boolean, hasCache?: boolean, error?: string };
 
 async function initialize(): Promise<InitializeReturnType> {
-    const privateKey = await SecureStore.getItemAsync('privateKey');
-    const sessionID = await SecureStore.getItemAsync("sid");
-    const sessionToken = await SecureStore.getItemAsync("sek");
-    const uids = await SecureStore.getItemAsync('uids');
-
-    if (privateKey === null || sessionID === null || sessionToken === null || uids === null) {
-        return { status: 'error', auth: false, hasCache: false, error: 'Missing value in keychain' };
+    const hasClearedCreds = (await clearTempCredentials()).status === 'success';
+    if (!hasClearedCreds) {
+        return { status: 'failed', error: 'failed to clear temp creds' };
     } else {
-        
+        const db = await SQLite.openDatabaseAsync('localCache')
+
+        return db.getFirstAsync('SELECT id FROM users').then(res => {//check if users table exists
+            ///logic for later on
+            return { status: 'success', auth: false, hasCache: true };
+        }).catch(e => {
+            createUsersTable().then(res => {
+
+            }).catch(e => {
+
+            })
+        })
     }
 }
 

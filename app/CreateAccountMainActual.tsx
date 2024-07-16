@@ -52,7 +52,7 @@ export default function CreateAccountMain({ navigation }) {
             <RBox transitionDuration={0} figmaImport={{ mobile: { top: 34, left: 167, width: 25, height: 25 } }}><ARCLogoMini width="100%" height="100%"></ARCLogoMini></RBox>
 
             <RLabel transitionIndex={1} figmaImport={{ mobile: { top: 103, left: 50, width: 260, height: 38 } }} text='Create Account' align='left' alignPadding={'3%'} verticalAlign='center' fontSize={14} backgroundColor={globalStyle.color + '20'}></RLabel>
-            <RButton figmaImport={{ mobile: { left: 50, width: 260, height: 155, top: 153 } }} transitionIndex={2} width="50%" height="30%">
+            <RButton onClick={() => { navigation.navigate('createAccountOnline', { name: 'createAccountOnline' }) }} figmaImport={{ mobile: { left: 50, width: 260, height: 155, top: 153 } }} transitionIndex={2} width="50%" height="30%">
               <RLabel verticalAlign='center' figmaImportConfig={buttonContainerSize} figmaImport={{ mobile: { top: 10, left: 39, width: 65, height: 21 } }} fontSize={8} backgroundColor={globalStyle.color + '20'} text='Recommended'></RLabel>
               <RLabel figmaImportConfig={buttonContainerSize} figmaImport={{ mobile: { top: 41, left: 17, width: '90%', height: 25 } }} fontSize={globalStyle.largeMobileFont} align='left' verticalCenter={true} text='Online Account'></RLabel>
               <RLabel figmaImportConfig={buttonContainerSize} figmaImport={{ mobile: { top: 64, left: 17, width: '80%', height: 150 } }} fontSize={12} align='left' verticalCenter={true} text='This mode gives you seamless remote encrypted backups and the ability to log in from multiple devices into your account'></RLabel>

@@ -156,14 +156,13 @@ export default function RButton(props: RButtonProps) {
             >
                 {props.children}
                 <Pressable
-                    android_ripple={{ color: props.androidRippleColor ? props.androidRippleColor : '#11111110' }}
+                    android_ripple={{ color: getVal(props.androidRippleColor, '#11111110') }}
                     style={{ width: '100%', height: '100%' }}
                     onPressIn={() => setIsMouseHovering(true)}
                     onLongPress={(e) => { props.onLongPress?.call(e); setIsMouseHovering(false); }}
                     onPressOut={(e) => { props.onClick?.call(e); setIsMouseHovering(false); }}>
-                    <RLabel text={props.label} verticalAlign={getVal(props.verticalAlign, 'center')} width="100%" height="100%" left={0} top={0} style={{
+                    <RLabel color={getVal(props.color, globalStyle.textColor)} text={props.label} verticalAlign={getVal(props.verticalAlign, 'center')} align={getVal(props.align, 'center')} alignPadding={getVal(props.alignPadding, '2%')} width="100%" height="100%" left={0} top={0} style={{
                         fontSize: getVal(props.mobileFontSize, 18),
-                        color: getVal(props.color, globalStyle.textColor),
                         fontFamily: currentFontFamiliy
                     }}></RLabel>
                 </Pressable>
