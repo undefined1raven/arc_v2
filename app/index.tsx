@@ -17,33 +17,77 @@ import LandingScreen from './LandingScreen';
 import CreateAccountOnline from '@/components/CreateAccount/CreateAccountOnline';
 import { BackgroundTaskRunner } from '@/components/common/BackgroundTaskRunner';
 import { openDB } from '@/fn/dbOps';
-import { initialize } from '@/fn/initialize';
+
+import { initialize, InitializeReturnType } from '@/fn/initialize';
 import { genenerateAccountCode } from '@/fn/generateAccountCode';
+import { setTempCredentials } from '@/fn/setTempCredentials';
 const Stack = createNativeStackNavigator();
 
 
 
-initialize().then(r => {
-  // console.log(r)
-}).catch(e => {
-  // console.log(e)
-})
 
 
-type handleAccountInfoEventReturnSig = { status: 'failed' | 'success', error: null | string | object, taskID: 'accountGen', symkey?: string }
+type handleAccountInfoEventReturnSig = { status: 'failed' | 'success', error: null | string | object, taskID: 'accountGen', symkey?: string, pk?: string }
 
 export default function App() {
+  const [accountCreds, setAccountCreds] = React.useState(null);
+  const [triggerCode, setCodeTrigger] = React.useState(null);
+
+  // initialize().then((res: InitializeReturnType) => {
+  //   if (res.status === 'success') {
+  //     if (res.mustCreateNewAccountCreds === true) {
+  //       if (accountCreds !== null) {
+  //         setTempCredentials({ RCKBackup: '', PIKBackup: '', pk: accountCreds.pk, publicKey: accountCreds.publicKey, symsk: accountCreds.symkey, featureConfig: '' }).then(r => {
+  //           console.log('yeey')
+  //         }).catch(e => {
+  //           console.log(e);
+  //         })
+  //       } else {
+  //         console.log('miss')
+  //         setCodeTrigger(Date.now().toString());
+  //       }
+  //     } else {
+  //       console.log('stx')
+  //     }
+  //   }
+  // }).catch(e => {
+  //   console.log(e)
+  // })
+
+
+  React.useEffect(() => {
+    if (accountCreds !== null) {
+      if (accountCreds.publicKey && accountCreds.pk && accountCreds.symkey) {
+        initialize().then((res: InitializeReturnType) => {
+          console.log(res)
+          if (res.status === 'success') {
+            if (res.mustCreateNewAccountCreds === true) {
+              setTempCredentials({ RCKBackup: '', PIKBackup: '', pk: accountCreds.pk, publicKey: accountCreds.publicKey, symsk: accountCreds.symkey, featureConfig: '' }).then(r => {
+                console.log('yeey')
+              }).catch(e => {
+                console.log(e);
+              })
+            } else {
+              console.log('sops')
+            }
+          }
+        }).catch(e => {
+          console.log(e)
+        })
+      }
+    }
+  }, [accountCreds])
 
   function handleAccountInfo(e) {
     const eventResults: handleAccountInfoEventReturnSig = JSON.parse(e.nativeEvent.data);
-    console.log(eventResults.error)
+    setAccountCreds(eventResults);
   }
 
 
   return (
     <Provider store={store}>
       <View>
-        <BackgroundTaskRunner triggeredCode='' code={genenerateAccountCode()}
+        <BackgroundTaskRunner tx={triggerCode} triggeredCode={genenerateAccountCode()} code={genenerateAccountCode()}
           messageHandler={(e) => { handleAccountInfo(e); }}
         ></BackgroundTaskRunner>
       </View>

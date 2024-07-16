@@ -13,23 +13,11 @@ async function setTempCredentials(args: setTempCredentialsArgsType): Promise<set
 
     const db = await SQLite.openDatabaseAsync('localCache');
 
-    function writeTempUser() {
-        db.runAsync('INSERT INTO usersx (id, signupTime, publicKey, PIKBackup, featureConfig) VALUES (?, ?, ?, ?, ?)', 'temp', Date.now().toString(), args.publicKey, args.PIKBackup, args.featureConfig).then(res => {
-            return { error: null, status: 'success' };
-        }).catch(e => {
-            return { error: 'Failed to add user to local cache', errorObj: e, status: 'failed' };
-        })
-    }
-
-    return db.getFirstAsync('SELECT id FROM users').then(res => {
-        return writeTempUser();
-    }).catch(async (e) => {
-        return createUsersTable().then(res => {
-            return writeTempUser();
-        }).catch(e => {
-            return { error: 'Failed to create users table', errorObj: e, status: 'failed' };
-        })
-
+    return db.runAsync('INSERT INTO users (id, signupTime, publicKey, PIKBackup, featureConfig) VALUES (?, ?, ?, ?, ?)', 'temp', Date.now().toString(), args.publicKey, args.PIKBackup, args.featureConfig).then(res => {
+        console.log(res)
+        return { error: null, status: 'success' };
+    }).catch(e => {
+        return { error: 'Failed to add user to local cache', errorObj: e, status: 'failed' };
     })
 }
 
