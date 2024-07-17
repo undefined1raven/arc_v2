@@ -24,6 +24,7 @@ type RButtonProps = {
     label?: string,
     transitionDuration?: number,
     transitionIndex?: number,
+    isEnabled?: boolean,
     verticalAlign?: 'top' | 'bottom' | 'center',
     androidRippleColor: ColorValueHex,
     className?: string | string[], color?: ColorValueHex, borderColor?: ColorValueHex, backgroundColor?: ColorValueHex, width?: number | string, height?: number | string, top?: number | string, left?: number | string, mobileFontSize?: number | FontSize, align?: AlignType, opacity?: number, style?: object, blur?: number, borderRadius?: number, alignPadding?: number | string, hoverOpacityMax?: string, hoverOpacityMin?: string, horizontalCenter?: boolean, verticalCenter?: boolean, figmaImportConfig?: object, mouseEnter?: Function, mouseLeave?: Function, transitions?: string | object, isSelected?: boolean, onLongPress?: Function
@@ -49,7 +50,7 @@ export default function RButton(props: RButtonProps) {
     let align = props.align ? props.align : 'center';
     let hoverOpacityMax = props.hoverOpacityMax ? props.hoverOpacityMax : '00';
     let hoverOpacityMin = props.hoverOpacityMin ? props.hoverOpacityMin : '00';
-    let backgroundColorActual = props.backgroundColor ? props.backgroundColor : globalStyle.color;
+    let backgroundColorActual = getVal(props.isEnabled, true) ? (props.backgroundColor ? props.backgroundColor : globalStyle.color) : globalStyle.colorInactive;
     const [backgroundOpacityActual, setBackgroundOpacityActual] = useState(hoverOpacityMin);
 
     function parsePresetTop() {
@@ -146,7 +147,7 @@ export default function RButton(props: RButtonProps) {
                 style={{
                     position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
                     borderRadius: getVal(props.borderRadius, globalStyle.borderRadius),
-                    borderColor: getVal(props.borderColor, globalStyle.color),
+                    borderColor: getVal(props.isEnabled, true) ? getVal(props.borderColor, globalStyle.color) : globalStyle.colorInactive,
                     borderWidth: 1,
                     padding: 0,
                     margin: 0,
@@ -156,12 +157,12 @@ export default function RButton(props: RButtonProps) {
             >
                 {props.children}
                 <Pressable
-                    android_ripple={{ color: getVal(props.androidRippleColor, '#11111110') }}
-                    style={{ width: '100%', height: '100%' }}
+                    android_ripple={{ color: getVal(props.isEnabled, true) ? getVal(props.androidRippleColor, '#11111110') : '#00000000' }}
+                    style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
                     onPressIn={() => setIsMouseHovering(true)}
                     onLongPress={(e) => { props.onLongPress?.call(e); setIsMouseHovering(false); }}
                     onPressOut={(e) => { props.onClick?.call(e); setIsMouseHovering(false); }}>
-                    <RLabel color={getVal(props.color, globalStyle.textColor)} text={props.label} verticalAlign={getVal(props.verticalAlign, 'center')} align={getVal(props.align, 'center')} alignPadding={getVal(props.alignPadding, '2%')} width="100%" height="100%" left={0} top={0} style={{
+                    <RLabel color={getVal(props.isEnabled, true) ? getVal(props.color, globalStyle.textColor) : globalStyle.textColorInactive} text={props.label} verticalAlign={getVal(props.verticalAlign, 'center')} align={getVal(props.align, 'center')} alignPadding={getVal(props.alignPadding, '2%')} width="100%" height="100%" left={0} top={0} style={{
                         fontSize: getVal(props.mobileFontSize, 18),
                         fontFamily: currentFontFamiliy
                     }}></RLabel>

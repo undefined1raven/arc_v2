@@ -1,4 +1,4 @@
-import { Pressable, View, Text, Button, useWindowDimensions } from "react-native";
+import { Pressable, View, Text, Button, useWindowDimensions, Keyboard } from "react-native";
 import { AlignType, ColorValueHex, FontSize } from "./CommonTypes";
 import { useEffect, useRef, useState } from "react";
 import { useThemeColor } from "@/hooks/useThemeColor";
@@ -9,7 +9,7 @@ import { useSharedValue } from 'react-native-reanimated';
 import store from "@/app/store";
 import globalStyles, { GlobalStyleType } from "@/hooks/globalStyles";
 import { useSelector } from "react-redux";
-import { GestureHandlerRootView, TextInput } from "react-native-gesture-handler";
+import { GestureHandlerRootView, ScrollView, TextInput, TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 type RButtonProps = {
     id?: string,
@@ -21,8 +21,10 @@ type RButtonProps = {
     fontSize: number,
     figmaImport?: object,
     maxLength: number,
+    textContentType?: string,
     label?: string,
     multiline?: boolean,
+    keyboardType?: 'default' | 'number-pad' | 'decimal-pad' | 'numeric' | 'phone-pad' | 'url',
     placeholderTextColor: ColorValueHex,
     cursorColor?: ColorValueHex,
     borderWidth?: number,
@@ -132,40 +134,43 @@ export default function RTextInput(props: RButtonProps) {
             }}
         >
             <GestureHandlerRootView style={{ position: 'absolute', width: '100%', height: '100%', left: 0, top: 0, padding: 0, margin: 0 }}>
-                <TextInput
-                    placeholderTextColor={getVal(props.placeholderTextColor, globalStyle.colorInactive)}
-                    onFocus={() => { setBackgroundOpacityActual(hoverOpacityMax); }}
-                    onBlur={() => { setBackgroundOpacityActual(hoverOpacityMin); }}
-                    multiline={getVal(props.multiline, false)}
-                    returnKeyType={getVal(props.returnKeyType, 'done')}
-                    maxLength={getVal(props.maxLength, 10000)}
-                    readOnly={getVal(props.readOnly, false)}
-                    textAlignVertical={getVal(props.textAlignVertical, 'center')}
-                    cursorColor={getVal(props.cursorColor, globalStyle.textColor)}
-                    onChangeText={(e) => { props.onInput(e); }}
-                    placeholder={props.label}
-                    secureTextEntry={getVal(props.secureTextEntry, false)} style={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                        left: 0,
-                        top: 0,
-                        padding: 0,
-                        margin: 0,
-                        color: getVal(props.color, globalStyle.textColor),
-                        display: 'flex',
-                        fontSize: getVal(props.fontSize, globalStyle.regularMobileFont),
-                        justifyContent: getVal(props.align, 'left'),
-                        textAlign: getVal(props.align, 'left'),
-                        alignItems: getVal(props.align, 'left'),
-                        paddingLeft: getVal(props.align === 'left' || props.align === 'right' ? (props.alignPadding ? props.alignPadding : '2%') : '0%', '2%'),
-                        paddingRight: getVal(props.align === 'right' || props.align === 'end' ? (props.alignPadding ? props.alignPadding : '2%') : '0%', '2%'),
-                        ...props.childrenStyle,
-                    }}></TextInput>
+                <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps='handled'>
+                    <TextInput
+                        placeholderTextColor={getVal(props.placeholderTextColor, globalStyle.colorInactive)}
+                        onFocus={() => { setBackgroundOpacityActual(hoverOpacityMax); }}
+                        onBlur={() => { setBackgroundOpacityActual(hoverOpacityMin); }}
+                        multiline={getVal(props.multiline, false)}
+                        returnKeyType={getVal(props.returnKeyType, 'done')}
+                        maxLength={getVal(props.maxLength, 10000)}
+                        readOnly={getVal(props.readOnly, false)}
+                        textAlignVertical={getVal(props.textAlignVertical, 'center')}
+                        cursorColor={getVal(props.cursorColor, globalStyle.textColor)}
+                        onChangeText={(e) => { getVal(props.onInput(e), () => { }) }}
+                        placeholder={props.label}
+                        keyboardType={getVal(props.keyboardType, 'default')}
+                        textContentType={getVal(props.textContentType, 'none')}
+                        secureTextEntry={getVal(props.secureTextEntry, false)} style={{
+                            position: 'absolute',
+                            width: '100%',
+                            height: '100%',
+                            left: 0,
+                            top: 0,
+                            padding: 0,
+                            margin: 0,
+                            color: getVal(props.color, globalStyle.textColor),
+                            display: 'flex',
+                            fontSize: getVal(props.fontSize, globalStyle.regularMobileFont),
+                            justifyContent: getVal(props.align, 'left'),
+                            textAlign: getVal(props.align, 'left'),
+                            alignItems: getVal(props.align, 'left'),
+                            paddingLeft: getVal(props.align === 'left' || props.align === 'right' ? (props.alignPadding ? props.alignPadding : '2%') : '0%', '2%'),
+                            paddingRight: getVal(props.align === 'right' || props.align === 'end' ? (props.alignPadding ? props.alignPadding : '2%') : '0%', '2%'),
+                            ...props.childrenStyle,
+                        }}></TextInput>
+                </ScrollView>
             </GestureHandlerRootView>
             {props.children}
         </Animated.View >
-
     );
 }
 

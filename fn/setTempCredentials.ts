@@ -3,7 +3,7 @@ import * as SQLite from 'expo-sqlite';
 import { createUsersTable } from './dbOps';
 
 
-type setTempCredentialsArgsType = { symsk: string, pk: string, PIKBackup: string, RCKBackup: string, publicKey: string, featureConfig: string }
+type setTempCredentialsArgsType = { symsk: string, pk: string, publicKey: string, featureConfig: string }
 type setTempCredentialsReturnType = { error: null | string, errorObj?: object | string, status: 'failed' | 'success' }
 
 
@@ -13,7 +13,7 @@ async function setTempCredentials(args: setTempCredentialsArgsType): Promise<set
 
     const db = await SQLite.openDatabaseAsync('localCache');
 
-    return db.runAsync('INSERT INTO users (id, signupTime, publicKey, PIKBackup, featureConfig) VALUES (?, ?, ?, ?, ?)', 'temp', Date.now().toString(), args.publicKey, args.PIKBackup, args.featureConfig).then(res => {
+    return db.runAsync('INSERT OR REPLACE INTO users (id, signupTime, publicKey, featureConfig) VALUES (?, ?, ?, ?)', 'temp', Date.now().toString(), args.publicKey, args.featureConfig).then(res => {
         console.log(res)
         return { error: null, status: 'success' };
     }).catch(e => {

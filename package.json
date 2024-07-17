@@ -20,6 +20,7 @@
     "@expo/vector-icons": "^14.0.2",
     "@react-navigation/native": "^6.0.2",
     "@reduxjs/toolkit": "^2.2.6",
+    "email-validator": "^2.0.4",
     "expo": "~51.0.18",
     "expo-blur": "~13.0.2",
     "expo-constants": "~16.0.2",

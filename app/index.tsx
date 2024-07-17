@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, TextInput, Button, StatusBar } from 'react-native';
+import { Text, View, StyleSheet, TextInput, Button, StatusBar, Keyboard } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import RButton from '@/components/common/RButton';
 import WebView from 'react-native-webview';
@@ -21,6 +21,8 @@ import { openDB } from '@/fn/dbOps';
 import { initialize, InitializeReturnType } from '@/fn/initialize';
 import { genenerateAccountCode } from '@/fn/generateAccountCode';
 import { setTempCredentials } from '@/fn/setTempCredentials';
+import CreateAccountOnlineEmail from '@/components/CreateAccount/CreateAccountOnlineEmail';
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 const Stack = createNativeStackNavigator();
 
 
@@ -32,7 +34,7 @@ type handleAccountInfoEventReturnSig = { status: 'failed' | 'success', error: nu
 export default function App() {
   const [accountCreds, setAccountCreds] = React.useState(null);
   const [triggerCode, setCodeTrigger] = React.useState(null);
-
+  const [hasInitialized, setHasInitialized] = React.useState(false);
   // initialize().then((res: InitializeReturnType) => {
   //   if (res.status === 'success') {
   //     if (res.mustCreateNewAccountCreds === true) {
@@ -54,15 +56,15 @@ export default function App() {
   //   console.log(e)
   // })
 
-
   React.useEffect(() => {
-    if (accountCreds !== null) {
+    if (accountCreds !== null && hasInitialized === false) {
       if (accountCreds.publicKey && accountCreds.pk && accountCreds.symkey) {
+        setHasInitialized(true);
         initialize().then((res: InitializeReturnType) => {
           console.log(res)
           if (res.status === 'success') {
             if (res.mustCreateNewAccountCreds === true) {
-              setTempCredentials({ RCKBackup: '', PIKBackup: '', pk: accountCreds.pk, publicKey: accountCreds.publicKey, symsk: accountCreds.symkey, featureConfig: '' }).then(r => {
+              setTempCredentials({ pk: accountCreds.pk, publicKey: accountCreds.publicKey, symsk: accountCreds.symkey, featureConfig: '' }).then(r => {
                 console.log('yeey')
               }).catch(e => {
                 console.log(e);
@@ -105,6 +107,10 @@ export default function App() {
         <Stack.Screen
           name="createAccountOnline"
           component={CreateAccountOnline}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="createAccountOnlineEmail"
+          component={CreateAccountOnlineEmail}
         ></Stack.Screen>
       </Stack.Navigator>
       <RBox id='statusBarBkg' borderRadius={0} top={-Constants.statusBarHeight} height={Constants.statusBarHeight} backgroundColor={'#000000'} width="100%"></RBox>
