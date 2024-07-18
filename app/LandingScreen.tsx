@@ -21,7 +21,7 @@ export default function LandingScreen({ navigation }) {
 
     useEffect(() => {
         setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
-    })
+    }, [])
 
     return (
         <View style={{ ...styles.container, backgroundColor: globalStyle.statusBarColor }}>

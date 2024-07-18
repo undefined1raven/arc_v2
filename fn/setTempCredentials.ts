@@ -13,7 +13,7 @@ async function setTempCredentials(args: setTempCredentialsArgsType): Promise<set
 
     const db = await SQLite.openDatabaseAsync('localCache');
 
-    return db.runAsync('INSERT OR REPLACE INTO users (id, signupTime, publicKey, featureConfig) VALUES (?, ?, ?, ?)', 'temp', Date.now().toString(), args.publicKey, args.featureConfig).then(res => {
+    return db.runAsync('INSERT OR REPLACE INTO users (id, signupTime, publicKey, featureConfig, version) VALUES (?, ?, ?, ?, ?)', 'temp', Date.now().toString(), args.publicKey, args.featureConfig, '0.1.0').then(res => {
         console.log(res)
         return { error: null, status: 'success' };
     }).catch(e => {

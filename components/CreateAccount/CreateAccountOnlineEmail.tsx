@@ -24,6 +24,8 @@ import { BackgroundTaskRunner } from '../common/BackgroundTaskRunner';
 import { wrapKeysWithPasswordCode } from '@/fn/getPasswordWrappedKeys';
 import { useSQLiteContext } from 'expo-sqlite';
 import { genenerateAccountCode } from '@/fn/generateAccountCode';
+import * as jsesc from 'jsesc';
+import { PasswordHashingReturnType } from '@/app/config/endpointReturnTypes';
 export default function CreateAccountOnlineEmail({ navigation }) {
     const globalStyle: GlobalStyleType = useSelector((store) => store.globalStyle);
     store.subscribe(() => { });
@@ -61,6 +63,14 @@ export default function CreateAccountOnlineEmail({ navigation }) {
         setIsEmailValid(EmailValidator.validate(emailInput));
     }, [emailInput])
 
+    function displayThenHideErrorBanner() {
+        setShowErrorBanner(true);
+        setTimeout(() => {
+            setShowErrorBanner(false);
+            setHasConfirmedAccountInfo(false);
+        }, 3000);
+    }
+
     useEffect(() => {
         const { length, symbol, number, uppercase } = passwordValidityObj;
         if (length && symbol && number && uppercase) {
@@ -72,17 +82,36 @@ export default function CreateAccountOnlineEmail({ navigation }) {
 
     const db = useSQLiteContext();
 
+
     function onWrappedKeys(e) {
         const eventData: WrapKeysWithPasswordCodeReturnType = JSON.parse(e.nativeEvent.data);
-        console.log(eventData)
-        if (eventData.status === 'success') {
-            setHasConfirmedAccountInfo(false);
+        if (eventData.status === 'success' && eventData.PSKBackup) {
+            try {
+                const parsedPSKBackup = JSON.parse(eventData.PSKBackup);
+                if (parsedPSKBackup.pk && parsedPSKBackup.symsk) {
+                    fetch('https://arcv2-api.vercel.app/api/accountCreation/hashPassword', { method: 'POST', body: JSON.stringify({ password: password }) }).then(async (res) => {
+                        const response: PasswordHashingReturnType = await res.json();
+                        if (response.status === 'success' && response.passwordHash) {
+                            db.runAsync(`UPDATE users SET PSKBackup=?, passwordHash=?, emailAddress=? WHERE id='temp'`, jsesc.default(eventData.PSKBackup, { json: true }), response.passwordHash, emailInput).then(res => {
+                                navigation.navigate('OTSOne', { name: 'OTSOne' });
+                                setHasConfirmedAccountInfo(false);
+                            }).catch(e => {
+                                displayThenHideErrorBanner();
+                            })
+                        } else {
+                            displayThenHideErrorBanner();
+                        }
+                    }).catch(e => {
+                        displayThenHideErrorBanner();
+                    })
+                } else {
+                    displayThenHideErrorBanner();
+                }
+            } catch (e) {
+                displayThenHideErrorBanner();
+            }
         } else {
-            setShowErrorBanner(true);
-            setTimeout(() => {
-                setShowErrorBanner(false);
-                setHasConfirmedAccountInfo(false);
-            }, 4000);
+            displayThenHideErrorBanner();
         }
     }
 

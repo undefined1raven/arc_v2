@@ -23,6 +23,8 @@ import { setTempCredentials } from '@/fn/setTempCredentials';
 import CreateAccountOnlineEmail from '@/components/CreateAccount/CreateAccountOnlineEmail';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { SQLiteProvider } from 'expo-sqlite';
+import OTSOne from '@/components/OneTimeSetup/OTSOne';
+import OTSTwo from '@/components/OneTimeSetup/OTSTwo';
 const Stack = createNativeStackNavigator();
 
 
@@ -94,12 +96,11 @@ export default function App() {
             messageHandler={(e) => { handleAccountInfo(e); }}
           ></BackgroundTaskRunner>
         </View>
-        <StatusBar backgroundColor={'#ffffff'}></StatusBar>
         <Stack.Navigator
           screenOptions={{ headerShown: false }}>
           <Stack.Screen
             name="landingScreen"
-            component={LandingScreen}
+            component={OTSOne}
           ></Stack.Screen>
           <Stack.Screen
             name="createAccountMain"
@@ -113,9 +114,17 @@ export default function App() {
             name="createAccountOnlineEmail"
             component={CreateAccountOnlineEmail}
           ></Stack.Screen>
+          <Stack.Screen
+            name="OTSOne"
+            component={OTSOne}
+          ></Stack.Screen>
+          <Stack.Screen
+            name="OTSTwo"
+            component={OTSTwo}
+          ></Stack.Screen>
         </Stack.Navigator>
         <RBox id='statusBarBkg' borderRadius={0} top={-Constants.statusBarHeight} height={Constants.statusBarHeight} backgroundColor={'#000000'} width="100%"></RBox>
       </Provider>
-    </SQLiteProvider>
+    </SQLiteProvider >
   );
 }

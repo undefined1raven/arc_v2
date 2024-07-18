@@ -52,14 +52,14 @@ function getKey(keyMaterial, salt) {
 }
 
 
- async function wrapCryptoKey(keyToWrap, password) {
+ async function wrapCryptoKey(keyToWrap, password, exportFormat) {
   // get the key encryption key
   const keyMaterial = await getKeyMaterial(password);
   let salt = crypto.getRandomValues(new Uint8Array(16));
   const wrappingKey = await getKey(keyMaterial, salt);
   const iv = crypto.getRandomValues(new Uint8Array(16));
   const wrappedKey = await crypto.subtle.wrapKey(
-      "raw",
+      exportFormat,
       keyToWrap,
       wrappingKey,
       { name: "AES-CBC", iv: iv }
@@ -107,8 +107,8 @@ function ab2str(buf) {
                 const secretSymmetricKeyJWK = JSON.parse('${symsk}');
                 importPrivateKey(privateKeyJWK).then(pkActual => {
                   importSymmetricKey(secretSymmetricKeyJWK).then(symskActual => {
-                    wrapCryptoKey(symskActual, '${password}').then(wrapedSymsk => {
-                      wrapCryptoKey(pkActual, '${password}').then(wrapedPk => {
+                    wrapCryptoKey(symskActual, '${password}', 'raw').then(wrapedSymsk => {
+                      wrapCryptoKey(pkActual, '${password}', 'jwk').then(wrapedPk => {
                       const transportReadyWrappedKey = JSON.stringify({
 									        key: ab2str(wrapedSymsk.wrappedKey),
 									        salt: ab2str(wrapedSymsk.salt),
@@ -138,7 +138,7 @@ function ab2str(buf) {
             }else{
               sendMessage(JSON.stringify({taskID: 'accountGen', status: 'failed', error: 'smth'}))
             }
-          }catch(e){
+          }catch(e){b
               sendMessage(JSON.stringify({taskID: 'accountGen', error: e, status: 'failed'}));
           }
         `
