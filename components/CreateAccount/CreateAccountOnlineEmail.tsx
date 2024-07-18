@@ -1,5 +1,5 @@
-import { Image, StyleSheet, Platform, View, useWindowDimensions, Button } from 'react-native';
-
+import { Image, StyleSheet, Platform, View, useWindowDimensions, Button, ActivityIndicator } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
 import RButton from '@/components/common/RButton';
 import { Provider, useDispatch, useSelector } from 'react-redux';
@@ -20,6 +20,10 @@ import { globalEnteringConfig } from '@/app/config/defaultTransitionConfig';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import { KeyboarDismissWrapper } from '../common/KeyboardDismissWrapper';
 import * as EmailValidator from 'email-validator';
+import { BackgroundTaskRunner } from '../common/BackgroundTaskRunner';
+import { wrapKeysWithPasswordCode } from '@/fn/getPasswordWrappedKeys';
+import { useSQLiteContext } from 'expo-sqlite';
+import { genenerateAccountCode } from '@/fn/generateAccountCode';
 export default function CreateAccountOnlineEmail({ navigation }) {
     const globalStyle: GlobalStyleType = useSelector((store) => store.globalStyle);
     store.subscribe(() => { });
@@ -34,8 +38,11 @@ export default function CreateAccountOnlineEmail({ navigation }) {
     const [isEmailValid, setIsEmailValid] = useState(false);
     const [isPasswordValid, setIsPasswordValid] = useState(false);
     const [passwordValidityObj, setPasswordValidityObj] = useState({ length: false, symbol: false, number: false, uppercase: false });
+    const [hasConfirmedAccountInfo, setHasConfirmedAccountInfo] = useState(false);
+    const [codeTriggeringState, setCodeTriggeringState] = useState(Date.now().toString());
+    const [showErrorBanner, setShowErrorBanner] = useState(false);
 
-
+    type WrapKeysWithPasswordCodeReturnType = { status: 'failed' | 'success', error: null | string | object, taskID: 'passwordKeyWrap', PSKBackup?: string }
 
     useEffect(() => {
         setTimeout(() => {
@@ -63,6 +70,28 @@ export default function CreateAccountOnlineEmail({ navigation }) {
         }
     }, [passwordValidityObj])
 
+    const db = useSQLiteContext();
+
+    function onWrappedKeys(e) {
+        const eventData: WrapKeysWithPasswordCodeReturnType = JSON.parse(e.nativeEvent.data);
+        console.log(eventData)
+        if (eventData.status === 'success') {
+            setHasConfirmedAccountInfo(false);
+        } else {
+            setShowErrorBanner(true);
+            setTimeout(() => {
+                setShowErrorBanner(false);
+                setHasConfirmedAccountInfo(false);
+            }, 4000);
+        }
+    }
+
+    useEffect(() => {
+        if (hasConfirmedAccountInfo === true) {
+            setCodeTriggeringState(Date.now().toString());
+        }
+    }, [hasConfirmedAccountInfo])
+
     return (
         <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
             <StatusBar backgroundColor={globalStyle.statusBarColor}></StatusBar>
@@ -72,6 +101,9 @@ export default function CreateAccountOnlineEmail({ navigation }) {
                 end={{ x: 0.3, y: 0.7 }}
                 style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
             />
+            <View>
+                <BackgroundTaskRunner tx={codeTriggeringState} triggeredCode={wrapKeysWithPasswordCode(password, SecureStore.getItem('temp-pk'), SecureStore.getItem('temp-symsk'))} messageHandler={(e: WrapKeysWithPasswordCodeReturnType) => { onWrappedKeys(e) }}></BackgroundTaskRunner>
+            </View>
             {
                 hasMounted ?
                     <Animated.View
@@ -82,9 +114,18 @@ export default function CreateAccountOnlineEmail({ navigation }) {
                         <RLabel figmaImport={{ mobile: { top: 103, left: 50, width: 260, height: 38 } }} text='Create Account' align='left' alignPadding={'3%'} verticalAlign='center' fontSize={14} backgroundColor={globalStyle.color + '20'}></RLabel>
                         <RLabel alignPadding={'0%'} figmaImport={{ mobile: { top: 153, left: 50, width: 150, height: 25 } }} align='left' fontSize={12} text='Email'></RLabel>
                         <RLabel alignPadding={'0%'} figmaImport={{ mobile: { top: 222, left: 50, width: 150, height: 25 } }} align='left' fontSize={12} text='Password'></RLabel>
-                        <RTextInput backgroundColor={emailInput.length > 0 ? isEmailValid ? globalStyle.successColor : globalStyle.errorColor : globalStyle.color} borderColor={emailInput.length > 0 ? isEmailValid ? globalStyle.successColor : globalStyle.errorColor : globalStyle.color} textContentType='emailAddress' textAlignVertical='center' align='left' alignPadding="2%" onInput={(e) => { setEmailInput(e) }} figmaImport={{ mobile: { top: 174, left: 50, width: 260, height: 34 } }} fontSize={16}></RTextInput>
-                        <RTextInput backgroundColor={password.length > 0 ? isPasswordValid ? globalStyle.successColor : globalStyle.errorColor : globalStyle.color} borderColor={password.length > 0 ? isPasswordValid ? globalStyle.successColor : globalStyle.errorColor : globalStyle.color} textContentType='password' textAlignVertical='center' align='left' alignPadding="2%" onInput={(e) => { setPassword(e) }} figmaImport={{ mobile: { top: 243, left: 50, width: 260, height: 34 } }} fontSize={16} secureTextEntry={true}></RTextInput>
-                        <RButton isEnabled={isEmailValid && isPasswordValid} figmaImport={{ mobile: { top: 388, left: 50, width: 260, height: 38 } }} label='Create Account' align='left' alignPadding={'3%'} verticalAlign='center' fontSize={14}></RButton>
+                        <RTextInput returnKeyType='next' readOnly={hasConfirmedAccountInfo} backgroundColor={emailInput.length > 0 ? isEmailValid ? globalStyle.successColor : globalStyle.errorColor : globalStyle.color} borderColor={emailInput.length > 0 ? isEmailValid ? globalStyle.successColor : globalStyle.errorColor : globalStyle.color} textContentType='emailAddress' textAlignVertical='center' align='left' alignPadding="2%" onInput={(e) => { setEmailInput(e) }} figmaImport={{ mobile: { top: 174, left: 50, width: 260, height: 34 } }} fontSize={16}></RTextInput>
+                        <RTextInput readOnly={hasConfirmedAccountInfo} backgroundColor={password.length > 0 ? isPasswordValid ? globalStyle.successColor : globalStyle.errorColor : globalStyle.color} borderColor={password.length > 0 ? isPasswordValid ? globalStyle.successColor : globalStyle.errorColor : globalStyle.color} textContentType='password' textAlignVertical='center' align='left' alignPadding="2%" onInput={(e) => { setPassword(e) }} figmaImport={{ mobile: { top: 243, left: 50, width: 260, height: 34 } }} fontSize={16} secureTextEntry={true}></RTextInput>
+                        <RButton androidRippleEnabled={!hasConfirmedAccountInfo} onClick={() => {
+                            if (isEmailValid === true && isPasswordValid && hasConfirmedAccountInfo === false) {
+                                setHasConfirmedAccountInfo(true)
+                            }
+                        }} isEnabled={isEmailValid && isPasswordValid} figmaImport={{ mobile: { top: 388, left: 50, width: 260, height: 38 } }} label='Create Account' align='left' alignPadding={'3%'} verticalAlign='center' fontSize={14}>
+                            <RBox width={50} left='83%' height={50}>
+                                <ActivityIndicator animating={showErrorBanner === false && hasConfirmedAccountInfo} color={globalStyle.color} size={'large'}></ActivityIndicator>
+                            </RBox>
+
+                        </RButton>
                         <RBox figmaImport={{ mobile: { left: 50, width: 120, height: 60, top: 283 } }}>
                             <RLabel color={passwordValidityObj.length ? globalStyle.successTextColor : globalStyle.textColor} left="11%" width='90%' align='left' alignPadding='0%' text='At least 6 characters' top={0} fontSize={10}></RLabel>
                             <RLabel color={passwordValidityObj.symbol ? globalStyle.successTextColor : globalStyle.textColor} left="11%" width='90%' align='left' alignPadding='0%' text='At least a symbol' top={15} fontSize={10}></RLabel>
@@ -99,6 +140,9 @@ export default function CreateAccountOnlineEmail({ navigation }) {
                             <ArrowDeco width="15%" style={{ transform: [{ rotateZ: '180deg' }], left: '5%' }}></ArrowDeco>
                             <RLabel text='Back' color={globalStyle.textColorAccent} left="71%" top="25%"></RLabel>
                         </RButton>
+                        {showErrorBanner ?
+                            <RLabel verticalAlign='center' figmaImport={{ mobile: { top: 510, left: 50, width: 260, height: 40 } }} text='Something went wrong :(' backgroundColor={globalStyle.errorColor + '20'} color={globalStyle.errorTextColor}></RLabel>
+                            : <RBox></RBox>}
                     </Animated.View>
                     : <RBox></RBox>}
         </View>)

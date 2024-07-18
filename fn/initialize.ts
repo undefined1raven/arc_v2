@@ -6,10 +6,12 @@ import { createUsersTable } from './dbOps';
 type InitializeReturnType = { status: 'success' | 'failed', auth?: boolean, hasCache?: boolean, error?: string, mustCreateNewAccountCreds?: boolean };
 
 async function initialize(): Promise<InitializeReturnType> {
-    try {
-        clearTempCredentials()
-    } catch (e) { }
     const db = await SQLite.openDatabaseAsync('localCache')
+    
+    SecureStore.deleteItemAsync('temp-pk').catch(e => { return { error: 'Failed to delete keychain pk', errorObj: e, status: 'failed' }; });;
+    SecureStore.deleteItemAsync('temp-symsk').catch(e => { return { error: 'Failed to delete keychain symsk', errorObj: e, status: 'failed' }; });
+    await db.runAsync(`DELETE FROM users WHERE id='temp'`);
+
     return db.getFirstAsync(`SELECT id FROM users`).then((res: { id: string }) => {//check if users table exists
         if (res !== null) {
             if (res.id !== 'temp') {

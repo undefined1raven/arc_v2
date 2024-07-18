@@ -26,7 +26,8 @@ type RButtonProps = {
     transitionIndex?: number,
     isEnabled?: boolean,
     verticalAlign?: 'top' | 'bottom' | 'center',
-    androidRippleColor: ColorValueHex,
+    androidRippleColor?: ColorValueHex,
+    androidRippleEnabled?: boolean,
     className?: string | string[], color?: ColorValueHex, borderColor?: ColorValueHex, backgroundColor?: ColorValueHex, width?: number | string, height?: number | string, top?: number | string, left?: number | string, mobileFontSize?: number | FontSize, align?: AlignType, opacity?: number, style?: object, blur?: number, borderRadius?: number, alignPadding?: number | string, hoverOpacityMax?: string, hoverOpacityMin?: string, horizontalCenter?: boolean, verticalCenter?: boolean, figmaImportConfig?: object, mouseEnter?: Function, mouseLeave?: Function, transitions?: string | object, isSelected?: boolean, onLongPress?: Function
 }
 
@@ -157,7 +158,7 @@ export default function RButton(props: RButtonProps) {
             >
                 {props.children}
                 <Pressable
-                    android_ripple={{ color: getVal(props.isEnabled, true) ? getVal(props.androidRippleColor, '#11111110') : '#00000000' }}
+                    android_ripple={{ color: getVal(props.androidRippleEnabled, true) ? (getVal(props.isEnabled, true) ? getVal(props.androidRippleColor, '#11111110') : 'transparent') : 'transparent' }}
                     style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
                     onPressIn={() => setIsMouseHovering(true)}
                     onLongPress={(e) => { props.onLongPress?.call(e); setIsMouseHovering(false); }}
