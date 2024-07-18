@@ -4,11 +4,11 @@ the examples provided by MDN for the architecture I've chosen (based on the Cryp
 */
 
 
-function ab2str(buf) {
+export function ab2str(buf) {
     return String.fromCharCode.apply(null, new Uint8Array(buf));
 }
 
-function str2ab(str) {
+export function str2ab(str) {
     const buf = new ArrayBuffer(str.length);
     const bufView = new Uint8Array(buf);
     for (let i = 0, strLen = str.length; i < strLen; i++) {

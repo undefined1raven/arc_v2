@@ -63,7 +63,7 @@ export default function OTSOne({ navigation }) {
                             <RLabel figmaImportConfig={titleHeaderContainer} figmaImport={{ mobile: { left: 293, top: 0, width: '50%', height: '100%' } }} alignPadding="0%" verticalAlign='center' fontSize={15} align='left' text='1/3'></RLabel>
                         </RBox>
                         <RLabel figmaImport={{ mobile: { left: 18, top: 86, width: '50%', height: 95 } }} alignPadding="0%" verticalAlign='top' fontSize={28} align='left' text='Welcome!'></RLabel>
-                        <RLabel figmaImport={{ mobile: { left: 18, top: 135, width: '90%', height: 120 } }} alignPadding="0%" verticalAlign='top' fontSize={18} align='left' text='Your data is encrypted before leaving this device to make sure no one besides you can read it at any point. To keep that level of security while also making sure you don’t lose access to the data, we need to setup recovery methods.'></RLabel>
+                        <RLabel figmaImport={{ mobile: { left: 18, top: 135, width: '90%', height: 120 } }} alignPadding="0%" verticalAlign='top' fontSize={18} align='left' text='We encrypt your data so only you can read it. Setting up recovery methods is required in the event something happens to this device so you could still recover your data.'></RLabel>
                         <RButton onClick={() => { navigation.navigate('OTSTwo', { name: 'OTSTwo' }) }} figmaImport={{ mobile: { top: 567, left: 18, width: 321, height: 53 } }} alignPadding={'3%'} verticalAlign='center' fontSize={14}>
                             <ArrowDeco width="15%" style={{ transform: [{ rotateZ: '0deg' }], left: '82%' }}></ArrowDeco>
                             <RLabel text='Continue' fontSize={18} left="3%" top="33%"></RLabel>

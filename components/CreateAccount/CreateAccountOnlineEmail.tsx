@@ -44,7 +44,7 @@ export default function CreateAccountOnlineEmail({ navigation }) {
     const [codeTriggeringState, setCodeTriggeringState] = useState(Date.now().toString());
     const [showErrorBanner, setShowErrorBanner] = useState(false);
 
-    type WrapKeysWithPasswordCodeReturnType = { status: 'failed' | 'success', error: null | string | object, taskID: 'passwordKeyWrap', PSKBackup?: string }
+    type WrapKeysWithPasswordCodeReturnType = { status: 'failed' | 'success', error: null | string | object, taskID: 'passwordKeyWrap', payload?: string }
 
     useEffect(() => {
         setTimeout(() => {
@@ -85,14 +85,14 @@ export default function CreateAccountOnlineEmail({ navigation }) {
 
     function onWrappedKeys(e) {
         const eventData: WrapKeysWithPasswordCodeReturnType = JSON.parse(e.nativeEvent.data);
-        if (eventData.status === 'success' && eventData.PSKBackup) {
+        if (eventData.status === 'success' && eventData.payload) {
             try {
-                const parsedPSKBackup = JSON.parse(eventData.PSKBackup);
+                const parsedPSKBackup = JSON.parse(eventData.payload);
                 if (parsedPSKBackup.pk && parsedPSKBackup.symsk) {
                     fetch('https://arcv2-api.vercel.app/api/accountCreation/hashPassword', { method: 'POST', body: JSON.stringify({ password: password }) }).then(async (res) => {
                         const response: PasswordHashingReturnType = await res.json();
                         if (response.status === 'success' && response.passwordHash) {
-                            db.runAsync(`UPDATE users SET PSKBackup=?, passwordHash=?, emailAddress=? WHERE id='temp'`, jsesc.default(eventData.PSKBackup, { json: true }), response.passwordHash, emailInput).then(res => {
+                            db.runAsync(`UPDATE users SET PSKBackup=?, passwordHash=?, emailAddress=? WHERE id='temp'`, jsesc.default(eventData.payload, { json: true }), response.passwordHash, emailInput).then(res => {
                                 navigation.navigate('OTSOne', { name: 'OTSOne' });
                                 setHasConfirmedAccountInfo(false);
                             }).catch(e => {

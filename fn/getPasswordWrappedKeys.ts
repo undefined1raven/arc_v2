@@ -121,25 +121,25 @@ function ab2str(buf) {
 									        iv: ab2str(wrapedPk.iv)
 								          })
                         const payload = JSON.stringify({symsk: transportReadyWrappedKey, pk: transportReadyWrappedPrivateKey});
-                        sendMessage(JSON.stringify({taskID: 'accountGen', status: 'success', error: null, PSKBackup: payload}))
+                        sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'success', error: null, payload: payload}))
                     }).catch(e => {
-                      sendMessage(JSON.stringify({taskID: 'accountGen', status: 'failed', error: 'failed to wrap pk'}))
+                      sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'failed', error: 'failed to wrap pk'}))
                     })
                     }).catch(e => {
-                      sendMessage(JSON.stringify({taskID: 'accountGen', status: 'failed', error: 'failed to wrap symsk'}))
+                      sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'failed', error: 'failed to wrap symsk'}))
                     })
                   }).catch(e => {
-                    sendMessage(JSON.stringify({taskID: 'accountGen', status: 'failed', error: 'failed to import symsk'}))
+                    sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'failed', error: 'failed to import symsk'}))
                   })
                 }).catch(e => {
-                  sendMessage(JSON.stringify({taskID: 'accountGen', status: 'failed', error: 'failed to import pk'}))
+                  sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'failed', error: 'failed to import pk'}))
                 })
 
             }else{
-              sendMessage(JSON.stringify({taskID: 'accountGen', status: 'failed', error: 'smth'}))
+              sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'failed', error: 'smth'}))
             }
           }catch(e){b
-              sendMessage(JSON.stringify({taskID: 'accountGen', error: e, status: 'failed'}));
+              sendMessage(JSON.stringify({taskID: 'keyWrapping', error: e, status: 'failed'}));
           }
         `
 }
