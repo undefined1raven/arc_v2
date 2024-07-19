@@ -84,34 +84,38 @@ export default function CreateAccountOnlineEmail({ navigation }) {
 
 
     function onWrappedKeys(e) {
-        const eventData: WrapKeysWithPasswordCodeReturnType = JSON.parse(e.nativeEvent.data);
-        if (eventData.status === 'success' && eventData.payload) {
-            try {
-                const parsedPSKBackup = JSON.parse(eventData.payload);
-                if (parsedPSKBackup.pk && parsedPSKBackup.symsk) {
-                    fetch('https://arcv2-api.vercel.app/api/accountCreation/hashPassword', { method: 'POST', body: JSON.stringify({ password: password }) }).then(async (res) => {
-                        const response: PasswordHashingReturnType = await res.json();
-                        if (response.status === 'success' && response.passwordHash) {
-                            db.runAsync(`UPDATE users SET PSKBackup=?, passwordHash=?, emailAddress=? WHERE id='temp'`, jsesc.default(eventData.payload, { json: true }), response.passwordHash, emailInput).then(res => {
-                                navigation.navigate('OTSOne', { name: 'OTSOne' });
-                                setHasConfirmedAccountInfo(false);
-                            }).catch(e => {
+        if (emailInput !== '') {
+            const eventData: WrapKeysWithPasswordCodeReturnType = JSON.parse(e.nativeEvent.data);
+            if (eventData.status === 'success' && eventData.payload) {
+                try {
+                    const parsedPSKBackup = JSON.parse(eventData.payload);
+                    if (parsedPSKBackup.pk && parsedPSKBackup.symsk) {
+                        fetch('https://arcv2-api.vercel.app/api/accountCreation/hashPassword', { method: 'POST', body: JSON.stringify({ password: password }) }).then(async (res) => {
+                            const response: PasswordHashingReturnType = await res.json();
+                            if (response.status === 'success' && response.passwordHash) {
+                                db.runAsync(`UPDATE users SET PSKBackup=?, passwordHash=?, emailAddress=? WHERE id='temp'`, jsesc.default(eventData.payload, { json: true }), response.passwordHash, emailInput).then(res => {
+                                    console.log(res)
+                                    navigation.navigate('OTSOne', { name: 'OTSOne' });
+                                    setHasConfirmedAccountInfo(false);
+                                }).catch(e => {
+                                    console.log(e)
+                                    displayThenHideErrorBanner();
+                                })
+                            } else {
                                 displayThenHideErrorBanner();
-                            })
-                        } else {
+                            }
+                        }).catch(e => {
                             displayThenHideErrorBanner();
-                        }
-                    }).catch(e => {
+                        })
+                    } else {
                         displayThenHideErrorBanner();
-                    })
-                } else {
+                    }
+                } catch (e) {
                     displayThenHideErrorBanner();
                 }
-            } catch (e) {
+            } else {
                 displayThenHideErrorBanner();
             }
-        } else {
-            displayThenHideErrorBanner();
         }
     }
 
@@ -150,7 +154,7 @@ export default function CreateAccountOnlineEmail({ navigation }) {
                                 setHasConfirmedAccountInfo(true)
                             }
                         }} isEnabled={isEmailValid && isPasswordValid} figmaImport={{ mobile: { top: 388, left: 50, width: 260, height: 38 } }} label='Create Account' align='left' alignPadding={'3%'} verticalAlign='center' fontSize={14}>
-                            <RBox width={50} left='83%' height={50}>
+                            <RBox width={50} left='83%' height={'100%'}>
                                 <ActivityIndicator animating={showErrorBanner === false && hasConfirmedAccountInfo} color={globalStyle.color} size={'large'}></ActivityIndicator>
                             </RBox>
 

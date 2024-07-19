@@ -25,6 +25,8 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { SQLiteProvider } from 'expo-sqlite';
 import OTSOne from '@/components/OneTimeSetup/OTSOne';
 import OTSTwo from '@/components/OneTimeSetup/OTSTwo';
+import OTSThree from '@/components/OneTimeSetup/OTSThree';
+import Home from '@/components/App/Home/Home';
 const Stack = createNativeStackNavigator();
 
 
@@ -121,6 +123,14 @@ export default function App() {
           <Stack.Screen
             name="OTSTwo"
             component={OTSTwo}
+          ></Stack.Screen>
+          <Stack.Screen
+            name="OTSThree"
+            component={OTSThree}
+          ></Stack.Screen>
+          <Stack.Screen
+            name="Home"
+            component={Home}
           ></Stack.Screen>
         </Stack.Navigator>
         <RBox id='statusBarBkg' borderRadius={0} top={-Constants.statusBarHeight} height={Constants.statusBarHeight} backgroundColor={'#000000'} width="100%"></RBox>

@@ -25,13 +25,16 @@ import { wrapKeysWithPasswordCode } from '@/fn/getPasswordWrappedKeys';
 import { useSQLiteContext } from 'expo-sqlite';
 import { genenerateAccountCode } from '@/fn/generateAccountCode';
 import { PasswordHashingReturnType } from '@/app/config/endpointReturnTypes';
-import { RadialGradient } from 'react-native-svg';
+import { parse, RadialGradient } from 'react-native-svg';
 import { GradientLine } from '../common/deco/GradientLine';
 import * as Crypto from 'expo-crypto';
 import * as Clipboard from 'expo-clipboard';
 import { download } from '../../fn/download';
+import * as jsesc from 'jsesc';
 type WrapKeysWithPasswordCodeReturnType = { status: 'failed' | 'success', error: null | string | object, taskID: 'passwordKeyWrap', payload?: string }
-
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import { StorageAccessFramework } from 'expo-file-system';
 export default function OTSTwo({ navigation }) {
     const globalStyle: GlobalStyleType = useSelector((store) => store.globalStyle);
     store.subscribe(() => { });
@@ -77,12 +80,25 @@ export default function OTSTwo({ navigation }) {
             setRecoveryCodeToBeProcessed(recoveryCodes[1]);
         }
         if (wrappedKeysStorage.length === 2) {
-            db.runAsync(`UPDATE users SET PSKBackup=?, passwordHash=?, emailAddress=? WHERE id='temp'`, jsesc.default(eventData.payload, { json: true }), response.passwordHash, emailInput).then(res => {
-                navigation.navigate('OTSOne', { name: 'OTSOne' });
-                
-            }).catch(e => {
-                
+            let keyIntegrity = 0;
+            wrappedKeysStorage.forEach(wrapedKey => {
+                try {
+                    const parsedKey = JSON.parse(wrapedKey);
+                    if (parsedKey.pk && parsedKey.symsk) {
+                        keyIntegrity++;
+                    }
+                } catch (e) {
+                    console.log(e)
+                }
             })
+            if (keyIntegrity === 2) {
+                db.runAsync(`UPDATE users SET RCKBackup=? WHERE id='temp'`, jsesc.default(JSON.stringify(wrappedKeysStorage), { json: true })).then(res => {
+                    console.log(res, 'xxxxxx')
+                    navigation.navigate('OTSThree', { name: 'OTSThree' });
+                }).catch(e => {
+                    console.log(e)
+                })
+            }
         }
     }, [wrappedKeysStorage])
 
@@ -102,9 +118,29 @@ export default function OTSTwo({ navigation }) {
     }
 
     function getWrappedKeysSaved() {
-        console.log(recoveryCodeToBeProcessed)
-        setCodeTrigger(Date.now().toString());
         if (recoveryCodes.length === 2 && recoveryCodeToBeProcessed !== '') {
+            setCodeTrigger(Date.now().toString());
+        }
+    }
+
+    async function saveFile(filename) {
+        const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
+        if (!permissions.granted) {
+            return;
+        }
+
+        const recoveryCodesString = recoveryCodes[0] + ', ' + recoveryCodes[1] + ', 0.1.1, [do not share these with anyone and keep them in a safe place]';
+
+        try {
+            await StorageAccessFramework.createFileAsync(permissions.directoryUri, `ARCRecoveryCodes-${Date.now()}.txt`, 'text/plain')
+                .then(async (uri) => {
+                    await FileSystem.writeAsStringAsync(uri, recoveryCodesString, { encoding: FileSystem.EncodingType.UTF8 });
+                })
+                .catch((e) => {
+                    console.log(e);
+                });
+        } catch (e) {
+            throw new Error(e);
         }
     }
     return (
@@ -124,7 +160,6 @@ export default function OTSTwo({ navigation }) {
             {
                 hasMounted ?
                     <Animated.View
-
                         entering={globalEnteringConfig()}
                         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
                         <RBox figmaImport={{ mobile: { top: 36, left: 18, width: 325, height: 36 } }} backgroundColor={globalStyle.color + '20'}>
@@ -140,9 +175,9 @@ export default function OTSTwo({ navigation }) {
                             : <RBox></RBox>
                         }
 
-                        <RButton onClick={() => { }} figmaImport={{ mobile: { top: 388, left: 18, width: 324, height: 53 } }} alignPadding={'3%'} verticalAlign='center' fontSize={14}>
-                            <ArrowDeco width="15%" style={{ transform: [{ rotateZ: '0deg' }], left: '82%' }}></ArrowDeco>
-                            <RLabel text='Continue' fontSize={18} left="3%" top="33%"></RLabel>
+                        <RButton onClick={() => { saveFile('backupcodes.txt') }} figmaImport={{ mobile: { top: 388, left: 18, width: 324, height: 53 } }} alignPadding={'3%'} verticalAlign='center' fontSize={14}>
+                            <ArrowDeco width="10%" style={{ transform: [{ rotateZ: '450deg' }], height: '30%', left: '89%' }}></ArrowDeco>
+                            <RLabel text='Download' width="80%" align='left' fontSize={18} left="3%" top="33%"></RLabel>
                         </RButton>
 
                         <RButton isEnabled={recoveryCodes.length === 2 && recoveryCodeToBeProcessed !== ''} onClick={() => { getWrappedKeysSaved() }} figmaImport={{ mobile: { top: 567, left: 18, width: 324, height: 53 } }} alignPadding={'3%'} verticalAlign='center' fontSize={14}>
