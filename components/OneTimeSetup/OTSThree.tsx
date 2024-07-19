@@ -54,7 +54,6 @@ export default function OTSThree({ navigation }) {
     const db = useSQLiteContext();
 
     useEffect(() => {
-        console.log(wrappedKeysStorage)
         if (wrappedKeysStorage !== null) {
             let keyIntegrity = false;
             try {

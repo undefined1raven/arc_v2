@@ -1,7 +1,6 @@
 import themeColors, { Themes, ThemeColorsType } from "@/app/config/colors";
 import { createSlice } from "@reduxjs/toolkit";
 import { ColorValueHex } from "@/components/common/CommonTypes";
-import { act } from "react-test-renderer";
 
 type PageBackgroundColorArrayType = ColorValueHex[];
 

@@ -7,7 +7,7 @@ import store from './store';
 import RBox from '@/components/common/RBox';
 import Constants from 'expo-constants';
 import { UseSelector } from 'react-redux';
-import globalStyles, { GlobalStyleType } from '@/hooks/globalStyles';
+import globalStyles, { GlobalStyleType, updateGlobalStyle } from '@/hooks/globalStyles';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LinearGradient } from 'react-native-svg';
@@ -16,7 +16,7 @@ import LandingScreen from './LandingScreen';
 import CreateAccountOnline from '@/components/CreateAccount/CreateAccountOnline';
 import { BackgroundTaskRunner } from '@/components/common/BackgroundTaskRunner';
 import { openDB } from '@/fn/dbOps';
-
+import { Appearance, useColorScheme } from 'react-native';
 import { initialize, InitializeReturnType } from '@/fn/initialize';
 import { genenerateAccountCode } from '@/fn/generateAccountCode';
 import { setTempCredentials } from '@/fn/setTempCredentials';
@@ -27,6 +27,7 @@ import OTSOne from '@/components/OneTimeSetup/OTSOne';
 import OTSTwo from '@/components/OneTimeSetup/OTSTwo';
 import OTSThree from '@/components/OneTimeSetup/OTSThree';
 import Home from '@/components/App/Home/Home';
+import themeColors, { ThemeColorsType } from '@/app/config/colors';
 const Stack = createNativeStackNavigator();
 
 
@@ -39,6 +40,9 @@ export default function App() {
   const [accountCreds, setAccountCreds] = React.useState(null);
   const [triggerCode, setCodeTrigger] = React.useState(null);
   const [hasInitialized, setHasInitialized] = React.useState(false);
+  let colorScheme = useColorScheme();
+
+  store.dispatch(updateGlobalStyle({ ...themeColors[colorScheme] }));
   // initialize().then((res: InitializeReturnType) => {
   //   if (res.status === 'success') {
   //     if (res.mustCreateNewAccountCreds === true) {
@@ -102,7 +106,7 @@ export default function App() {
           screenOptions={{ headerShown: false }}>
           <Stack.Screen
             name="landingScreen"
-            component={OTSOne}
+            component={LandingScreen}
           ></Stack.Screen>
           <Stack.Screen
             name="createAccountMain"
