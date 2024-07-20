@@ -28,6 +28,8 @@ import OTSTwo from '@/components/OneTimeSetup/OTSTwo';
 import OTSThree from '@/components/OneTimeSetup/OTSThree';
 import Home from '@/components/App/Home/Home';
 import themeColors, { ThemeColorsType } from '@/app/config/colors';
+import { useNavigation } from '@react-navigation/native';
+import LoadingScreen from '@/components/common/LoadingScreen';
 const Stack = createNativeStackNavigator();
 
 
@@ -64,6 +66,8 @@ export default function App() {
   //   console.log(e)
   // })
 
+  const navigation = useNavigation();
+
   React.useEffect(() => {
     if (accountCreds !== null && hasInitialized === false) {
       if (accountCreds.publicKey && accountCreds.pk && accountCreds.symkey) {
@@ -73,12 +77,18 @@ export default function App() {
           if (res.status === 'success') {
             if (res.mustCreateNewAccountCreds === true) {
               setTempCredentials({ pk: accountCreds.pk, publicKey: accountCreds.publicKey, symsk: accountCreds.symkey, featureConfig: '' }).then(r => {
-                console.log('yeey')
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'landingScreen' }],
+                });
               }).catch(e => {
                 console.log(e);
               })
             } else {
-              console.log('sops')
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Home' }],
+              });
             }
           }
         }).catch(e => {
@@ -104,6 +114,10 @@ export default function App() {
         </View>
         <Stack.Navigator
           screenOptions={{ headerShown: false }}>
+          <Stack.Screen
+            name="LoadingScreen"
+            component={LoadingScreen}
+          ></Stack.Screen>
           <Stack.Screen
             name="landingScreen"
             component={LandingScreen}

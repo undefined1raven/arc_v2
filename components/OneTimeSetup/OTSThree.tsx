@@ -44,6 +44,7 @@ export default function OTSThree({ navigation }) {
     const [isSkipBoxChecked, setIsSkipBoxChecked] = useState(false);
     const [wrappedKeysStorage, setWrappedKeysStorage] = useState(null);
     const [showSkipLoadingSpinner, setShowSkipLoadingSpinner] = useState(false);
+    const [canCompleteSignUp, setCanCompleteSignUp] = useState(false);
     useEffect(() => {
         setHasMounted(true);
         setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
@@ -53,8 +54,43 @@ export default function OTSThree({ navigation }) {
 
     const db = useSQLiteContext();
 
+    function completeSignUp() {
+        db.getFirstAsync(`SELECT id, PSKBackup, publicKey, RCKBackup, featureConfig, signupTime, passwordHash, emailAddress, passkeys, PIKBackup, trustedDevices, oauthState, securityLogs, version FROM users WHERE id='temp'`).then(res => {
+            const { publicKey, RCKBackup, featureConfig, PSKBackup, signupTime, passwordHash, emailAddress, passkeys, PIKBackup, trustedDevices, oauthState, securityLogs, version } = res;
+            if (RCKBackup !== null && publicKey !== null && featureConfig !== null) {
+                const aid = Crypto.randomUUID();
+                db.runAsync(`INSERT INTO users (id, publicKey, RCKBackup, featureConfig, PSKBackup, signupTime, passwordHash, emailAddress, passkeys, PIKBackup, trustedDevices, oauthState, securityLogs, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    aid, publicKey, RCKBackup, featureConfig, PSKBackup, signupTime, passwordHash, emailAddress, passkeys, PIKBackup, trustedDevices, oauthState, securityLogs, version
+                ).then(res => {
+                    db.runAsync(`DELETE FROM users WHERE id='temp'`).then(resx => {
+                        navigation.reset({
+                            index: 0,
+                            routes: [{ name: 'Home' }],
+                        });
+                    }).catch(e => {
+                        console.log(e)
+                    })
+                }).catch(e => {
+                    console.log(e)
+                })
+            }
+        }).catch(e => {
+            console.log(e)
+        })
+    }
+
     useEffect(() => {
         if (wrappedKeysStorage !== null) {
+            setCanCompleteSignUp(true);
+        }
+    }, [wrappedKeysStorage])
+
+    function setPINInput(e) {
+        setPin(e);
+    }
+
+    useEffect(() => {
+        if (canCompleteSignUp === true) {
             let keyIntegrity = false;
             try {
                 const parsedKey = JSON.parse(wrappedKeysStorage);
@@ -64,33 +100,26 @@ export default function OTSThree({ navigation }) {
             }
             if (keyIntegrity) {
                 db.runAsync(`UPDATE users SET PIKBackup=? WHERE id='temp'`, jsesc.default(wrappedKeysStorage, { json: true })).then(res => {
-                    navigation.reset({
-                        index: 0,
-                        routes: [{ name: 'Home' }],
-                    });
+                    completeSignUp();
                 }).catch(e => {
                     console.log(e)
                 })
             }
+            setCanCompleteSignUp(false);
         }
-    }, [wrappedKeysStorage])
-
-    function setPINInput(e) {
-        setPin(e);
-    }
+    }, [canCompleteSignUp])
 
     useEffect(() => {
         setIsPinValid(pin.match(/^(|[0-9]*)$/) && pin.length >= 4 && pin.length <= 6);
     }, [pin])
 
+
+
     function onSkipPin() {
         if (isSkipBoxChecked) {
             setShowSkipLoadingSpinner(true);
             db.runAsync(`UPDATE users SET PIKBackup=? WHERE id='temp'`, null).then(res => {
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'Home' }],
-                });
+                completeSignUp();
             }).catch(e => {
                 console.log(e)
             })

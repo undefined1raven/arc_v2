@@ -9,16 +9,16 @@ async function initialize(): Promise<InitializeReturnType> {
     const db = await SQLite.openDatabaseAsync('localCache')
     SecureStore.deleteItemAsync('temp-pk').catch(e => { return { error: 'Failed to delete keychain pk', errorObj: e, status: 'failed' }; });;
     SecureStore.deleteItemAsync('temp-symsk').catch(e => { return { error: 'Failed to delete keychain symsk', errorObj: e, status: 'failed' }; });
-    try{
+    try {
         await db.runAsync(`DELETE FROM users WHERE id='temp'`);
-    }catch(e){
-        
+    } catch (e) {
+
     }
 
     return db.getFirstAsync(`SELECT id FROM users`).then((res: { id: string }) => {//check if users table exists
         if (res !== null) {
             if (res.id !== 'temp') {
-                return { status: 'success', auth: false, hasCache: true };
+                return { status: 'success', auth: true, hasCache: true };
             } else {
                 return { status: 'success', mustCreateNewAccountCreds: true }
             }

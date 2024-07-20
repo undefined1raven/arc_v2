@@ -35,6 +35,7 @@ type WrapKeysWithPasswordCodeReturnType = { status: 'failed' | 'success', error:
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { StorageAccessFramework } from 'expo-file-system';
+import { DownloadDeco } from '../common/deco/DownloadDeco';
 export default function OTSTwo({ navigation }) {
     const globalStyle: GlobalStyleType = useSelector((store) => store.globalStyle);
     store.subscribe(() => { });
@@ -93,7 +94,6 @@ export default function OTSTwo({ navigation }) {
             })
             if (keyIntegrity === 2) {
                 db.runAsync(`UPDATE users SET RCKBackup=? WHERE id='temp'`, jsesc.default(JSON.stringify(wrappedKeysStorage), { json: true })).then(res => {
-                    console.log(res, 'xxxxxx')
                     navigation.navigate('OTSThree', { name: 'OTSThree' });
                 }).catch(e => {
                     console.log(e)
@@ -169,14 +169,16 @@ export default function OTSTwo({ navigation }) {
                         <RLabel figmaImport={{ mobile: { left: 18, top: 86, width: '90%', height: 95 } }} alignPadding="0%" verticalAlign='top' fontSize={28} align='left' text='Recovery Codes'></RLabel>
                         <RButton onClick={async () => { triggerCopiedToClipboardLabel(); await Clipboard.setStringAsync(recoveryCodes[0]) }} hoverOpacityMin={'10'} hoverOpacityMax={'10'} figmaImport={{ mobile: { left: 18, top: 135, width: 324, height: 55 } }} fontType='mono' alignPadding="0%" verticalAlign='center' mobileFontSize={7} align='center' label={recoveryCodes[0]}></RButton>
                         <RButton onClick={async () => { triggerCopiedToClipboardLabel(); await Clipboard.setStringAsync(recoveryCodes[1]) }} hoverOpacityMin={'10'} hoverOpacityMax={'10'} figmaImport={{ mobile: { left: 18, top: 198, width: 325, height: 55 } }} fontType='mono' alignPadding="0%" verticalAlign='center' mobileFontSize={7} align='center' label={recoveryCodes[1]}></RButton>
-                        <RLabel figmaImport={{ mobile: { left: 18, top: 336, width: '90%', height: 120 } }} alignPadding="0%" verticalAlign='top' fontSize={18} align='left' text='Download or write down a copy of these codes. Keep these codes secret.'></RLabel>
+                        <RLabel figmaImport={{ mobile: { left: 18, top: 450, width: '90%', height: 120 } }} alignPadding="0%" verticalAlign='top' fontSize={18} align='left' text='Download or write down a copy of these codes. Keep these codes secret.'></RLabel>
                         {showCopiedToClipboard ?
                             <RLabel figmaImport={{ mobile: { left: 18, top: 260, width: 324, height: 53 } }} alignPadding="0%" color={globalStyle.successTextColor} backgroundColor={globalStyle.successColor + '40'} verticalAlign='center' fontSize={18} text='Copied to clipboard'></RLabel>
                             : <RBox></RBox>
                         }
 
-                        <RButton onClick={() => { saveFile('backupcodes.txt') }} figmaImport={{ mobile: { top: 388, left: 18, width: 324, height: 53 } }} alignPadding={'3%'} verticalAlign='center' fontSize={14}>
-                            <ArrowDeco width="10%" style={{ transform: [{ rotateZ: '450deg' }], height: '30%', left: '89%' }}></ArrowDeco>
+                        <RButton onClick={() => { saveFile('backupcodes.txt') }} figmaImport={{ mobile: { top: 500, left: 18, width: 324, height: 53 } }} alignPadding={'3%'} verticalAlign='center' fontSize={14}>
+                            <RBox width={'15%'} top="15%" height={'80%'} left="85%">
+                                <DownloadDeco width="100%" height="100%"></DownloadDeco>
+                            </RBox>
                             <RLabel text='Download' width="80%" align='left' fontSize={18} left="3%" top="33%"></RLabel>
                         </RButton>
 
