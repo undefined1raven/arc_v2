@@ -8,7 +8,8 @@ import RBox from '@/components/common/RBox';
 import Constants from 'expo-constants';
 import { UseSelector } from 'react-redux';
 import globalStyles, { GlobalStyleType, updateGlobalStyle } from '@/hooks/globalStyles';
-import { NavigationContainer } from '@react-navigation/native';
+import { updateLoadingScreenMessage } from '@/hooks/loadingScreenMessage';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LinearGradient } from 'react-native-svg';
 import CreateAccountMainActual from './CreateAccountMainActual';
@@ -30,6 +31,7 @@ import Home from '@/components/App/Home/Home';
 import themeColors, { ThemeColorsType } from '@/app/config/colors';
 import { useNavigation } from '@react-navigation/native';
 import LoadingScreen from '@/components/common/LoadingScreen';
+import KeysLoadingScreen from '@/components/CreateAccount/KeysLoadingScreen';
 const Stack = createNativeStackNavigator();
 
 
@@ -45,46 +47,83 @@ export default function App() {
   let colorScheme = useColorScheme();
 
   store.dispatch(updateGlobalStyle({ ...themeColors[colorScheme] }));
-  // initialize().then((res: InitializeReturnType) => {
-  //   if (res.status === 'success') {
-  //     if (res.mustCreateNewAccountCreds === true) {
-  //       if (accountCreds !== null) {
-  //         setTempCredentials({ RCKBackup: '', PIKBackup: '', pk: accountCreds.pk, publicKey: accountCreds.publicKey, symsk: accountCreds.symkey, featureConfig: '' }).then(r => {
-  //           console.log('yeey')
-  //         }).catch(e => {
-  //           console.log(e);
-  //         })
-  //       } else {
-  //         console.log('miss')
-  //         setCodeTrigger(Date.now().toString());
-  //       }
-  //     } else {
-  //       console.log('stx')
-  //     }
-  //   }
-  // }).catch(e => {
-  //   console.log(e)
-  // })
+
+
+  function redirectToCreateAccountWhenKeysAval() {
+    const navState = navigation.getState();
+    const currentScreen = navState?.routeNames[navState?.index];
+    console.log(navigation.getState()?.routes[0].state?.routeNames);
+    if (currentScreen === 'landingScreen') {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'createAccountMain' }],
+      });
+    }
+  }
+
+  React.useEffect(() => {
+    console.log()
+    initialize().then((res: InitializeReturnType) => {
+      if (res.status === 'success') {
+        if (res.mustCreateNewAccountCreds === true) {
+          store.dispatch(updateLoadingScreenMessage({ message: 'Must create new credentials' }));
+          if (accountCreds !== null) {
+            setHasInitialized(true);
+            store.dispatch(updateLoadingScreenMessage({ message: 'Writing account credentials' }));
+            setTempCredentials({ RCKBackup: '', PIKBackup: '', pk: accountCreds.pk, publicKey: accountCreds.publicKey, symsk: accountCreds.symkey, featureConfig: '' }).then(r => {
+              store.dispatch(updateLoadingScreenMessage({ message: 'Ready' }));
+              // redirectToCreateAccountWhenKeysAval();//  user is redirected from the keysLoadingScreen when loading message is "Ready"
+            }).catch(e => {
+              console.log(e);
+            })
+          } else {
+            console.log('miss')
+            setCodeTrigger(Date.now().toString());
+            if (res.allowedAyncGen === true) {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'landingScreen' }],
+              });
+            }
+            store.dispatch(updateLoadingScreenMessage({ message: 'Must create new credentials' }));
+            setTimeout(() => {
+              store.dispatch(updateLoadingScreenMessage({ message: 'Generating secure keys', initialTime: Date.now() }));
+            }, 20);
+          }
+        } else {
+          store.dispatch(updateLoadingScreenMessage({ message: 'Ready' }));
+          setHasInitialized(true);
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+          });
+        }
+      }
+    }).catch(e => {
+      console.log(e)
+    })
+  }, [])
 
   const navigation = useNavigation();
 
   React.useEffect(() => {
-    if (accountCreds !== null && hasInitialized === false) {
+    if (hasInitialized === false && triggerCode !== null) {
       if (accountCreds.publicKey && accountCreds.pk && accountCreds.symkey) {
-        setHasInitialized(true);
         initialize().then((res: InitializeReturnType) => {
           console.log(res)
           if (res.status === 'success') {
             if (res.mustCreateNewAccountCreds === true) {
+              store.dispatch(updateLoadingScreenMessage({ message: 'Writing account credentials' }));
               setTempCredentials({ pk: accountCreds.pk, publicKey: accountCreds.publicKey, symsk: accountCreds.symkey, featureConfig: '' }).then(r => {
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'landingScreen' }],
-                });
+                setHasInitialized(true);
+                store.dispatch(updateLoadingScreenMessage({ message: 'Ready' }));
+                // redirectToCreateAccountWhenKeysAval();//  user is redirected from the keysLoadingScreen when loading message is "Ready"
               }).catch(e => {
                 console.log(e);
               })
             } else {
+              store.dispatch(updateLoadingScreenMessage({ message: 'Ready' }));
+              setHasInitialized(true);
               navigation.reset({
                 index: 0,
                 routes: [{ name: 'Home' }],
@@ -92,11 +131,12 @@ export default function App() {
             }
           }
         }).catch(e => {
+          store.dispatch(updateLoadingScreenMessage({ message: 'Something went wrong. Reload the app' }));
           console.log(e)
         })
       }
     }
-  }, [accountCreds])
+  }, [accountCreds, hasInitialized])
 
   function handleAccountInfo(e) {
     const eventResults: handleAccountInfoEventReturnSig = JSON.parse(e.nativeEvent.data);
@@ -113,7 +153,7 @@ export default function App() {
           ></BackgroundTaskRunner>
         </View>
         <Stack.Navigator
-          screenOptions={{ headerShown: false }}>
+          screenOptions={{ contentStyle: { backgroundColor: '#FF0000' }, headerShown: false }}>
           <Stack.Screen
             name="LoadingScreen"
             component={LoadingScreen}
@@ -149,6 +189,10 @@ export default function App() {
           <Stack.Screen
             name="Home"
             component={Home}
+          ></Stack.Screen>
+          <Stack.Screen
+            name="keysLoadingScreen"
+            component={KeysLoadingScreen}
           ></Stack.Screen>
         </Stack.Navigator>
         <RBox id='statusBarBkg' borderRadius={0} top={-Constants.statusBarHeight} height={Constants.statusBarHeight} backgroundColor={'#000000'} width="100%"></RBox>

@@ -37,12 +37,11 @@ export default function Home({ navigation }) {
     const db = useSQLiteContext();
     useEffect(() => {
         setHasMounted(true);
-        console.log(db.getAllSync(`SELECT * FROM users`))
+        console.log(db.runSync(`SELECT * FROM users`))
         setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
     }, [])
 
     const titleHeaderContainer = { containerHeight: 36, containerWidth: 325 }
-
     return (
         <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
             <StatusBar backgroundColor={globalStyle.statusBarColor}></StatusBar>
@@ -61,7 +60,10 @@ export default function Home({ navigation }) {
                     <Animated.View
                         entering={globalEnteringConfig()}
                         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-
+                        <RButton width="50%" height="20%" top="20%" left="25%" label='reset'
+                            onClick={() => {
+                                db.runSync(`DROP TABLE users`);
+                            }}></RButton>
                     </Animated.View>
                     : <RBox></RBox>}
         </View>)

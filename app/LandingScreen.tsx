@@ -17,11 +17,21 @@ import { ARCLogo } from '@/components/common/deco/ARCLogo';
 
 export default function LandingScreen({ navigation }) {
     const globalStyle: GlobalStyleType = useSelector((store) => store.globalStyle);
+    const loadingScreenMessage: string = useSelector((store) => store.loadingScreenMessage);
     store.subscribe(() => { });
 
     useEffect(() => {
         setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
     }, [])
+
+
+    function onCreateAccount() {
+        if (loadingScreenMessage === 'Ready') {
+            navigation.navigate('createAccountMain', { name: 'createAccountMain' })
+        } else {
+            navigation.navigate('keysLoadingScreen', { name: 'keysLoadingScreen' })
+        }
+    }
 
     return (
         <View style={{ ...styles.container, backgroundColor: globalStyle.statusBarColor }}>
@@ -39,7 +49,7 @@ export default function LandingScreen({ navigation }) {
                 <RBox transitionDuration={0} figmaImport={{ mobile: { top: 205, left: 155, width: 50, height: 50 } }}><ARCLogoMini width="100%" height="100%"></ARCLogoMini></RBox>
                 <RButton transitionDuration={0} mobileFontSize={22} figmaImport={{ mobile: { top: 366, left: 50, width: 260, height: 44 } }} label='Log In'></RButton>
                 <RLabel text='or' figmaImport={{ mobile: { top: 428, left: '0', width: '100%', height: 44 } }}></RLabel>
-                <RButton onClick={() => navigation.navigate('createAccountMain', { name: 'createAccountMain' })} mobileFontSize={22} transitionDuration={0} figmaImport={{ mobile: { top: 463, left: 50, width: 260, height: 44 } }} label='Create Account'></RButton>
+                <RButton onClick={() => { onCreateAccount() }} mobileFontSize={22} transitionDuration={0} figmaImport={{ mobile: { top: 463, left: 50, width: 260, height: 44 } }} label='Create Account'></RButton>
             </Animated.View>
         </View>
     );
