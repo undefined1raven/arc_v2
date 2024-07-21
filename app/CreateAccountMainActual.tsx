@@ -63,7 +63,7 @@ export default function CreateAccountMain({ navigation }) {
                 <ArrowDeco></ArrowDeco>
               </RBox>
             </RButton>
-            <RButton transitionIndex={4} figmaImport={{ mobile: { left: 50, width: 260, height: 155, top: 334 } }}>
+            <RButton onClick={() => { navigation.navigate('createAccountOffline', { name: 'createAccountOffline' }) }} transitionIndex={4} figmaImport={{ mobile: { left: 50, width: 260, height: 155, top: 334 } }}>
               <RLabel figmaImportConfig={buttonContainerSize} figmaImport={{ mobile: { top: 41, left: 17, width: '90%', height: 25 } }} fontSize={globalStyle.largeMobileFont} align='left' verticalCenter={true} text='Offline Account'></RLabel>
               <RLabel figmaImportConfig={buttonContainerSize} figmaImport={{ mobile: { top: 64, left: 17, width: '80%', height: 50 } }} fontSize={12} align='left' verticalCenter={true} text='This mode lets you store all your data on your current device requiring a back-up file to log into any other devices'></RLabel>
               <RBox figmaImportConfig={buttonContainerSize} figmaImport={{ mobile: { top: 14, left: 22, width: 10, height: 13 } }}>

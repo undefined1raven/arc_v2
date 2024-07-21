@@ -50,11 +50,11 @@ export default function CreateAccountOnline({ navigation }) {
                         <RBox figmaImport={{ mobile: { top: 34, left: 167, width: 25, height: 25 } }}><ARCLogoMini width="100%" height="100%"></ARCLogoMini></RBox>
                         <RButton color={globalStyle.colorInactive} borderColor={globalStyle.colorInactive} backgroundColor={globalStyle.colorInactive} androidRippleColor={globalStyle.colorInactive + '00'} figmaImport={{ mobile: { top: 153, left: 50, width: 260, height: 44 } }} label='Continue with Google' align='left' mobileFontSize={15}></RButton>
                         <RButton color={globalStyle.colorInactive} borderColor={globalStyle.colorInactive} backgroundColor={globalStyle.colorInactive} androidRippleColor={globalStyle.colorInactive + '00'} figmaImport={{ mobile: { top: 217, left: 50, width: 260, height: 44 } }} label='Continue with Meta' align='left' mobileFontSize={15}></RButton>
-                        <RButton onClick={() => {navigation.navigate('createAccountOnlineEmail')}} figmaImport={{ mobile: { top: 281, left: 50, width: 260, height: 44 } }} label='Continue with email' align='left' mobileFontSize={15}></RButton>
+                        <RButton onClick={() => { navigation.navigate('createAccountOnlineEmail') }} figmaImport={{ mobile: { top: 281, left: 50, width: 260, height: 44 } }} label='Continue with email' align='left' mobileFontSize={15}></RButton>
                         <RLabel figmaImport={{ mobile: { top: 347, left: 0, width: '100%', height: 15 } }} style text='or' fontSize={12}></RLabel>
                         <RLabel figmaImport={{ mobile: { top: 103, left: 50, width: 260, height: 38 } }} text='Create Account' align='left' alignPadding={'3%'} verticalAlign='center' fontSize={14} backgroundColor={globalStyle.color + '20'}></RLabel>
                         <RLabel figmaImport={{ mobile: { top: 441, left: 50, width: 260, height: 100 } }} style={{ paddingLeft: '2%', paddingRight: '2%' }} text='The key file is a secure way of logging into your account without having to remember any credentials' verticalAlign='center' fontSize={12} backgroundColor={globalStyle.color + '20'}></RLabel>
-                        <RButton figmaImport={{ mobile: { top: 385, left: 50, width: 260, height: 44 } }} label='Generate key file' align='left' mobileFontSize={15}></RButton>
+                        <RButton onClick={(e) => { navigation.navigate('createAccountKeyFile'); }} figmaImport={{ mobile: { top: 385, left: 50, width: 260, height: 44 } }} label='Generate key file' align='left' mobileFontSize={15}></RButton>
                     </Animated.View>
                     : <RBox></RBox>}
         </View>)

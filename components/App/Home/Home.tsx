@@ -37,7 +37,7 @@ export default function Home({ navigation }) {
     const db = useSQLiteContext();
     useEffect(() => {
         setHasMounted(true);
-        console.log(db.runSync(`SELECT * FROM users`))
+        console.log(db.getAllSync(`SELECT * FROM users`))
         setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
     }, [])
 

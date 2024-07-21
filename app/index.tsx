@@ -32,6 +32,8 @@ import themeColors, { ThemeColorsType } from '@/app/config/colors';
 import { useNavigation } from '@react-navigation/native';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import KeysLoadingScreen from '@/components/CreateAccount/KeysLoadingScreen';
+import CreateAccountKeyFile from '@/components/CreateAccount/CreateAccountKeyFile';
+import CreateAccountOffline from '@/components/CreateAccount/CreateAccountOffline';
 const Stack = createNativeStackNavigator();
 
 
@@ -193,6 +195,14 @@ export default function App() {
           <Stack.Screen
             name="keysLoadingScreen"
             component={KeysLoadingScreen}
+          ></Stack.Screen>
+          <Stack.Screen
+            name="createAccountKeyFile"
+            component={CreateAccountKeyFile}
+          ></Stack.Screen>
+          <Stack.Screen
+            name="createAccountOffline"
+            component={CreateAccountOffline}
           ></Stack.Screen>
         </Stack.Navigator>
         <RBox id='statusBarBkg' borderRadius={0} top={-Constants.statusBarHeight} height={Constants.statusBarHeight} backgroundColor={'#000000'} width="100%"></RBox>
