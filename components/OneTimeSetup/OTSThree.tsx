@@ -61,15 +61,23 @@ export default function OTSThree({ navigation }) {
                 const aid = Crypto.randomUUID();
                 db.runAsync(`INSERT INTO users (id, publicKey, RCKBackup, featureConfig, PSKBackup, signupTime, passwordHash, emailAddress, passkeys, PIKBackup, trustedDevices, oauthState, securityLogs, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     aid, publicKey, RCKBackup, featureConfig, PSKBackup, signupTime, passwordHash, emailAddress, passkeys, PIKBackup, trustedDevices, oauthState, securityLogs, version
-                ).then(res => {
-                    db.runAsync(`DELETE FROM users WHERE id='temp'`).then(resx => {
-                        navigation.reset({
-                            index: 0,
-                            routes: [{ name: 'Home' }],
-                        });
-                    }).catch(e => {
-                        console.log(e)
-                    })
+                ).then(async (res) => {
+                    const pk = await SecureStore.getItemAsync('temp-pk').catch(e => { return { error: 'Failed to get pk from keychain', errorObj: e, status: 'failed' }; });
+                    const symsk = await SecureStore.getItemAsync('temp-symsk').catch(e => { return { error: 'Failed to get symsk from keychain', errorObj: e, status: 'failed' }; });
+                    if (pk !== null && symsk !== null) {
+                        await SecureStore.setItemAsync(`${aid}-pk`, pk);
+                        await SecureStore.setItemAsync(`${aid}-symsk`, symsk);
+                        await SecureStore.deleteItemAsync('temp-symsk');
+                        await SecureStore.deleteItemAsync('temp-pk');
+                        db.runAsync(`DELETE FROM users WHERE id='temp'`).then(resx => {
+                            navigation.reset({
+                                index: 0,
+                                routes: [{ name: 'Home' }],
+                            });
+                        }).catch(e => {
+                            console.log(e)
+                        })
+                    }
                 }).catch(e => {
                     console.log(e)
                 })

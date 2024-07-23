@@ -1,3 +1,4 @@
+import { version } from "react";
 import themeColors from "./colors";
 import { ARCTasksType, FeatureConfigType, FeatureConfigArcType, FeatureConfigTessType, FeatureConfigSIDType } from "./commonTypes";
 
@@ -155,11 +156,34 @@ const tessDefaultConfig: FeatureConfigTessType = {
         },
 
 
-    ], labelArray: [{labelID: 'LID-000000-0000-0000-000001'}]
+    ], labelArray: [
+        {
+            labelID: 'LID-000000-0000-0000-000001',
+            name: 'High Priority',
+            lightColor: '#580055',
+            textLightColor: '#580055',
+            darkColor: '#C300BC',
+            textDarkColor: '#C300BC',
+            version: '0.1.0',
+            deleted: false,
+            completionMultiplier: (score: number) => { return score * 1.2 }
+        },
+        {
+            labelID: 'LID-000000-0000-0000-000002',
+            name: 'Optional',
+            lightColor: '#757120',
+            textLightColor: '#757120',
+            darkColor: '#A19B16',
+            textDarkColor: '#A19B16',
+            version: '0.1.0',
+            deleted: false,
+            completionMultiplier: (score: number) => { return (score * 0) + 1 }
+        }],
+    pinProtected: false
 };
-const sidDefaultConfigT: FeatureConfigSIDType = {};
+const sidDefaultConfig: FeatureConfigSIDType = { moodArray: [], pinProtected: false };
 
-const defaultFeatureConfig: FeatureConfigType = { tess: tessDefaultConfig, arc: arcDefaultConfig, sid: sidDefaultConfigT };
+const defaultFeatureConfig: FeatureConfigType = { tess: tessDefaultConfig, arc: arcDefaultConfig, sid: sidDefaultConfig };
 
 
 export { defaultFeatureConfig }

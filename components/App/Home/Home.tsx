@@ -27,6 +27,8 @@ import { genenerateAccountCode } from '@/fn/generateAccountCode';
 import { PasswordHashingReturnType } from '@/app/config/endpointReturnTypes';
 import { RadialGradient } from 'react-native-svg';
 import { GradientLine } from '../../common/deco/GradientLine';
+import { encryptData } from '@/fn/ecnryptData';
+import { decryptData } from '@/fn/decryptData';
 
 
 
@@ -34,15 +36,23 @@ export default function Home({ navigation }) {
     const globalStyle: GlobalStyleType = useSelector((store) => store.globalStyle);
     store.subscribe(() => { });
     const [hasMounted, setHasMounted] = useState(false);
+    const [encryptedData, setEncryptedData] = useState('');
     const db = useSQLiteContext();
     useEffect(() => {
         setHasMounted(true);
-        console.log(db.getAllSync(`SELECT * FROM users`))
         setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
     }, [])
 
     return (
         <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+            <BackgroundTaskRunner messageHandler={(e) => { 
+                const resJSON = JSON.parse(e.nativeEvent.data);
+                console.log(resJSON.payload)
+             }} code={encryptData(JSON.stringify({ hii: 'xx' }), SecureStore.getItem('e8e03dc6-3b5f-44a4-a6fa-026448116fba.local-symsk'))}></BackgroundTaskRunner>
+            <BackgroundTaskRunner messageHandler={(e) => {
+                console.log(encryptedData)
+                console.log(e.nativeEvent.data);
+            }} code={decryptData(encryptedData, SecureStore.getItem('e8e03dc6-3b5f-44a4-a6fa-026448116fba.local-symsk'))}></BackgroundTaskRunner>
             <StatusBar backgroundColor={globalStyle.statusBarColor}></StatusBar>
             <LinearGradient
                 colors={globalStyle.pageBackgroundColors}
@@ -60,7 +70,9 @@ export default function Home({ navigation }) {
                         entering={globalEnteringConfig()}
                         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
                         <RButton width="50%" height="20%" top="20%" left="25%" label='reset'
-                            onClick={() => {
+                            onClick={async () => {
+                                await SecureStore.deleteItemAsync('temp-symsk');
+                                await SecureStore.deleteItemAsync('temp-pk');
                                 db.runSync(`DROP TABLE users`);
                             }}></RButton>
                     </Animated.View>

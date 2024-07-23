@@ -12,7 +12,7 @@ type FeatureConfigTessType = { statusArray: TessStatusType[], labelArray: TessLa
 
 
 type SIDMoodType = { moodID: string, name: string, deleted: boolean, version: '0.1.0', lightColor: ColorValueHex, textLightColor: ColorValueHex, darkColor: ColorValueHex, textDarkColor: ColorValueHex, score: number }
-type FeatureConfigSIDType = { moodArray: SIDMoodType[] }
+type FeatureConfigSIDType = { moodArray: SIDMoodType[], pinProtected: boolean }
 
 type FeatureConfigType = { arc: FeatureConfigArcType, tess: FeatureConfigTessType, sid: FeatureConfigSIDType };
 

@@ -27,7 +27,6 @@ import { BackupFileDeco } from '../common/deco/BackupFileDeco';
 export default function CreateAccountOffline({ navigation }) {
     const globalStyle: GlobalStyleType = useSelector((store) => store.globalStyle);
     store.subscribe(() => { });
-    const [hasDownloadKey, setHasDownloadeKey] = useState(false);
     useEffect(() => {
         setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
     })
@@ -41,64 +40,42 @@ export default function CreateAccountOffline({ navigation }) {
         }, 150);
     }, [])
 
-    async function saveKey() {
-        const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
-        if (!permissions.granted) {
-            setHasDownloadeKey(false);
-            return;
-        }
-        try {
-            const pk = await SecureStore.getItemAsync('temp-pk').catch(e => { return { error: 'Failed to set keychain pk', errorObj: e, status: 'failed' }; });
-            const symsk = await SecureStore.getItemAsync('temp-symsk').catch(e => { return { error: 'Failed to set keychain symsk', errorObj: e, status: 'failed' }; });
-            console.log(accountData.publicKey)
-            if (accountData.publicKey && accountData.featureConfig !== undefined && pk !== null && symsk !== null) {
-                const keyContent = JSON.stringify({ ...accountData, pk: pk, symsk: symsk, id: 'local' });
-                await StorageAccessFramework.createFileAsync(permissions.directoryUri, `ARC_Account_Key-${Date.now()}.txt`, 'text/plain')
-                    .then(async (uri) => {
-                        await FileSystem.writeAsStringAsync(uri, keyContent, { encoding: FileSystem.EncodingType.UTF8 });
-                        setHasDownloadeKey(true);
-                    })
-                    .catch((e) => {
-                        setHasDownloadeKey(false);
-                        console.log(e);
-                    });
-            } else {
-                //
-            }
-        } catch (e) {
-            setHasDownloadeKey(false);
-        }
-    }
-
-
     async function createAccount() {
-        setShowLoading(true);
         if (showLoading === false) {
-            await db.getFirstAsync(`SELECT * FROM users WHERE id='temp'`).then(res => {
-                if (res.publicKey && res.signupTime && res.featureConfig !== undefined) {
-                    const aid = Crypto.randomUUID();
-                    res = { ...res, id: aid };
-                    const keys = Object.keys(res);
-                    const placeholders = keys.map((_, i) => `?`).join(',');
-                    db.runAsync(`INSERT INTO users (${keys.join(',')}) VALUES (${placeholders})`, Object.values(res)).then(() => {
-                        db.runAsync(`DELETE FROM users WHERE id='temp'`).then(() => {
-                            navigation.navigate('Home', { name: 'Home' });
+            setShowLoading(true);
+            const pk = await SecureStore.getItemAsync('temp-pk').catch(e => { return { error: 'Failed to get pk from keychain', errorObj: e, status: 'failed' }; });
+            const symsk = await SecureStore.getItemAsync('temp-symsk').catch(e => { return { error: 'Failed to get symsk from keychain', errorObj: e, status: 'failed' }; });
+            if (pk !== null && symsk !== null) {
+                const aid = Crypto.randomUUID() + '.local';
+                await SecureStore.setItemAsync(`${aid}-pk`, pk);
+                await SecureStore.setItemAsync(`${aid}-symsk`, symsk);
+                await SecureStore.deleteItemAsync('temp-symsk');
+                await SecureStore.deleteItemAsync('temp-pk');
+                await db.getFirstAsync(`SELECT * FROM users WHERE id='temp'`).then(res => {
+                    if (res.publicKey && res.signupTime && res.featureConfig !== undefined) {
+                        res = { ...res, id: aid };
+                        const keys = Object.keys(res);
+                        const placeholders = keys.map((_, i) => `?`).join(',');
+                        db.runAsync(`INSERT INTO users (${keys.join(',')}) VALUES (${placeholders})`, Object.values(res)).then(() => {
+                            db.runAsync(`DELETE FROM users WHERE id='temp'`).then(() => {
+                                navigation.navigate('Home', { name: 'Home' });
+                            }).catch(e => {
+                                console.log(e)
+                                setShowLoading(false);
+                            })
                         }).catch(e => {
                             console.log(e)
                             setShowLoading(false);
                         })
-                    }).catch(e => {
-                        console.log(e)
+                    } else {
                         setShowLoading(false);
-                    })
-                } else {
+                        console.log('oup')
+                    }
+                }).catch(e => {
+                    console.log(e)
                     setShowLoading(false);
-                    console.log('oup')
-                }
-            }).catch(e => {
-                console.log(e)
-                setShowLoading(false);
-            })
+                })
+            }
         }
     }
 
