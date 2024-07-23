@@ -41,7 +41,6 @@ export default function Home({ navigation }) {
         setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
     }, [])
 
-    const titleHeaderContainer = { containerHeight: 36, containerWidth: 325 }
     return (
         <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
             <StatusBar backgroundColor={globalStyle.statusBarColor}></StatusBar>
