@@ -1,7 +1,7 @@
 
 
 
-function decryptData(JSONString: string, symsk: string) {
+function decryptData(cipher: string, symsk: string, iv: string) {
     return `
  function ab2str(buf) {
      return String.fromCharCode.apply(null, new Uint8Array(buf));
@@ -38,34 +38,41 @@ function decryptData(JSONString: string, symsk: string) {
  }
  try {
      if (crypto.subtle !== undefined) {
-        const {iv, cipher} = JSON.parse(${JSONString});
-        if(iv && cipher){
+        if('${cipher}' && '${iv}'){
             const jwk = JSON.parse('${symsk}');
             importSymmetricKey(jwk).then(key => {
-                symmetricDecrypt(cipher, key, iv).then(res => {
-                    sendMessage(JSON.stringify({taskID: 'dataEncryption', error: null, status: 'success', paylaod: JSON.stringify(res)}));
+                symmetricDecrypt('${cipher}', key, '${iv}').then(res => {
+                    sendMessage(JSON.stringify({taskID: 'dataDecryption', error: null, status: 'success', paylaod: JSON.stringify(res)}));
                     }).catch(e => {
-                        sendMessage(JSON.stringify({taskID: 'dataEncryption', error: 'Encryption error', status: 'failed'}));
+                        sendMessage(JSON.stringify({taskID: 'dataDecryption', error: 'Decryption error', status: 'failed'));
                         })
                         }).catch(e => {
                             sendMessage(JSON.stringify({
-                                taskID: 'dataEncryption',
+                                taskID: 'dataDecryption',
                                 error: 'Key import failed',
                             status: 'failed'
                         }));
                                 
                     })
+        }else{
+            sendMessage(JSON.stringify({
+             taskID: 'dataDecryption',
+             error: 'Invalid Inputs',
+             status: 'failed'
+         }));
+        
         }
+
      } else {
         sendMessage(JSON.stringify({
-             taskID: 'dataEncryption',
+             taskID: 'dataDecryption',
              error: 'Subtle Crypto INOP',
              status: 'failed'
          }));
      }
  } catch (e) {
      sendMessage(JSON.stringify({
-         taskID: 'dataEncryption',
+         taskID: 'dataDecryption',
          error: e,
          status: 'failed'
      }));

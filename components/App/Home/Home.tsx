@@ -29,6 +29,7 @@ import { RadialGradient } from 'react-native-svg';
 import { GradientLine } from '../../common/deco/GradientLine';
 import { encryptData } from '@/fn/ecnryptData';
 import { decryptData } from '@/fn/decryptData';
+import { defaultFeatureConfig } from '@/app/config/defaultFeatureConfig';
 
 
 
@@ -36,23 +37,34 @@ export default function Home({ navigation }) {
     const globalStyle: GlobalStyleType = useSelector((store) => store.globalStyle);
     store.subscribe(() => { });
     const [hasMounted, setHasMounted] = useState(false);
-    const [encryptedData, setEncryptedData] = useState('');
+    const [codeTrigger, setCodeTrigger] = useState('0');
+    const [encryptedData, setEncryptedData] = useState({ iv: '', cipher: '' });
     const db = useSQLiteContext();
     useEffect(() => {
         setHasMounted(true);
         setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
     }, [])
 
+
+    useEffect(() => {
+        // console.log(encryptedData.iv)
+    }, [encryptedData])
+
     return (
         <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-            <BackgroundTaskRunner messageHandler={(e) => { 
-                const resJSON = JSON.parse(e.nativeEvent.data);
-                console.log(resJSON.payload)
-             }} code={encryptData(JSON.stringify({ hii: 'xx' }), SecureStore.getItem('e8e03dc6-3b5f-44a4-a6fa-026448116fba.local-symsk'))}></BackgroundTaskRunner>
             <BackgroundTaskRunner messageHandler={(e) => {
-                console.log(encryptedData)
-                console.log(e.nativeEvent.data);
-            }} code={decryptData(encryptedData, SecureStore.getItem('e8e03dc6-3b5f-44a4-a6fa-026448116fba.local-symsk'))}></BackgroundTaskRunner>
+                const resJSON = JSON.parse(e.nativeEvent.data);
+                const payload = JSON.parse(resJSON.payload);
+                if (resJSON.status === 'success') {
+                    setEncryptedData({ iv: payload.iv, cipher: payload.cipher });
+                    setCodeTrigger(Date.now().toString());
+                }
+            }} code={encryptData(JSON.stringify(defaultFeatureConfig), SecureStore.getItem('e8e03dc6-3b5f-44a4-a6fa-026448116fba.local-symsk'))}></BackgroundTaskRunner>
+            <BackgroundTaskRunner messageHandler={(e) => {
+
+                // console.log(JSON.parse(e.nativeEvent.data));
+
+            }} tx={codeTrigger} triggeredCode={decryptData(encryptedData.cipher, SecureStore.getItem('e8e03dc6-3b5f-44a4-a6fa-026448116fba.local-symsk'), encryptedData.iv)}></BackgroundTaskRunner>
             <StatusBar backgroundColor={globalStyle.statusBarColor}></StatusBar>
             <LinearGradient
                 colors={globalStyle.pageBackgroundColors}

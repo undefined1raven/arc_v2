@@ -40,7 +40,7 @@ function encryptData(JSONString: string, symsk: string) {
         const jwk = JSON.parse('${symsk}');
         importSymmetricKey(jwk).then(key => {
             symmetricEncrypt('${JSONString}', key).then(res => {
-                sendMessage(JSON.stringify({taskID: 'dataEncryption', error: null, status: 'success', paylaod: JSON.stringify(res)}));
+                sendMessage(JSON.stringify({taskID: 'dataEncryption', error: null, status: 'success', payload: JSON.stringify(res)}));
             }).catch(e => {
                 sendMessage(JSON.stringify({taskID: 'dataEncryption', error: 'Encryption error', status: 'failed'}));
             })
