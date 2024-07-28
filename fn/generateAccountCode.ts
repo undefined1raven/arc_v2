@@ -1,5 +1,5 @@
 
-
+import { defaultFeatureConfig } from "@/app/config/defaultFeatureConfig"
 
 function genenerateAccountCode() {
   return `
@@ -25,6 +25,23 @@ async function exportCryptoKey(key) {
         }).catch(e => console.log(e));
 }
 
+ function ab2str(buf) {
+     return String.fromCharCode.apply(null, new Uint8Array(buf));
+ }
+ async function symmetricEncrypt(plaintext, key) {
+     let encoded = new TextEncoder().encode(plaintext);
+     let iv = crypto.getRandomValues(new Uint8Array(12));
+     return await crypto.subtle.encrypt({
+         name: 'AES-GCM',
+         iv: iv
+     }, key, encoded).then((encrypted) => {
+         return {
+             cipher: ab2str(encrypted),
+             iv: ab2str(iv)
+         };
+     });
+ }
+
      function sendMessage(message){
           window.ReactNativeWebView.postMessage(message)
         }
@@ -43,7 +60,11 @@ async function exportCryptoKey(key) {
                 const publicKey = keys.publicKey;
                 exportCryptoKey(privateKey).then((exportedPrivateKey) => {
           				exportCryptoKey(publicKey).then((exportedPublicKey) => {
-                    sendMessage(JSON.stringify({publicKey: exportedPublicKey, pk: exportedPrivateKey, taskID: 'accountGen', status: 'success', symkey: jwk, error: null}));
+                    symmetricEncrypt('${JSON.stringify(defaultFeatureConfig)}', key).then(encryptedDefaultFeatureConfig => {
+                      sendMessage(JSON.stringify({publicKey: exportedPublicKey, pk: exportedPrivateKey, taskID: 'accountGen', status: 'success', symkey: jwk, error: null, featureConfig: encryptedDefaultFeatureConfig}));
+                    }).catch(e => {
+                      sendMessage(JSON.stringify({taskID: 'accountGen', status: 'failed', error: 'failed to encrypt default feature config'}))
+                    })
 				          }).catch(e => {
                 sendMessage(JSON.stringify({taskID: 'accountGen', status: 'failed', error: 'failed to export pk'}))
               });

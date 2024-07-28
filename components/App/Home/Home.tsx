@@ -27,44 +27,57 @@ import { genenerateAccountCode } from '@/fn/generateAccountCode';
 import { PasswordHashingReturnType } from '@/app/config/endpointReturnTypes';
 import { RadialGradient } from 'react-native-svg';
 import { GradientLine } from '../../common/deco/GradientLine';
-import { encryptData } from '@/fn/ecnryptData';
+import { encryptData } from '@/fn/encrypt';
 import { decryptData } from '@/fn/decryptData';
 import { defaultFeatureConfig } from '@/app/config/defaultFeatureConfig';
+import { localUsersType, updateLocalUserIDs } from '@/hooks/localUserIDs';
 
-
+import { randomUUID } from 'expo-crypto';
+import { UserData } from '@/app/config/commonTypes';
 
 export default function Home({ navigation }) {
-    const globalStyle: GlobalStyleType = useSelector((store) => store.globalStyle);
     store.subscribe(() => { });
+    const globalStyle: GlobalStyleType = useSelector((store) => store.globalStyle);
+    const localUserIDsActual: localUsersType = useSelector((store) => store.localUserIDs);
     const [hasMounted, setHasMounted] = useState(false);
     const [codeTrigger, setCodeTrigger] = useState('0');
+    const [activeUserID, setActiveUserID] = useState(SecureStore.getItem('activeUserID'));
     const [encryptedData, setEncryptedData] = useState({ iv: '', cipher: '' });
     const db = useSQLiteContext();
+
+    const featureData: UserData = db.getFirstSync(`SELECT * FROM users`);
+
     useEffect(() => {
-        setHasMounted(true);
         setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
+        if (localUserIDsActual.users.length > 1) {
+            const currentActiveUser = SecureStore.getItem('activeUserID');
+            if (currentActiveUser !== undefined && currentActiveUser !== null) {
+                setActiveUserID(localUserIDsActual.users[0].id);
+                setHasMounted(true);
+            }
+            ///multi account logic
+        } else if (localUserIDsActual.users.length === 1) {
+            if (localUserIDsActual.users[0].authenticated === true) {
+                SecureStore.setItem('activeUserID', localUserIDsActual.users[0].id);
+                setActiveUserID(localUserIDsActual.users[0].id);
+                setHasMounted(true);
+            } else {
+                navigation.navigate('landingScreen', { name: 'landingScreen' });
+            }
+        }
     }, [])
 
-
     useEffect(() => {
-        // console.log(encryptedData.iv)
-    }, [encryptedData])
+        setCodeTrigger(Date.now().toString());
+    }, [activeUserID])
 
     return (
         <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
             <BackgroundTaskRunner messageHandler={(e) => {
-                const resJSON = JSON.parse(e.nativeEvent.data);
-                const payload = JSON.parse(resJSON.payload);
-                if (resJSON.status === 'success') {
-                    setEncryptedData({ iv: payload.iv, cipher: payload.cipher });
-                    setCodeTrigger(Date.now().toString());
-                }
-            }} code={encryptData(JSON.stringify(defaultFeatureConfig), SecureStore.getItem('e8e03dc6-3b5f-44a4-a6fa-026448116fba.local-symsk'))}></BackgroundTaskRunner>
-            <BackgroundTaskRunner messageHandler={(e) => {
 
-                // console.log(JSON.parse(e.nativeEvent.data));
+                console.log(JSON.parse(e.nativeEvent.data));
 
-            }} tx={codeTrigger} triggeredCode={decryptData(encryptedData.cipher, SecureStore.getItem('e8e03dc6-3b5f-44a4-a6fa-026448116fba.local-symsk'), encryptedData.iv)}></BackgroundTaskRunner>
+            }} tx={codeTrigger} triggeredCode={decryptData(featureData.featureConfig, SecureStore.getItem(`${activeUserID}-symsk`))}></BackgroundTaskRunner>
             <StatusBar backgroundColor={globalStyle.statusBarColor}></StatusBar>
             <LinearGradient
                 colors={globalStyle.pageBackgroundColors}

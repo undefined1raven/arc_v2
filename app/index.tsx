@@ -40,10 +40,10 @@ const Stack = createNativeStackNavigator();
 
 
 
-type handleAccountInfoEventReturnSig = { status: 'failed' | 'success', error: null | string | object, taskID: 'accountGen', symkey?: string, pk?: string }
+type handleAccountInfoEventReturnSig = { status: 'failed' | 'success', error: null | string | object, taskID: 'accountGen', symkey?: string, pk?: string, featureConfig?: string, publicKey?: string }
 
 export default function App() {
-  const [accountCreds, setAccountCreds] = React.useState(null);
+  const [accountCreds, setAccountCreds] = React.useState<null | { publicKey: string, symkey: string, pk: string, featureConfig: string }>(null);
   const [triggerCode, setCodeTrigger] = React.useState(null);
   const [hasInitialized, setHasInitialized] = React.useState(false);
   let colorScheme = useColorScheme();
@@ -51,17 +51,7 @@ export default function App() {
   store.dispatch(updateGlobalStyle({ ...themeColors[colorScheme] }));
 
 
-  function redirectToCreateAccountWhenKeysAval() {
-    const navState = navigation.getState();
-    const currentScreen = navState?.routeNames[navState?.index];
-    console.log(navigation.getState()?.routes[0].state?.routeNames);
-    if (currentScreen === 'landingScreen') {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'createAccountMain' }],
-      });
-    }
-  }
+
 
   React.useEffect(() => {
     console.log()
@@ -72,14 +62,13 @@ export default function App() {
           if (accountCreds !== null) {
             setHasInitialized(true);
             store.dispatch(updateLoadingScreenMessage({ message: 'Writing account credentials' }));
-            setTempCredentials({ RCKBackup: '', PIKBackup: '', pk: accountCreds.pk, publicKey: accountCreds.publicKey, symsk: accountCreds.symkey, featureConfig: '' }).then(r => {
+            setTempCredentials({ RCKBackup: '', PIKBackup: '', pk: accountCreds.pk, publicKey: accountCreds.publicKey, symsk: accountCreds.symkey, featureConfig: JSON.stringify(accountCreds.featureConfig) }).then(r => {
               store.dispatch(updateLoadingScreenMessage({ message: 'Ready' }));
-              // redirectToCreateAccountWhenKeysAval();//  user is redirected from the keysLoadingScreen when loading message is "Ready"
+              //  user is redirected from the keysLoadingScreen when loading message is "Ready"
             }).catch(e => {
               console.log(e);
             })
           } else {
-            console.log('miss')
             setCodeTrigger(Date.now().toString());
             if (res.allowedAyncGen === true) {
               navigation.reset({
@@ -109,17 +98,17 @@ export default function App() {
   const navigation = useNavigation();
 
   React.useEffect(() => {
-    if (hasInitialized === false && triggerCode !== null) {
+    if (hasInitialized === false && triggerCode !== null && accountCreds !== null) {
       if (accountCreds.publicKey && accountCreds.pk && accountCreds.symkey) {
         initialize().then((res: InitializeReturnType) => {
           console.log(res)
           if (res.status === 'success') {
             if (res.mustCreateNewAccountCreds === true) {
               store.dispatch(updateLoadingScreenMessage({ message: 'Writing account credentials' }));
-              setTempCredentials({ pk: accountCreds.pk, publicKey: accountCreds.publicKey, symsk: accountCreds.symkey, featureConfig: '' }).then(r => {
+              setTempCredentials({ pk: accountCreds.pk, publicKey: accountCreds.publicKey, symsk: accountCreds.symkey, featureConfig: JSON.stringify(accountCreds.featureConfig) }).then(r => {
                 setHasInitialized(true);
                 store.dispatch(updateLoadingScreenMessage({ message: 'Ready' }));
-                // redirectToCreateAccountWhenKeysAval();//  user is redirected from the keysLoadingScreen when loading message is "Ready"
+                //  user is redirected from the keysLoadingScreen when loading message is "Ready"
               }).catch(e => {
                 console.log(e);
               })
@@ -142,7 +131,9 @@ export default function App() {
 
   function handleAccountInfo(e) {
     const eventResults: handleAccountInfoEventReturnSig = JSON.parse(e.nativeEvent.data);
-    setAccountCreds(eventResults);
+    if (eventResults.error === null && eventResults.pk && eventResults.featureConfig !== undefined && eventResults.symkey && eventResults.publicKey) {
+      setAccountCreds({ pk: eventResults.pk, featureConfig: eventResults.featureConfig, symkey: eventResults.symkey, publicKey: eventResults.publicKey });
+    }
   }
 
 
