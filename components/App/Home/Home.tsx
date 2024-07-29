@@ -31,6 +31,7 @@ import { encryptData } from '@/fn/encrypt';
 import { decryptData } from '@/fn/decryptData';
 import { defaultFeatureConfig } from '@/app/config/defaultFeatureConfig';
 import { localUsersType, updateLocalUserIDs } from '@/hooks/localUserIDs';
+import * as jsesc from 'jsesc';
 
 import { randomUUID } from 'expo-crypto';
 import { UserData } from '@/app/config/commonTypes';
@@ -68,16 +69,34 @@ export default function Home({ navigation }) {
     }, [])
 
     useEffect(() => {
-        setCodeTrigger(Date.now().toString());
-    }, [activeUserID])
+    }, [encryptedData])
+
+
+    function getEncryptedStringComponents(str: string) {
+        try {
+            const { iv, cipher } = JSON.parse(str);
+            if (iv && cipher) {
+                return { iv: iv, cipher: cipher };
+            } else {
+                throw new Error('Failed to extract iv or cipher')
+            }
+        } catch (e) {
+            throw new Error('Invalid string')
+        }
+    }
 
     return (
         <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
             <BackgroundTaskRunner messageHandler={(e) => {
+                const res = JSON.parse(e.nativeEvent.data)
+                if (res.status === 'success') {
+                    const payload = JSON.parse(res.payload);
+                    setEncryptedData(payload);
+                }
+            }} triggeredCode={encryptData(JSON.stringify({ hi: 'hiii' }), SecureStore.getItem(`${activeUserID}-symsk`))} code={encryptData(JSON.stringify(defaultFeatureConfig), SecureStore.getItem(`${activeUserID}-symsk`))}></BackgroundTaskRunner>
 
-                console.log(JSON.parse(e.nativeEvent.data));
+            <BackgroundTaskRunner tx={JSON.stringify(encryptedData)} messageHandler={(e) => { console.log(JSON.parse(e.nativeEvent.data)) }} triggeredCode={decryptData(encryptedData, SecureStore.getItem(`${activeUserID}-symsk`))} code={decryptData(encryptedData, SecureStore.getItem(`${activeUserID}-symsk`))}></BackgroundTaskRunner>
 
-            }} tx={codeTrigger} triggeredCode={decryptData(featureData.featureConfig, SecureStore.getItem(`${activeUserID}-symsk`))}></BackgroundTaskRunner>
             <StatusBar backgroundColor={globalStyle.statusBarColor}></StatusBar>
             <LinearGradient
                 colors={globalStyle.pageBackgroundColors}
