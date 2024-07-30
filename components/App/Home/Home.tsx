@@ -35,6 +35,7 @@ import * as jsesc from 'jsesc';
 import { randomUUID } from 'expo-crypto';
 import { UserData } from '@/app/config/commonTypes';
 import { EncryptionWorker } from '@/components/common/EncryptionWorker';
+import { DecryptionWorker } from '@/components/common/DecryptionWorker';
 
 export default function Home({ navigation }) {
     store.subscribe(() => { });
@@ -44,6 +45,8 @@ export default function Home({ navigation }) {
     const [activeUserID, setActiveUserID] = useState(SecureStore.getItem('activeUserID'));
     const [dataForEncryption, setDataForEncryption] = useState<string>('x');
     const db = useSQLiteContext();
+    const ok = db.getFirstSync(`SELECT featureConfig FROM users`);
+    const fc = JSON.parse(JSON.parse(jsesc.default(ok, { json: true })).featureConfig);
     useEffect(() => {
         setInterval(() => {
             setDataForEncryption(JSON.stringify({ tx: Date.now() }))
@@ -71,14 +74,14 @@ export default function Home({ navigation }) {
 
     return (
         <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-            
-            <EncryptionWorker JSONstring={dataForEncryption} symsk={SecureStore.getItem(`${localUserIDsActual.users[0].id}-symsk`) as string}
-                onEncrypted={(e) => {
+
+            <DecryptionWorker iv={fc.iv} cipher={fc.cipher} symsk={SecureStore.getItem(`${localUserIDsActual.users[0].id}-symsk`) as string}
+                onDecrypted={(e) => {
                     console.log(e)
                 }}
                 onError={(e) => { console.log(e, ' err') }}
-            ></EncryptionWorker>
-            
+            ></DecryptionWorker>
+
             <StatusBar backgroundColor={globalStyle.statusBarColor}></StatusBar>
             <LinearGradient
                 colors={globalStyle.pageBackgroundColors}

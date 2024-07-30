@@ -1,7 +1,7 @@
 
 
 
-function dataCryptoOps(symsk: string, type: 'decrypt' | 'encrypt', payload: string) {//payload is either JSONstring to be encrypted or encryptedJSONstring containing iv and cipher params
+function dataCryptoOps(symsk: string, type: 'decrypt' | 'encrypt', payload: string | null) {//payload is either JSONstring to be encrypted or encryptedJSONstring containing iv and cipher params
     return `
  function ab2str(buf) {
      return String.fromCharCode.apply(null, new Uint8Array(buf));
@@ -50,6 +50,11 @@ async function symmetricDecrypt(cipher, key, iv) {
  function sendMessage(message) {
      window.ReactNativeWebView.postMessage(message)
  }
+
+   window.onerror = function(message, sourcefile, lineno, colno, error) {
+      sendMessage(JSON.stringify({status: 'failed', error: "Message: " + message + " - Source: " + sourcefile + " Line: " + lineno + ":" + colno}));
+    };
+   
  try {
      if (crypto.subtle !== undefined) {
         const jwk = JSON.parse('${symsk}');
@@ -62,15 +67,18 @@ async function symmetricDecrypt(cipher, key, iv) {
                     })
             }else{
                 try{
+                    const {cipher, iv} = JSON.parse(window.ReactNativeWebView.injectedObjectJson());
+                    console.log(cipher)
                     sendMessage(JSON.stringify({taskID: 'dataDecryption', error: null, status: 'success', payload: JSON.stringify({hi: 'xx'})}));
-                    // symmetricDecrypt(cipher, key, iv).then(res => {
-                    // }).catch(e => {
-                    //     sendMessage(JSON.stringify({taskID: 'dataDecryption', error: e, status: 'failed'}));
-                    // })
+                    symmetricDecrypt(cipher, key, iv).then(res => {
+                        sendMessage(JSON.stringify({taskID: 'dataDecryption', error: null, status: 'success', payload: JSON.stringify(res)}));
+                    }).catch(e => {
+                        sendMessage(JSON.stringify({taskID: 'dataDecryption', error: e, status: 'failed'}));
+                    })
                 }catch(e){
                     sendMessage(JSON.stringify({
                      taskID: 'dataDecryption',
-                     error: 'Encrypted components parsing failed',
+                     error: e,
                      status: 'failed'
                      }));
                 }
