@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import WebView from "react-native-webview";
 
 
-type BackgroundTaskRunnerProps = { code: string, messageHandler: Function, source?: string, triggeredCode?: string, tx?: string };
+type BackgroundTaskRunnerProps = { code: string, messageHandler: Function, source?: string, triggeredCode?: string, tx?: string | number, allowTriggering?: boolean | undefined };
 function BackgroundTaskRunner(props: BackgroundTaskRunnerProps) {
     const worker = useRef(null);
 
@@ -21,7 +21,7 @@ function BackgroundTaskRunner(props: BackgroundTaskRunnerProps) {
             injectedJavaScript={getVal(props.code, '')}
             onMessage={getVal(props.messageHandler, () => { })}
             source={{
-                uri: 'https://ankaryn.online',
+                uri: 'https://ring-relay.vercel.app/',
             }}></WebView>
     )
 }

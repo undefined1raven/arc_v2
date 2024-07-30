@@ -1,6 +1,4 @@
 
-
-
 function decryptData(encryptedObj: { iv: string, cipher: string }, symsk: string) {
     return `
 
@@ -60,6 +58,8 @@ if(crypto === undefined || crypto?.subtle === undefined){
 }
           `
 }
+
+
 
 
 export { decryptData }

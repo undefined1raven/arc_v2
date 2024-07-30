@@ -32,23 +32,22 @@ import { decryptData } from '@/fn/decryptData';
 import { defaultFeatureConfig } from '@/app/config/defaultFeatureConfig';
 import { localUsersType, updateLocalUserIDs } from '@/hooks/localUserIDs';
 import * as jsesc from 'jsesc';
-
 import { randomUUID } from 'expo-crypto';
 import { UserData } from '@/app/config/commonTypes';
+import { EncryptionWorker } from '@/components/common/EncryptionWorker';
 
 export default function Home({ navigation }) {
     store.subscribe(() => { });
     const globalStyle: GlobalStyleType = useSelector((store) => store.globalStyle);
     const localUserIDsActual: localUsersType = useSelector((store) => store.localUserIDs);
     const [hasMounted, setHasMounted] = useState(false);
-    const [codeTrigger, setCodeTrigger] = useState('0');
     const [activeUserID, setActiveUserID] = useState(SecureStore.getItem('activeUserID'));
-    const [encryptedData, setEncryptedData] = useState({ iv: '', cipher: '' });
+    const [dataForEncryption, setDataForEncryption] = useState<string>('x');
     const db = useSQLiteContext();
-
-    const featureData: UserData = db.getFirstSync(`SELECT * FROM users`);
-
     useEffect(() => {
+        setInterval(() => {
+            setDataForEncryption(JSON.stringify({ tx: Date.now() }))
+        }, 5000)
         setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
         if (localUserIDsActual.users.length > 1) {
             const currentActiveUser = SecureStore.getItem('activeUserID');
@@ -68,35 +67,18 @@ export default function Home({ navigation }) {
         }
     }, [])
 
-    useEffect(() => {
-    }, [encryptedData])
 
-
-    function getEncryptedStringComponents(str: string) {
-        try {
-            const { iv, cipher } = JSON.parse(str);
-            if (iv && cipher) {
-                return { iv: iv, cipher: cipher };
-            } else {
-                throw new Error('Failed to extract iv or cipher')
-            }
-        } catch (e) {
-            throw new Error('Invalid string')
-        }
-    }
 
     return (
         <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-            <BackgroundTaskRunner messageHandler={(e) => {
-                const res = JSON.parse(e.nativeEvent.data)
-                if (res.status === 'success') {
-                    const payload = JSON.parse(res.payload);
-                    setEncryptedData(payload);
-                }
-            }} triggeredCode={encryptData(JSON.stringify({ hi: 'hiii' }), SecureStore.getItem(`${activeUserID}-symsk`))} code={encryptData(JSON.stringify(defaultFeatureConfig), SecureStore.getItem(`${activeUserID}-symsk`))}></BackgroundTaskRunner>
-
-            <BackgroundTaskRunner tx={JSON.stringify(encryptedData)} messageHandler={(e) => { console.log(JSON.parse(e.nativeEvent.data)) }} triggeredCode={decryptData(encryptedData, SecureStore.getItem(`${activeUserID}-symsk`))} code={decryptData(encryptedData, SecureStore.getItem(`${activeUserID}-symsk`))}></BackgroundTaskRunner>
-
+            
+            <EncryptionWorker JSONstring={dataForEncryption} symsk={SecureStore.getItem(`${localUserIDsActual.users[0].id}-symsk`) as string}
+                onEncrypted={(e) => {
+                    console.log(e)
+                }}
+                onError={(e) => { console.log(e, ' err') }}
+            ></EncryptionWorker>
+            
             <StatusBar backgroundColor={globalStyle.statusBarColor}></StatusBar>
             <LinearGradient
                 colors={globalStyle.pageBackgroundColors}
