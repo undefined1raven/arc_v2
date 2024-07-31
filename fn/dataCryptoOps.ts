@@ -6,6 +6,11 @@ function dataCryptoOps(symsk: string, type: 'decrypt' | 'encrypt', payload: stri
  function ab2str(buf) {
      return String.fromCharCode.apply(null, new Uint8Array(buf));
  }
+
+function ab2strA(buf){
+    return btoa(String.fromCharCode(...new Uint8Array(buf)));
+}
+
  async function symmetricEncrypt(plaintext, key) {
      let encoded = new TextEncoder().encode(plaintext);
      let iv = crypto.getRandomValues(new Uint8Array(12));
@@ -14,8 +19,8 @@ function dataCryptoOps(symsk: string, type: 'decrypt' | 'encrypt', payload: stri
          iv: iv
      }, key, encoded).then((encrypted) => {
          return {
-             cipher: ab2str(encrypted),
-             iv: ab2str(iv)
+             cipher: ab2strA(encrypted),
+             iv: ab2strA(iv)
          };
      });
  }
@@ -51,10 +56,20 @@ async function symmetricDecrypt(cipher, key, iv) {
      window.ReactNativeWebView.postMessage(message)
  }
 
-   window.onerror = function(message, sourcefile, lineno, colno, error) {
-      sendMessage(JSON.stringify({status: 'failed', error: "Message: " + message + " - Source: " + sourcefile + " Line: " + lineno + ":" + colno}));
-    };
-   
+function decode(str){
+    let utf8decoder = new TextDecoder();
+    const originalObj = JSON.parse(str);
+    const outArray = [];
+    const objKeys = Object.keys(originalObj);
+    for(let ix = 0; ix < objKeys.length; ix++){
+        outArray.push(originalObj[ix])
+    }
+    const uint = new Uint8Array(outArray);
+    return utf8decoder.decode(uint);
+}
+
+console.log('debugging active')
+console.log('json present: ', \`${payload}\`)
  try {
      if (crypto.subtle !== undefined) {
         const jwk = JSON.parse('${symsk}');
@@ -67,20 +82,24 @@ async function symmetricDecrypt(cipher, key, iv) {
                     })
             }else{
                 try{
-                    const {cipher, iv} = JSON.parse(window.ReactNativeWebView.injectedObjectJson());
-                    console.log(cipher)
+                    const payloadA = '${payload}';
+                    const rawIV = payloadA.split('^')[0];
+                    const rawCipher = payloadA.split('^')[1];
                     sendMessage(JSON.stringify({taskID: 'dataDecryption', error: null, status: 'success', payload: JSON.stringify({hi: 'xx'})}));
-                    symmetricDecrypt(cipher, key, iv).then(res => {
+                    symmetricDecrypt(decode(rawCipher), key, decode(rawIV)).then(res => {
                         sendMessage(JSON.stringify({taskID: 'dataDecryption', error: null, status: 'success', payload: JSON.stringify(res)}));
                     }).catch(e => {
                         sendMessage(JSON.stringify({taskID: 'dataDecryption', error: e, status: 'failed'}));
                     })
-                }catch(e){
+                }catch(e){ 
                     sendMessage(JSON.stringify({
                      taskID: 'dataDecryption',
                      error: e,
                      status: 'failed'
                      }));
+                     setTimeout(() => {
+                        document.location.reload();
+                    }, 5000)
                 }
             }
         }).catch(e => {

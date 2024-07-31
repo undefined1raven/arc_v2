@@ -43,14 +43,13 @@ export default function Home({ navigation }) {
     const localUserIDsActual: localUsersType = useSelector((store) => store.localUserIDs);
     const [hasMounted, setHasMounted] = useState(false);
     const [activeUserID, setActiveUserID] = useState(SecureStore.getItem('activeUserID'));
-    const [dataForEncryption, setDataForEncryption] = useState<string>('x');
+    const [dataForEncryption, setDataForEncryption] = useState<{ iv: string, cipher: string }>({ cipher: '', iv: '' });
+    const [startDecryption, setStartDecryption] = useState(false);
     const db = useSQLiteContext();
-    const ok = db.getFirstSync(`SELECT featureConfig FROM users`);
-    const fc = JSON.parse(JSON.parse(jsesc.default(ok, { json: true })).featureConfig);
     useEffect(() => {
-        setInterval(() => {
-            setDataForEncryption(JSON.stringify({ tx: Date.now() }))
-        }, 5000)
+        const ok = db.getFirstSync(`SELECT featureConfig FROM users`);
+        const fc = JSON.parse(JSON.parse(jsesc.default(ok, { json: true })).featureConfig);
+        setDataForEncryption({ iv: fc.iv, cipher: fc.cipher });
         setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
         if (localUserIDsActual.users.length > 1) {
             const currentActiveUser = SecureStore.getItem('activeUserID');
@@ -70,17 +69,26 @@ export default function Home({ navigation }) {
         }
     }, [])
 
+    useEffect(() => {
+        if (dataForEncryption.iv !== '' && dataForEncryption.cipher !== '') {
+            setStartDecryption(true);
+        }
+    }, [dataForEncryption])
 
+    function encode(str: string) {
+        const enc = new TextEncoder().encode(str)
+        return JSON.stringify(enc);
+    }
 
     return (
         <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
 
-            <DecryptionWorker iv={fc.iv} cipher={fc.cipher} symsk={SecureStore.getItem(`${localUserIDsActual.users[0].id}-symsk`) as string}
+            {startDecryption === true ? <DecryptionWorker cipher={encode(dataForEncryption.cipher)} iv={encode(dataForEncryption.iv)} symsk={SecureStore.getItem(`${localUserIDsActual.users[0].id}-symsk`) as string}
                 onDecrypted={(e) => {
                     console.log(e)
                 }}
                 onError={(e) => { console.log(e, ' err') }}
-            ></DecryptionWorker>
+            ></DecryptionWorker> : <RBox></RBox>}
 
             <StatusBar backgroundColor={globalStyle.statusBarColor}></StatusBar>
             <LinearGradient

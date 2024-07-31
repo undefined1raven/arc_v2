@@ -11,17 +11,17 @@ function DecryptionWorker(props: EncryptionWorkerProps) {
     const [tx, setTx] = useState(Date.now());
     useEffect(() => {
         setTimeout(() => {
-            setTx(Date.now());
-        }, 30);
+            if (props.cipher !== undefined && props.iv !== undefined) {
+                setTx(Date.now());
+            }
+        }, 50);
     }, [props.cipher])
 
     return (<View>
         <BackgroundTaskRunner
             tx={tx}
-
-            JSObjectInsert={{ iv: props.iv, cipher: props.cipher }}
-            triggeredCode={dataCryptoOps(props.symsk, 'decrypt', null)}
-            code={dataCryptoOps(props.symsk, 'decrypt', null)}
+            triggeredCode={dataCryptoOps(props.symsk, 'decrypt', props.iv + '^' + props.cipher)}
+            code={dataCryptoOps(props.symsk, 'decrypt', props.iv + '^' + props.cipher)}
             messageHandler={(res: { nativeEvent: { data: string } }) => {
                 const respone: EncryptionWorkerReturnType = JSON.parse(res.nativeEvent.data);
                 if (respone.status === 'success') {
