@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { dataCryptoOps } from "@/fn/dataCryptoOps";
 
+
 type EncryptionWorkerReturnType = { error: string | null | object, payload?: object, status: 'success' | 'failed', taskID: string };
 type EncryptionWorkerProps = { cipher: string, iv: string, onDecrypted: Function, onError: Function, symsk: string };
 function DecryptionWorker(props: EncryptionWorkerProps) {
