@@ -15,7 +15,7 @@ import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
 import { FeatureConfigArcType } from "@/app/config/commonTypes";
 import { updateArcFeatureConfig } from "@/hooks/arcFeatureConfig";
 
-export default function ActivitiesSettingsMain({ navigation }) {
+export default function ActivitiesSettingsMain() {
   const globalStyle: GlobalStyleType = useSelector(
     (store) => store.globalStyle
   );
@@ -28,11 +28,6 @@ export default function ActivitiesSettingsMain({ navigation }) {
   useEffect(() => {
     setTimeout(() => {
       setHasMounted(true);
-      store.dispatch(
-        updateArcFeatureConfig({
-          tasks: [...arcFeatureConfig.tasks, { taskID: "uwu" }],
-        })
-      );
       setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
     }, 150);
   }, []);

@@ -12,7 +12,7 @@ function EncryptionWorker(props: EncryptionWorkerProps) {
     useEffect(() => {
         setTimeout(() => {
             setTx(Date.now());
-        }, 10);
+        }, 30);
     }, [])
 
     return (<View>

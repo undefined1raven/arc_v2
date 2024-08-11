@@ -8,6 +8,7 @@ import {
   StatusBar,
   Keyboard,
 } from "react-native";
+import { LogBox } from "react-native";
 import RButton from "@/components/common/RButton";
 import WebView from "react-native-webview";
 import { Provider, useSelector } from "react-redux";
@@ -70,9 +71,8 @@ export default function App() {
   let colorScheme = useColorScheme();
 
   store.dispatch(updateGlobalStyle({ ...themeColors[colorScheme] }));
-
+  LogBox.ignoreAllLogs();
   React.useEffect(() => {
-    console.log();
     initialize()
       .then((res: InitializeReturnType) => {
         if (res.status === "success") {
@@ -154,7 +154,6 @@ export default function App() {
       if (accountCreds.publicKey && accountCreds.pk && accountCreds.symkey) {
         initialize()
           .then((res: InitializeReturnType) => {
-            console.log(res);
             if (res.status === "success") {
               if (res.mustCreateNewAccountCreds === true) {
                 store.dispatch(

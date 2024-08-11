@@ -5,6 +5,9 @@ import { createUsersTable } from "./dbOps";
 import { useDispatch, useSelector } from "react-redux";
 import store from "@/app/store";
 import { updateLocalUserIDs } from "@/hooks/localUserIDs";
+import { getInsertStringFromObject } from "./dbUtils";
+import { ARC_ChunksType } from "@/app/config/commonTypes";
+import { randomUUID } from "expo-crypto";
 
 type InitializeReturnType = {
   status: "success" | "failed";
@@ -23,16 +26,43 @@ type CheckCacheTableResponse = {
   hasData: boolean; //used when status == 'success' to tell if table is empty;
   tx?: number; //latest timestamp
 };
+
 async function initialize(): Promise<InitializeReturnType> {
   var tx = Date.now();
+  const db = await SQLite.openDatabaseAsync("localCache");
+
+  function createEmptyArcChunk() {
+    const chunkDefault: ARC_ChunksType = {
+      id: `ARC-${Date.now()}-${randomUUID()}`,
+      userID: "",
+      encryptedContent: "",
+      tx: Date.now(),
+      iv: "",
+      version: "0.1.1",
+    };
+    const insertString = getInsertStringFromObject(chunkDefault);
+    if (insertString.error === null && insertString.queryString) {
+      return db
+        .runAsync(
+          `INSERT INTO ARC_Chunks ${insertString.queryString}`,
+          insertString.values
+        )
+        .then(() => {
+          return { status: "success", error: null };
+        })
+        .catch((e) => {
+          return { status: "failed", error: e };
+        });
+    } else {
+      return { status: "failed", error: "insert str getter failed" };
+    }
+  }
 
   function profile(label) {
     console.log((Date.now() - tx).toString() + " | ", label);
     tx = Date.now();
   }
   profile("ini called");
-
-  const db = await SQLite.openDatabaseAsync("localCache");
 
   profile("db link established");
 
@@ -73,6 +103,8 @@ async function initialize(): Promise<InitializeReturnType> {
       .getFirstAsync(`SELECT id, tx FROM ${tableName} ORDER BY tx DESC`)
       .then((r) => {
         if (r === null) {
+          ///grab from backend and see if the user has any there
+
           return { status: "success", error: null, hasData: false };
         } else if (r.tx) {
           return { status: "success", error: null, hasData: true, tx: r.tx };
@@ -83,6 +115,31 @@ async function initialize(): Promise<InitializeReturnType> {
           (await createCacheTable(tableName)) as CheckCacheTableResponse;
         console.log(tableCreationOp, "x");
         return tableCreationOp;
+      });
+  }
+
+  async function checkUserDataTable(): Promise<{
+    status: "success" | "failed";
+    error: null | string | object;
+  }> {
+    return db
+      .getFirstAsync(`SELECT userID FROM userData`)
+      .then((r) => {
+        return { status: "success", error: null };
+      })
+      .catch((e) => {
+        db.runAsync(
+          `CREATE TABLE userData (userID TEXT NOT NULL, key TEXT NOT NULL, value TEXT)`
+        )
+          .then((r) => {
+            return { status: "success", error: null };
+          })
+          .catch((e) => {
+            return { status: "failed", error: e };
+          });
+      })
+      .catch((e) => {
+        return { status: "failed", error: e };
       });
   }
 
@@ -122,10 +179,10 @@ async function initialize(): Promise<InitializeReturnType> {
       //check if users table exists
       profile("asssess #1");
       if (res !== null) {
+        
         const usersInCache: UsersInCache = await db.getAllAsync(
           `SELECT id FROM users`
         );
-
         await assessLocalUsers(usersInCache);
         const createCacheTablesPromises = [];
         const currentCacheTables = {
@@ -141,14 +198,17 @@ async function initialize(): Promise<InitializeReturnType> {
         }
 
         return Promise.all(createCacheTablesPromises)
-          .then((responses) => {
+          .then(async (responses) => {
+            const { status, error } = await checkUserDataTable();
             const hasDataInCache = responses[0].hasData;
-            if (hasDataInCache) {
-              //check if stale
-              return { status: "success", auth: true, hasCache: true };
-            } else {
-              return { status: "success", auth: true, hasCache: true };
-              //go to the backend and fetch latest
+            if (error === null && status === "success") {
+              if (hasDataInCache) {
+                //check if stale
+                return { status: "success", auth: true, hasCache: true };
+              } else {
+                return { status: "success", auth: true, hasCache: true };
+                //go to the backend and fetch latest
+              }
             }
           })
           .catch((e) => {

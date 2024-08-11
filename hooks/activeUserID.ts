@@ -1,14 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-type activeUserIDType = {
-  activeUser: { authenticated: boolean; id: string | null };
-};
+type activeUserIDType = null | string;
 const activeUser = createSlice({
   name: "activeUser",
-  initialState: { activeUser: { authenticated: false, id: null } },
+  initialState: null,
   reducers: {
-    updateActiveUser: (state, action: activeUserIDType) => {
-      return { activeUser: action };
+    updateActiveUser: (state, action) => {
+      return action.payload;
     },
   },
 });

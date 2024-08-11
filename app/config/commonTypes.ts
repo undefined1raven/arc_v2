@@ -1,5 +1,14 @@
 import { ColorValueHex } from "@/components/common/CommonTypes";
 
+type UserDataKeys = "currentActivities" | "currentMood";
+type UserDataValues = {
+  currentActivities: { taskID: string; tx: number }[];
+  currentMood: { moodID: string; tx: number };
+};
+type ArcTaskLogType = {
+  taskID: string;
+  tx: number;
+};
 type ARCTasksType = {
   taskID: string;
   name: string;
@@ -123,9 +132,13 @@ export type {
   TessStatusType,
   TessLabelType,
   SIDMoodType,
+  ARC_ChunksType,
   FeatureConfigType,
   UserData,
   FeatureConfigArcType,
   FeatureConfigTessType,
   FeatureConfigSIDType,
+  UserDataKeys,
+  ArcTaskLogType,
+  UserDataValues,
 };

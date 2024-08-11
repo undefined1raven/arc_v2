@@ -8,8 +8,16 @@ import {
   ActivityIndicator,
   FlatList,
 } from "react-native";
+import { BlurView } from "expo-blur";
+
 import * as SecureStore from "expo-secure-store";
-import { useEffect, useState } from "react";
+import React, {
+  Component,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import RButton from "@/components/common/RButton";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import RBox from "@/components/common/RBox";
@@ -38,8 +46,15 @@ import { Header } from "./Header";
 import ActivitiesSettingsMain from "../Settings/Activities/ActivitiesSettingsMain";
 import { updateArcFeatureConfig } from "@/hooks/arcFeatureConfig";
 import TimeTracker from "./Widgets/TimeTracker";
+import { localStorageGet, localStorageSet } from "@/fn/localStorage";
+import { act } from "react-test-renderer";
+import { updateActiveUser } from "@/hooks/activeUserID";
+import WebView from "react-native-webview";
+import MenuMain from "@/components/common/menu/MenuMain";
+import { LoadData } from "./LoadData";
 
-export default function Home({ navigation }) {
+type HomeProps = { onRequestUserIDs: Function };
+export default function Home({ navigation, onRequestUserIDs }) {
   store.subscribe(() => {});
   const windowHeight = Dimensions.get("window").height;
   const globalStyle: GlobalStyleType = useSelector(
@@ -48,6 +63,9 @@ export default function Home({ navigation }) {
   const localUserIDsActual: localUsersType = useSelector(
     (store) => store.localUserIDs
   );
+
+  const rt = useSelector((store) => store.rt);
+  const [component, setComponent] = useState(rt);
   const [hasMounted, setHasMounted] = useState(false);
   const [userSymsk, setUserSymsk] = useState<null | string>(null);
   const [activeUserID, setActiveUserID] = useState(
@@ -66,8 +84,12 @@ export default function Home({ navigation }) {
       const currentActiveUser = SecureStore.getItem("activeUserID");
       if (currentActiveUser !== undefined && currentActiveUser !== null) {
         setActiveUserID(localUserIDsActual.users[0].id);
+      } else {
+        ///multi account logic but for now pick the first one active by def
+        const activeUser = localUserIDsActual.users[0].id;
+        SecureStore.setItem("activeUserID", activeUser);
+        setActiveUserID(localUserIDsActual.users[0].id);
       }
-      ///multi account logic
     } else if (localUserIDsActual.users.length === 1) {
       if (localUserIDsActual.users[0].authenticated === true) {
         const activeUserID = localUserIDsActual.users[0].id;
@@ -80,10 +102,14 @@ export default function Home({ navigation }) {
   }, []);
 
   useEffect(() => {
+    store.dispatch(updateActiveUser(activeUserID));
     function prepareFeatureConfigDecryption() {
       const rawfeatureConfig = db.getFirstSync(
         `SELECT featureConfig, id FROM users WHERE id='${activeUserID}'`
       );
+      if (rawfeatureConfig === null) {
+        onRequestUserIDs();
+      }
       const parsedFeatureConfig = JSON.parse(
         jsesc.default(rawfeatureConfig, { json: true })
       );
@@ -116,7 +142,7 @@ export default function Home({ navigation }) {
         encryptedFeatureConfig={encryptedFeatureConfig}
         symsk={userSymsk}
       ></FeatureConfigDecryptor>
-
+      <LoadData activeUserID={activeUserID} symsk={userSymsk}></LoadData>
       <StatusBar backgroundColor={globalStyle.statusBarColor}></StatusBar>
       <LinearGradient
         colors={globalStyle.pageBackgroundColors}
@@ -145,12 +171,12 @@ export default function Home({ navigation }) {
           <RBox
             id="widgetContainer"
             figmaImport={{
-              mobile: { top: 22, left: "0", width: "100%", height: 561 },
+              mobile: { top: 22, left: "0", width: "100%", height: 618 },
             }}
           >
             <TimeTracker></TimeTracker>
-            <ActivitiesSettingsMain></ActivitiesSettingsMain>
           </RBox>
+          <MenuMain></MenuMain>
         </Animated.View>
       ) : (
         <Animated.View

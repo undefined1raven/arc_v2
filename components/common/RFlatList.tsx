@@ -26,7 +26,7 @@ import { useFonts } from "expo-font";
 import { Oxanium_400Regular } from "@expo-google-fonts/oxanium";
 import { IBMPlexMono_400Regular } from "@expo-google-fonts/ibm-plex-mono";
 import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
-type RButtonProps = {
+type RFlatListProps = {
   id?: string;
   fontType?: "regular" | "mono";
   children?: any;
@@ -56,7 +56,7 @@ type RButtonProps = {
   transitions?: string | object;
 };
 
-export default function RLabel(props: RButtonProps) {
+export default function RFlatList(props: RButtonProps) {
   //Internal state
   let [fontsLoaded] = useFonts({
     Oxanium_400Regular,
