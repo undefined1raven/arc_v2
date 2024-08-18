@@ -108,7 +108,7 @@ export default function Home({ navigation, onRequestUserIDs }) {
         `SELECT featureConfig, id FROM users WHERE id='${activeUserID}'`
       );
       if (rawfeatureConfig === null) {
-        onRequestUserIDs();
+        // onRequestUserIDs();
       }
       const parsedFeatureConfig = JSON.parse(
         jsesc.default(rawfeatureConfig, { json: true })

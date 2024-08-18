@@ -10,7 +10,7 @@ type FetureConfigDecryptorPropsType = {
   onError: Function;
   onDecryption: Function;
 };
-function FeatureConfigDecryptor(props: FetureConfigDecryptorPropsType) {
+function FeatureConfigDecryptor2(props: FetureConfigDecryptorPropsType) {
   const [encodedCipher, setEncodedCipher] = useState<null | string>(null);
   const [encodedIV, setEncodedIV] = useState<null | string>(null);
   const [readyToDecrypt, setReadyToDecrypt] = useState<boolean>(false);
@@ -55,9 +55,7 @@ function FeatureConfigDecryptor(props: FetureConfigDecryptorPropsType) {
         try {
           const parsedFC = JSON.parse(e);
           props.onDecryption(parsedFC);
-        } catch (e) {
-          props.onDecryption({ error: "uwu" });
-        }
+        } catch (e) {}
       }}
       cipher={encodedCipher as string}
     ></DecryptionWorker>
@@ -66,4 +64,4 @@ function FeatureConfigDecryptor(props: FetureConfigDecryptorPropsType) {
   );
 }
 
-export { FeatureConfigDecryptor };
+export { FeatureConfigDecryptor2 };

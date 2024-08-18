@@ -1,8 +1,10 @@
-
-
-
-function dataCryptoOps(symsk: string, type: 'decrypt' | 'encrypt', payload: string | null) {//payload is either JSONstring to be encrypted or encryptedJSONstring containing iv and cipher params
-    return `
+function dataCryptoOps(
+  symsk: string,
+  type: "decrypt" | "encrypt",
+  payload: string | null
+) {
+  //payload is either JSONstring to be encrypted or encryptedJSONstring containing iv and cipher params
+  return `
  function ab2str(buf) {
      return String.fromCharCode.apply(null, new Uint8Array(buf));
  }
@@ -57,6 +59,7 @@ async function symmetricDecrypt(cipher, key, iv) {
  }
 
 function decode(str){
+    console.log('before decode: ', str);
     let utf8decoder = new TextDecoder();
     const originalObj = JSON.parse(str);
     const outArray = [];
@@ -74,21 +77,25 @@ console.log('json present: ', \`${payload}\`)
      if (crypto.subtle !== undefined) {
         const jwk = JSON.parse('${symsk}');
         importSymmetricKey(jwk).then(key => {
-            if('${type}' === 'encrypt' && '${typeof (payload)}' === 'string'){
+            if('${type}' === 'encrypt' && '${typeof payload}' === 'string'){
+            document.title = 'encrypting';
                 symmetricEncrypt('${payload}', key).then(res => {
                     sendMessage(JSON.stringify({taskID: 'dataEncryption', error: null, status: 'success', payload: JSON.stringify(res)}));
                     }).catch(e => {
                         sendMessage(JSON.stringify({taskID: 'dataEncryption', error: 'Encryption error', status: 'failed'}));
                     })
             }else{
+                document.title = 'decrypting';
                 try{
                     const payloadA = '${payload}';
                     const rawIV = payloadA.split('^')[0];
                     const rawCipher = payloadA.split('^')[1];
-                    sendMessage(JSON.stringify({taskID: 'dataDecryption', error: null, status: 'success', payload: JSON.stringify({hi: 'xx'})}));
+                    console.log(decode(rawCipher));
                     symmetricDecrypt(decode(rawCipher), key, decode(rawIV)).then(res => {
+                        console.log(res, 'decrypted');
                         sendMessage(JSON.stringify({taskID: 'dataDecryption', error: null, status: 'success', payload: JSON.stringify(res)}));
                     }).catch(e => {
+                        console.log('error: ', e);
                         sendMessage(JSON.stringify({taskID: 'dataDecryption', error: e, status: 'failed'}));
                     })
                 }catch(e){ 
@@ -124,8 +131,7 @@ console.log('json present: ', \`${payload}\`)
          status: 'failed'
      }));
  }
-          `
+          `;
 }
 
-
-export { dataCryptoOps }
+export { dataCryptoOps };
