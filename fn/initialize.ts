@@ -86,7 +86,7 @@ async function initialize(): Promise<InitializeReturnType> {
   ) {
     return db
       .runAsync(
-        `CREATE TABLE ${tableName} (id TEXT NOT NULL, userID TEXT NOT NULL, encryptedContent TEXT NOT NULL, iv TEXT NOT NULL, tx NUMBER NOT NULL, version TEXT NOT NULL)`
+        `CREATE TABLE ${tableName} (id TEXT NOT NULL, userID TEXT NOT NULL, encryptedContent TEXT NOT NULL, tx NUMBER NOT NULL, version TEXT NOT NULL)`
       )
       .then((e) => {
         return { status: "success", error: null, hasData: false };

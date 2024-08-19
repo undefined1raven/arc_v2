@@ -103,7 +103,6 @@ type ARC_ChunksType = {
   id: string;
   userID: string;
   encryptedContent: string;
-  iv: string;
   tx: number;
   version: "0.1.1";
 };
