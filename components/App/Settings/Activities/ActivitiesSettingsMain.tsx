@@ -33,7 +33,6 @@ export default function ActivitiesSettingsMain() {
   }, []);
 
   useEffect(() => {
-    console.log(arcFeatureConfig.tasks.filter((e) => e.taskID === "uwu"));
   }, [arcFeatureConfig]);
 
   return (

@@ -49,7 +49,6 @@ export default function CreateAccountKeyFile({ navigation }) {
             const accountData = await db.getFirstAsync(`SELECT * FROM users WHERE id='temp'`);
             const pk = await SecureStore.getItemAsync('temp-pk').catch(e => { return { error: 'Failed to set keychain pk', errorObj: e, status: 'failed' }; });
             const symsk = await SecureStore.getItemAsync('temp-symsk').catch(e => { return { error: 'Failed to set keychain symsk', errorObj: e, status: 'failed' }; });
-            console.log(accountData.publicKey)
             if (accountData.publicKey && accountData.featureConfig !== undefined && pk !== null && symsk !== null) {
                 const keyContent = JSON.stringify({ ...accountData, pk: pk, symsk: symsk, id: 'local' });
                 await StorageAccessFramework.createFileAsync(permissions.directoryUri, `ARC_Account_Key-${Date.now()}.txt`, 'text/plain')

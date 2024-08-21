@@ -21,7 +21,6 @@ function ARC_ChunksEncryptor(props: ARC_ChunksEncryptorPropsType) {
       setJSONString(props.plainChunk);
     }
     if (JSONString !== null && props.symsk !== null) {
-      console.log(true);
       setReadyToEncrypt(true);
     }
   }, [props.symsk, props.plainChunk]);
@@ -37,7 +36,6 @@ function ARC_ChunksEncryptor(props: ARC_ChunksEncryptorPropsType) {
       symsk={props.symsk as string}
       onEncrypted={(e) => {
         try {
-          console.log('enceyppyep')
           props.onEncryption(e);
         } catch (e) {
           props.onError(e);

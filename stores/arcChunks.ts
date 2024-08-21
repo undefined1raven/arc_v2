@@ -1,11 +1,13 @@
+import { decrypt } from "@/fn/crypto/decrypt";
 import { create } from "zustand";
 type arcChunkStore = {
   chunkID: string;
   activities: { taskID: string; tx: number }[];
-  chunkTX: number;
+  tx: number;
+  version: '0.1.1';
 }[];
 const useStore = create((set) => ({
-  arcChunks: [{ chunkID: "1", activities: [], chunkTX: 0 }],
+  arcChunks: [],
   decryptionQueue: [],
   appendDecryptionQueue: (id: string | string[]) => {
     set((state) => {
@@ -14,6 +16,23 @@ const useStore = create((set) => ({
       } else {
         return { decryptionQueue: [...state.decryptionQueue, id] };
       }
+    });
+  },
+  removeChunkFromDecryptionQueue: (id: string | string[]) => {
+    set((state) => {
+      return {
+        decryptionQueue: state.decryptionQueue.filter((lid) => lid !== id),
+      };
+    });
+  },
+  addChunkToArcChunks: (chunk: {
+    chunkID: string;
+    tx: number;
+    activities: any[];
+    version: '0.1.1';
+  }) => {
+    set((state) => {
+      return { arcChunks: [...state.arcChunks, chunk] };
     });
   },
   addActivityToArcChunk: (

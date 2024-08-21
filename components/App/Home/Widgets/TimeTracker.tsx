@@ -13,7 +13,10 @@ import Animated, { FadeInDown, Easing, FadeIn } from "react-native-reanimated";
 import { ARCLogoMini } from "@/components/common/deco/ARCLogoMini";
 import { ARCLogo } from "@/components/common/deco/ARCLogo";
 import store from "@/app/store";
-import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
+import {
+  getVal,
+  globalEnteringConfig,
+} from "@/app/config/defaultTransitionConfig";
 import { widgetContainerConfig } from "../widgetContainerConfig";
 import { localStorageGet } from "@/fn/localStorage";
 import { useSQLiteContext } from "expo-sqlite";
@@ -29,6 +32,8 @@ import { timeOfDayFromUnix } from "@/fn/timeUtils/timeOfDayFromUnix";
 import { AddIcon } from "@/components/common/deco/AddIcon";
 import { updateArcChunks } from "@/hooks/arcChunks";
 import { MaxActivitiesInArcChunk } from "@/app/config/chunking";
+import { useStore } from "@/stores/arcChunks";
+import { act } from "react-test-renderer";
 
 export default function TimeTracker({ navigation }) {
   store.subscribe(() => {});
@@ -64,11 +69,17 @@ export default function TimeTracker({ navigation }) {
   };
   const db = useSQLiteContext();
 
+  const ARC_ChunksBuffer = useStore((state) => state.arcChunks);
+  const addActivityToArcChunk = useStore(
+    (state) => state.addActivityToArcChunk
+  );
   useEffect(() => {
     getCurrentActivities().then((r) => {
       setCurrentActivities(r);
-      if (r !== null) {
+      if (r !== null && r.length > 0) {
         setCurrentDisplayedActivity(r[0]);
+      } else {
+        setCurrentDisplayedActivity(null);
       }
     });
     setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
@@ -92,6 +103,31 @@ export default function TimeTracker({ navigation }) {
     );
   }, [currentDisplayedActivity]);
 
+  useEffect(() => {
+    // if (activeUserID === null) return;
+    // console.log(currentActivities, "current activities 2");
+    // db.runAsync(`UPDATE userData SET value = ? WHERE key = ? AND userID = ?`, [
+    //   JSON.stringify(currentActivities),
+    //   "currentActivities",
+    //   activeUserID,
+    // ]);
+  }, [currentActivities]);
+
+  useEffect(() => {
+    // setInterval(() => {
+    //   db.getFirstAsync(`SELECT * FROM userData WHERE userID = ?, key = "currentActivities"`, [activeUserID]).then((r) => {
+    //     console.log(r, "current activities 4");
+    //   });
+    // }, 1000);
+  }, []);
+
+  function mutateCurrentActivities(value?: any) {
+    db.runAsync(`UPDATE userData SET value = ? WHERE key = ? AND userID = ?`, [
+      JSON.stringify(getVal(value, currentActivities)),
+      "currentActivities",
+      activeUserID,
+    ]);
+  }
 
   return (
     <RBox width="100%" height="100%" top={0} left={0}>
@@ -117,7 +153,7 @@ export default function TimeTracker({ navigation }) {
           fontSize={12}
           color={globalStyle.textColorAccent}
         ></RLabel>
-        {currentActivities === null ? (
+        {currentActivities === null || currentActivities.length === 0 ? (
           <Animated.View
             style={styles.defaultStyle}
             entering={FadeInDown.duration(50).damping(15)}
@@ -128,7 +164,6 @@ export default function TimeTracker({ navigation }) {
                 mobile: { top: 60, left: 5, width: 344, height: 48 },
               }}
               onClick={() => {
-                console.log(Date.now());
                 setShowMenu(true);
               }}
               mobileFontSize={20}
@@ -154,32 +189,28 @@ export default function TimeTracker({ navigation }) {
                 mobile: { top: 109, left: 5, width: 344, height: 48 },
               }}
               onClick={() => {
-                // const lastChunkID =
-                //   arcChunks.triggerChunkIDs[
-                //     arcChunks.triggerChunkIDs.length - 1
-                //   ];
-                // const currentChunkLength = arcChunks.plainActivities.find(
-                //   (elm) => elm.chunkID === lastChunkID
-                // )?.activities.length;
-                // if (currentChunkLength > MaxActivitiesInArcChunk) {
-                // } else {
-                //   const oldActivitiesObj = arcChunks.plainActivities.find(
-                //     (elm) => elm.chunkID === lastChunkID
-                //   );
-                //   const updatedActivitiesObj = {
-                //     ...oldActivitiesObj,
-                //     activities: [
-                //       ...oldActivitiesObj.activities,
-                //       currentDisplayedActivity,
-                //     ],
-                //   };
-                //   const updatedPlainActivities = arcChunks.plainActivities.filter(elm => elm.chunkID !== lastChunkID);
-                //   updatedPlainActivities.push(updatedActivitiesObj);
-                //   console.log(updatedPlainActivities);
-                //   db.runAsync(`UPDATE userData SET currentActivities=? WHERE userID=?`, [JSON.stringify(currentActivities.filter(elm => elm !== currentDisplayedActivity)), activeUserID]);
-                //   setCurrentActivities((prev) => prev.splice(prev.findIndex(elm => elm === currentDisplayedActivity), 1));
-                //   store.dispatch(updateArcChunks({ triggerChunkIDs: [...arcChunks.triggerChunkIDs], plainActivities: updatedPlainActivities }));
-                // }
+                const sortedBuffer = ARC_ChunksBuffer.sort(
+                  (a, b) => b.tx - a.tx
+                );
+                const lastChunk = sortedBuffer[0];
+                if (lastChunk.activities.length < MaxActivitiesInArcChunk) {
+                  addActivityToArcChunk(
+                    lastChunk.chunkID,
+                    currentDisplayedActivity
+                  );
+                  const updatedCurrentActivities = currentActivities.filter(
+                    (elm) => elm !== currentDisplayedActivity
+                  );
+                  setCurrentActivities(updatedCurrentActivities);
+                  if (currentActivities.length > 0) {
+                    setCurrentDisplayedActivity(currentActivities[0]);
+                    mutateCurrentActivities(updatedCurrentActivities);
+                  } else {
+                    setCurrentDisplayedActivity(null);
+                    setCurrentActivities(null);
+                    mutateCurrentActivities(null);
+                  }
+                }
               }}
               mobileFontSize={20}
               label="Done"
@@ -277,6 +308,14 @@ export default function TimeTracker({ navigation }) {
       {showMenu ? (
         <RBox style={styles.defaultStyle}>
           <TimeTrackingActivityMenu
+            onTriggerRerender={() => {
+              getCurrentActivities().then((r) => {
+                setCurrentActivities(r);
+                if (r !== null) {
+                  setCurrentDisplayedActivity(r[0]);
+                }
+              });
+            }}
             onBackButton={() => setShowMenu(false)}
           ></TimeTrackingActivityMenu>
         </RBox>

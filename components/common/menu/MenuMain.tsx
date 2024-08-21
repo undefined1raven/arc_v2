@@ -27,11 +27,12 @@ import getRandomInt from "@/fn/getRandomInt";
 import { MenuConfigType } from "@/hooks/menuConfig";
 import { useSQLiteContext } from "expo-sqlite";
 import * as SecureStore from "expo-secure-store";
+import { useMenuConfigStore } from "../../../stores/mainMenu";
 export default function MenuMain() {
   const globalStyle: GlobalStyleType = useSelector(
     (store) => store.globalStyle
   );
-  const menuConfig: MenuConfigType = useSelector((store) => store.menuConfig);
+  const menuConfig = useMenuConfigStore((store) => store.menuConfig);
   const arcFeatureConfig: FeatureConfigArcType = useSelector(
     (store) => store.arcFeatureConfig
   );

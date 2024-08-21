@@ -4,7 +4,7 @@ import { createSlice } from "@reduxjs/toolkit";
 type ActivitiesArray = {
   chunkID: string;
   activities: ArcTaskLogType[];
-  chunkTX: number;
+  tx: number;
 }[];
 export type { ActivitiesArray };
 const arcChunks = createSlice({

@@ -54,6 +54,7 @@ import MenuMain from "@/components/common/menu/MenuMain";
 import { LoadData } from "./LoadData";
 import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
 import { ArcChunksBuffer } from "@/components/common/crypto/ArcChunksBuffer";
+import { ArcChunksWriteBuffer } from "@/components/common/crypto/ArcChunksWriteBuffer";
 
 type HomeProps = { onRequestUserIDs: Function };
 export default function Home({ navigation, onRequestUserIDs }) {
@@ -80,7 +81,6 @@ export default function Home({ navigation, onRequestUserIDs }) {
   const db = useSQLiteContext();
 
   useEffect(() => {
-    console.log(localUserIDsActual);
     setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
     if (localUserIDsActual.users.length > 1) {
       const currentActiveUser = SecureStore.getItem("activeUserID");
@@ -134,7 +134,11 @@ export default function Home({ navigation, onRequestUserIDs }) {
         height: "100%",
       }}
     >
-      <ArcChunksBuffer symsk={userSymsk} activeUserID={activeUserID}></ArcChunksBuffer>
+      <ArcChunksWriteBuffer></ArcChunksWriteBuffer>
+      <ArcChunksBuffer
+        symsk={userSymsk}
+        activeUserID={activeUserID}
+      ></ArcChunksBuffer>
       <FeatureConfigDecryptor
         onError={() => {}}
         onDecryption={(e: string) => {

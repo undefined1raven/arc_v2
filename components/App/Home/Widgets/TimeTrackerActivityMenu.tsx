@@ -46,8 +46,12 @@ import { ColorValueHex } from "@/components/common/CommonTypes";
 import { SearchIcon } from "@/components/common/deco/SearchIcon";
 import { AddIcon } from "@/components/common/deco/AddIcon";
 import { getCurrentActivities } from "@/fn/dbUtils/getCurrentActivities";
+import { useMenuConfigStore } from "@/stores/mainMenu";
 
-type TimeTrackingActivityMenuProps = { onBackButton: Function };
+type TimeTrackingActivityMenuProps = {
+  onBackButton: Function;
+  onTriggerRerender: Function;
+};
 export default function TimeTrackingActivityMenu(
   props: TimeTrackingActivityMenuProps
 ) {
@@ -58,6 +62,10 @@ export default function TimeTrackingActivityMenu(
   const activeUserID: activeUserIDType = useSelector(
     (store) => store.activeUserID
   );
+
+  const hideMainMenu = useMenuConfigStore((store) => store.hideMenu);
+  const showMainMenu = useMenuConfigStore((store) => store.showMenu);
+
   const [searchInput, setSearchInput] = useState("");
   const arcFeatureConfig: FeatureConfigArcType = useSelector(
     (store) => store.arcFeatureConfig
@@ -72,15 +80,16 @@ export default function TimeTrackingActivityMenu(
     containerWidth: 354,
   };
   const db = useSQLiteContext();
+  const menuConfig: MenuConfigType = useSelector((store) => store.menuConfig);
 
   function onBackTrigger() {
+    props.onTriggerRerender();
+    showMainMenu();
     props.onBackButton();
-    store.dispatch(updateMenuConfig({ visible: true }));
   }
 
   useEffect(() => {
-    console.log(Date.now());
-    store.dispatch(updateMenuConfig({ visible: false }));
+    hideMainMenu();
     BackHandler.addEventListener("hardwareBackPress", () => {
       onBackTrigger();
       return true;
@@ -100,23 +109,47 @@ export default function TimeTrackingActivityMenu(
   async function addActivityToCurrentActivities(taskID: string) {
     const currentActivities: UserDataValues["currentActivities"] =
       await getCurrentActivities();
-    if (currentActivities === null) {
-      const currentActivities: UserDataValues["currentActivities"] = [
+    if (currentActivities === null || currentActivities.length === 0) {
+      const newCurrentActivities: UserDataValues["currentActivities"] = [
         { taskID: taskID, tx: Date.now() },
       ];
-      await db.runAsync(
-        `INSERT INTO userData (userID, key, value) VALUES (?, ?, ?)`,
-        [activeUserID, "currentActivities", JSON.stringify(currentActivities)]
-      );
+      await db
+        .runAsync(`UPDATE userData SET value=? WHERE userID=? AND key=?`, [
+          JSON.stringify(newCurrentActivities),
+          activeUserID,
+          "currentActivities",
+        ])
+        .then((r) => {
+          db.getFirstAsync(`SELECT * FROM userData WHERE userID=? AND key=?`, [
+            activeUserID,
+            "currentActivities",
+          ])
+            .then((r) => {})
+            .catch((e) => {
+              console.log(e);
+            });
+          onBackTrigger();
+        })
+        .catch((e) => {
+          console.log(e);
+        });
     } else {
       if (currentActivities.find((elm) => elm.taskID === taskID)) {
         return;
       }
       currentActivities.push({ taskID: taskID, tx: Date.now() });
-      await db.runAsync(
-        `UPDATE userData SET value=? WHERE userID=? AND key=?`,
-        [JSON.stringify(currentActivities), activeUserID, "currentActivities"]
-      );
+      await db
+        .runAsync(`UPDATE userData SET value=? WHERE userID=? AND key=?`, [
+          JSON.stringify(currentActivities),
+          activeUserID,
+          "currentActivities",
+        ])
+        .then((r) => {
+          onBackTrigger();
+        })
+        .catch((e) => {
+          console.log(e);
+        });
     }
   }
 
