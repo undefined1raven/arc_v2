@@ -13,13 +13,12 @@ import { ARCLogoMini } from "@/components/common/deco/ARCLogoMini";
 import store from "@/app/store";
 import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
 import { FeatureConfigArcType } from "@/app/config/commonTypes";
-import { updateArcFeatureConfig } from "@/hooks/arcFeatureConfig";
+import { useGlobalStyleStore } from "@/stores/globalStyles";
+import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 
 export default function ActivitiesSettingsMain() {
-  const globalStyle: GlobalStyleType = useSelector(
-    (store) => store.globalStyle
-  );
-  const arcFeatureConfig: FeatureConfigArcType = useSelector(
+  const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
+  const arcFeatureConfig: FeatureConfigArcType = useArcFeatureConfigStore(
     (store) => store.arcFeatureConfig
   );
 
@@ -32,8 +31,7 @@ export default function ActivitiesSettingsMain() {
     }, 150);
   }, []);
 
-  useEffect(() => {
-  }, [arcFeatureConfig]);
+  useEffect(() => {}, [arcFeatureConfig]);
 
   return (
     <View

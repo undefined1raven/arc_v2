@@ -39,14 +39,15 @@ import {
   GestureHandlerRootView,
   NativeViewGestureHandler,
 } from "react-native-gesture-handler";
-import { updateMenuConfig } from "@/hooks/menuConfig";
 import RTextInput from "@/components/common/RTextInput";
 import { FeatureConfigArcType, UserDataValues } from "@/app/config/commonTypes";
 import { ColorValueHex } from "@/components/common/CommonTypes";
 import { SearchIcon } from "@/components/common/deco/SearchIcon";
 import { AddIcon } from "@/components/common/deco/AddIcon";
+import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { getCurrentActivities } from "@/fn/dbUtils/getCurrentActivities";
 import { useMenuConfigStore } from "@/stores/mainMenu";
+import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 
 type TimeTrackingActivityMenuProps = {
   onBackButton: Function;
@@ -56,9 +57,8 @@ export default function TimeTrackingActivityMenu(
   props: TimeTrackingActivityMenuProps
 ) {
   store.subscribe(() => {});
-  const globalStyle: GlobalStyleType = useSelector(
-    (store) => store.globalStyle
-  );
+  const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
+  
   const activeUserID: activeUserIDType = useSelector(
     (store) => store.activeUserID
   );
@@ -67,7 +67,7 @@ export default function TimeTrackingActivityMenu(
   const showMainMenu = useMenuConfigStore((store) => store.showMenu);
 
   const [searchInput, setSearchInput] = useState("");
-  const arcFeatureConfig: FeatureConfigArcType = useSelector(
+  const arcFeatureConfig: FeatureConfigArcType = useArcFeatureConfigStore(
     (store) => store.arcFeatureConfig
   );
   const [hasMounted, setHasMounted] = useState(false);
@@ -114,11 +114,14 @@ export default function TimeTrackingActivityMenu(
         { taskID: taskID, tx: Date.now() },
       ];
       await db
-        .runAsync(`UPDATE userData SET value=? WHERE userID=? AND key=?`, [
-          JSON.stringify(newCurrentActivities),
-          activeUserID,
-          "currentActivities",
-        ])
+        .runAsync(
+          `INSERT OR REPLACE INTO userData (value, userID, key) VALUES (?, ?, ?)`,
+          [
+            JSON.stringify(newCurrentActivities),
+            activeUserID,
+            "currentActivities",
+          ]
+        )
         .then((r) => {
           db.getFirstAsync(`SELECT * FROM userData WHERE userID=? AND key=?`, [
             activeUserID,

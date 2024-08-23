@@ -10,6 +10,7 @@ import { AlignType, ColorValueHex, FontSize } from "./CommonTypes";
 import { useEffect, useRef, useState } from "react";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import FigmaImporter from "../../fn/figmaImporter";
+import { useGlobalStyleStore } from "@/stores/globalStyles";
 import FigmaImportConfig from "../../fn/FigmaImportConfig";
 import Animated, {
   Easing,
@@ -86,10 +87,7 @@ export default function RTextInput(props: RButtonProps) {
   //Internal state
   const { height, width } = useWindowDimensions();
   store.subscribe(() => {});
-  const globalStyle: GlobalStyleType = useSelector(
-    (store) => store.globalStyle
-  );
-
+  const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   let align = props.align ? props.align : "center";
   let hoverOpacityMax = props.hoverOpacityMax ? props.hoverOpacityMax : "20";
   let hoverOpacityMin = props.hoverOpacityMin ? props.hoverOpacityMin : "00";

@@ -8,6 +8,7 @@ import globalStyles, {
 import store from "@/app/store";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
+import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { getVal } from "@/app/config/defaultTransitionConfig";
 type HeaderProps = { show?: boolean };
 function Header(props: HeaderProps) {
@@ -19,9 +20,8 @@ function Header(props: HeaderProps) {
   }, [props.show]);
 
   store.subscribe(() => {});
-  const globalStyle: GlobalStyleType = useSelector(
-    (store) => store.globalStyle
-  );
+  const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
+
   return showActual === true ? (
     <Animated.View
       style={{

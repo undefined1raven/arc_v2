@@ -28,6 +28,7 @@ import { useFonts } from "expo-font";
 import { Oxanium_400Regular } from "@expo-google-fonts/oxanium";
 import { IBMPlexMono_400Regular } from "@expo-google-fonts/ibm-plex-mono";
 import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
+import { useGlobalStyleStore } from "@/stores/globalStyles";
 import RLabel from "./RLabel";
 
 type RButtonProps = {

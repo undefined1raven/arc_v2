@@ -22,6 +22,7 @@ import globalStyles, { GlobalStyleType } from "@/hooks/globalStyles";
 import { useSelector } from "react-redux";
 import { fontController } from "../../fn/fontController";
 import { BlurView } from "expo-blur";
+import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { useFonts } from "expo-font";
 import { Oxanium_400Regular } from "@expo-google-fonts/oxanium";
 import { IBMPlexMono_400Regular } from "@expo-google-fonts/ibm-plex-mono";
@@ -68,9 +69,8 @@ export default function RLabel(props: RButtonProps) {
   const p50Width = 0.5 * width;
   const p50Height = 0.5 * height;
   store.subscribe(() => {});
-  const globalStyle: GlobalStyleType = useSelector(
-    (store) => store.globalStyle
-  );
+  const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
+
   const labelRef = useRef(null);
   function getVal(value: any, defaultVal: any) {
     if (value !== undefined) {

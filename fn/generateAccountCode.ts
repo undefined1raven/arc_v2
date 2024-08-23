@@ -1,11 +1,26 @@
-
-import { defaultFeatureConfig } from "@/app/config/defaultFeatureConfig"
+import { defaultFeatureConfig } from "@/app/config/defaultFeatureConfig";
 
 function genenerateAccountCode() {
   return `
         async function exportCryptoKey(key) {
     const exported = await crypto.subtle.exportKey("jwk", key);
     return JSON.stringify(exported);
+}
+
+function stringToCharCodeArray(str) {
+  let stringActual = str;
+  if (str === undefined) {
+    throw new Error("stringToCharCodeArray: str is undefined");
+  } else {
+    if (typeof str !== "string") {
+      stringActual = str.toString();
+    }
+  }
+  const charCodeArray = [];
+  for (let i = 0; i < stringActual.length; i++) {
+    charCodeArray.push(stringActual.charCodeAt(i));
+  }
+  return charCodeArray;
 }
 
 async function exportCryptoKey(key) {
@@ -27,6 +42,13 @@ async function exportCryptoKey(key) {
 
  function ab2str(buf) {
      return String.fromCharCode.apply(null, new Uint8Array(buf));
+ }
+
+
+ function encodeEncrypted(encrypted){
+     JSON.stringify(
+        stringToCharCodeArray(encrypted)
+      );
  }
  async function symmetricEncrypt(plaintext, key) {
      let encoded = new TextEncoder().encode(plaintext);
@@ -60,11 +82,26 @@ async function exportCryptoKey(key) {
                 const publicKey = keys.publicKey;
                 exportCryptoKey(privateKey).then((exportedPrivateKey) => {
           				exportCryptoKey(publicKey).then((exportedPublicKey) => {
-                    symmetricEncrypt('${JSON.stringify(defaultFeatureConfig)}', key).then(encryptedDefaultFeatureConfig => {
-                      sendMessage(JSON.stringify({publicKey: exportedPublicKey, pk: exportedPrivateKey, taskID: 'accountGen', status: 'success', symkey: jwk, error: null, featureConfig: encryptedDefaultFeatureConfig}));
-                    }).catch(e => {
-                      sendMessage(JSON.stringify({taskID: 'accountGen', status: 'failed', error: 'failed to encrypt default feature config'}))
-                    })
+                    const configPromises = [];
+
+                    configPromises.push(symmetricEncrypt('${JSON.stringify(
+                      defaultFeatureConfig.arc
+                    )}', key));
+                    configPromises.push(symmetricEncrypt('${JSON.stringify(
+                      defaultFeatureConfig.sid
+                    )}', key));
+                    configPromises.push(symmetricEncrypt('${JSON.stringify(
+                      defaultFeatureConfig.tess
+                    )}', key));
+                    Promise.all(configPromises).then((encryptedConfigs) => {
+                        const rawEncryptedArcConfig = encryptedConfigs[0];
+                    });
+                      // sendMessage(JSON.stringify({publicKey: exportedPublicKey, pk: exportedPrivateKey, taskID: 'accountGen', status: 'success', symkey: jwk, error: null, featureConfig: encryptedDefaultFeatureConfig}));
+                      // sendMessage(JSON.stringify({taskID: 'accountGen', status: 'failed', error: 'failed to encrypt default feature config'}))
+                    
+
+
+
 				          }).catch(e => {
                 sendMessage(JSON.stringify({taskID: 'accountGen', status: 'failed', error: 'failed to export pk'}))
               });
@@ -85,8 +122,7 @@ async function exportCryptoKey(key) {
               sendMessage(JSON.stringify({taskID: 'accountGen', error: e, status: 'failed'}));
           }
         
-        `
+        `;
 }
 
-
-export { genenerateAccountCode }
+export { genenerateAccountCode };

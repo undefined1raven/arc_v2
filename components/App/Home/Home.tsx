@@ -9,7 +9,7 @@ import {
   FlatList,
 } from "react-native";
 import { BlurView } from "expo-blur";
-
+import { reloadAppAsync } from "expo";
 import * as SecureStore from "expo-secure-store";
 import React, {
   Component,
@@ -44,7 +44,6 @@ import { Dimensions } from "react-native";
 import { FeatureConfigDecryptor } from "../decryptors/FetureConfigDecryptor";
 import { Header } from "./Header";
 import ActivitiesSettingsMain from "../Settings/Activities/ActivitiesSettingsMain";
-import { updateArcFeatureConfig } from "@/hooks/arcFeatureConfig";
 import TimeTracker from "./Widgets/TimeTracker";
 import { localStorageGet, localStorageSet } from "@/fn/localStorage";
 import { act } from "react-test-renderer";
@@ -55,20 +54,25 @@ import { LoadData } from "./LoadData";
 import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
 import { ArcChunksBuffer } from "@/components/common/crypto/ArcChunksBuffer";
 import { ArcChunksWriteBuffer } from "@/components/common/crypto/ArcChunksWriteBuffer";
+import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
+import { useGlobalStyleStore } from "@/stores/globalStyles";
 
 type HomeProps = { onRequestUserIDs: Function };
 export default function Home({ navigation, onRequestUserIDs }) {
   store.subscribe(() => {});
   const windowHeight = Dimensions.get("window").height;
-  const globalStyle: GlobalStyleType = useSelector(
-    (store) => store.globalStyle
+
+  const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
+  const updateArcFeatureConfig = useArcFeatureConfigStore(
+    (store) => store.updateArcFeatureConfig
+  );
+  const arcFeatureConfig: FeatureConfigType = useArcFeatureConfigStore(
+    (store) => store.arcFeatureConfig
   );
   const localUserIDsActual: localUsersType = useSelector(
     (store) => store.localUserIDs
   );
 
-  const rt = useSelector((store) => store.rt);
-  const [component, setComponent] = useState(rt);
   const [hasMounted, setHasMounted] = useState(false);
   const [userSymsk, setUserSymsk] = useState<null | string>(null);
   const [activeUserID, setActiveUserID] = useState(
@@ -104,6 +108,10 @@ export default function Home({ navigation, onRequestUserIDs }) {
   }, []);
 
   useEffect(() => {
+    console.log(arcFeatureConfig);
+  }, [arcFeatureConfig]);
+
+  useEffect(() => {
     store.dispatch(updateActiveUser(activeUserID));
     function prepareFeatureConfigDecryption() {
       const rawfeatureConfig = db.getFirstSync(
@@ -115,6 +123,9 @@ export default function Home({ navigation, onRequestUserIDs }) {
       const parsedFeatureConfig = JSON.parse(
         jsesc.default(rawfeatureConfig, { json: true })
       );
+      if (rawfeatureConfig === null) {
+        reloadAppAsync();
+      }
       setEncryptedFeatureConfig(parsedFeatureConfig.featureConfig);
       const symskLocal = SecureStore.getItem(`${activeUserID}-symsk`) as string;
       setUserSymsk(symskLocal);
@@ -142,7 +153,9 @@ export default function Home({ navigation, onRequestUserIDs }) {
       <FeatureConfigDecryptor
         onError={() => {}}
         onDecryption={(e: string) => {
+          console.log(decryptedFC);
           const decryptedFC = JSON.parse(e);
+          updateArcFeatureConfig(decryptedFC.arc);
           store.dispatch(updateArcFeatureConfig(decryptedFC.arc));
           setHasMounted(true);
         }}

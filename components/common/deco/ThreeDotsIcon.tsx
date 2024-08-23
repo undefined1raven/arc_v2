@@ -1,5 +1,6 @@
 import store from "@/app/store";
 import { GlobalStyleType } from "@/hooks/globalStyles";
+import { useGlobalStyleStore } from "@/stores/globalStyles";
 import * as React from "react";
 import { View } from "react-native";
 import Svg, {
@@ -14,9 +15,7 @@ import Svg, {
 import { useSelector } from "react-redux";
 const ThreeDotsIcon = (props: SvgProps) => {
   store.subscribe(() => {});
-  const globalStyle: GlobalStyleType = useSelector(
-    (store) => store.globalStyle
-  );
+  const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const [opacityArray, setOpacityArray] = React.useState([]);
   const colorActual = props.color ? props.color : globalStyle.color;
 

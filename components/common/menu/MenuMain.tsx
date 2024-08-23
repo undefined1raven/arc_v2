@@ -1,6 +1,7 @@
 import { View, ActivityIndicator, StyleSheet, Dimensions } from "react-native";
 import { useEffect, useState } from "react";
 import { Provider, useDispatch, useSelector } from "react-redux";
+import { useGlobalStyleStore } from "@/stores/globalStyles";
 import RBox from "@/components/common/RBox";
 import globalStyles, {
   GlobalStyleType,
@@ -17,7 +18,6 @@ import { ARCLogoMini } from "@/components/common/deco/ARCLogoMini";
 import store from "@/app/store";
 import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
 import { FeatureConfigArcType } from "@/app/config/commonTypes";
-import { updateArcFeatureConfig } from "@/hooks/arcFeatureConfig";
 import RButton from "../RButton";
 import { HomeIcon } from "../deco/HomeIcon";
 import { ThreeDotsIcon } from "../deco/ThreeDotsIcon";
@@ -29,13 +29,9 @@ import { useSQLiteContext } from "expo-sqlite";
 import * as SecureStore from "expo-secure-store";
 import { useMenuConfigStore } from "../../../stores/mainMenu";
 export default function MenuMain() {
-  const globalStyle: GlobalStyleType = useSelector(
-    (store) => store.globalStyle
-  );
+  
+  const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const menuConfig = useMenuConfigStore((store) => store.menuConfig);
-  const arcFeatureConfig: FeatureConfigArcType = useSelector(
-    (store) => store.arcFeatureConfig
-  );
 
   store.subscribe(() => {});
   const [hasMounted, setHasMounted] = useState(false);

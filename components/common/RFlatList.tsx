@@ -21,6 +21,7 @@ import store from "@/app/store";
 import globalStyles, { GlobalStyleType } from "@/hooks/globalStyles";
 import { useSelector } from "react-redux";
 import { fontController } from "../../fn/fontController";
+import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { BlurView } from "expo-blur";
 import { useFonts } from "expo-font";
 import { Oxanium_400Regular } from "@expo-google-fonts/oxanium";
@@ -68,10 +69,7 @@ export default function RFlatList(props: RButtonProps) {
   const p50Width = 0.5 * width;
   const p50Height = 0.5 * height;
   store.subscribe(() => {});
-  const globalStyle: GlobalStyleType = useSelector(
-    (store) => store.globalStyle
-  );
-  const labelRef = useRef(null);
+  const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   function getVal(value: any, defaultVal: any) {
     if (value !== undefined) {
       return value;

@@ -21,6 +21,7 @@ import { widgetContainerConfig } from "../widgetContainerConfig";
 import { localStorageGet } from "@/fn/localStorage";
 import { useSQLiteContext } from "expo-sqlite";
 import { activeUserIDType } from "@/hooks/activeUserID";
+import { useGlobalStyleStore } from "@/stores/globalStyles";
 import RButton from "@/components/common/RButton";
 import { BlurView } from "expo-blur";
 import TimeTrackingActivityMenu from "./TimeTrackerActivityMenu";
@@ -34,20 +35,21 @@ import { updateArcChunks } from "@/hooks/arcChunks";
 import { MaxActivitiesInArcChunk } from "@/app/config/chunking";
 import { useStore } from "@/stores/arcChunks";
 import { act } from "react-test-renderer";
+import { newChunkID } from "@/fn/newChunkID";
+import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 
 export default function TimeTracker({ navigation }) {
   store.subscribe(() => {});
-  const globalStyle: GlobalStyleType = useSelector(
-    (store) => store.globalStyle
-  );
+  const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
+
   const activeUserID: activeUserIDType = useSelector(
     (store) => store.activeUserID
   );
-  const arcFeatureConfig: FeatureConfigArcType = useSelector(
+  const arcFeatureConfig: FeatureConfigArcType = useArcFeatureConfigStore(
     (store) => store.arcFeatureConfig
   );
-  const arcChunks: FeatureConfigArcType = useSelector(
-    (store) => store.arcChunks
+  const addChunkToArcChunks: Function = useDispatch(
+    (state) => state.addChunkToArcChunks
   );
   const [hasMounted, setHasMounted] = useState(false);
   const [displayDurationLabel, setDisplayDurationLabel] = useState("");
@@ -192,24 +194,33 @@ export default function TimeTracker({ navigation }) {
                 const sortedBuffer = ARC_ChunksBuffer.sort(
                   (a, b) => b.tx - a.tx
                 );
-                const lastChunk = sortedBuffer[0];
-                if (lastChunk.activities.length < MaxActivitiesInArcChunk) {
-                  addActivityToArcChunk(
-                    lastChunk.chunkID,
-                    currentDisplayedActivity
-                  );
-                  const updatedCurrentActivities = currentActivities.filter(
-                    (elm) => elm !== currentDisplayedActivity
-                  );
-                  setCurrentActivities(updatedCurrentActivities);
-                  if (currentActivities.length > 0) {
-                    setCurrentDisplayedActivity(currentActivities[0]);
-                    mutateCurrentActivities(updatedCurrentActivities);
-                  } else {
-                    setCurrentDisplayedActivity(null);
-                    setCurrentActivities(null);
-                    mutateCurrentActivities(null);
+                if (sortedBuffer.length === 0) {
+                  addChunkToArcChunks({
+                    chunkID: newChunkID(),
+                    tx: Date.now(),
+                    activities: [currentDisplayedActivity],
+                    version: "0.1.1",
+                  });
+                } else {
+                  const lastChunk = sortedBuffer[0];
+                  if (lastChunk.activities.length < MaxActivitiesInArcChunk) {
+                    addActivityToArcChunk(
+                      lastChunk.chunkID,
+                      currentDisplayedActivity
+                    );
                   }
+                }
+                const updatedCurrentActivities = currentActivities.filter(
+                  (elm) => elm !== currentDisplayedActivity
+                );
+                setCurrentActivities(updatedCurrentActivities);
+                if (currentActivities.length > 0) {
+                  setCurrentDisplayedActivity(currentActivities[0]);
+                  mutateCurrentActivities(updatedCurrentActivities);
+                } else {
+                  setCurrentDisplayedActivity(null);
+                  setCurrentActivities(null);
+                  mutateCurrentActivities(null);
                 }
               }}
               mobileFontSize={20}
