@@ -23,7 +23,6 @@ import Animated, {
 import { useSharedValue } from "react-native-reanimated";
 import store from "@/app/store";
 import globalStyles, { GlobalStyleType } from "@/hooks/globalStyles";
-import { useSelector } from "react-redux";
 import { useFonts } from "expo-font";
 import { Oxanium_400Regular } from "@expo-google-fonts/oxanium";
 import { IBMPlexMono_400Regular } from "@expo-google-fonts/ibm-plex-mono";
@@ -84,7 +83,7 @@ export default function RButton(props: RButtonProps) {
     bottom: { top: "100%", transform: "translateY(-10dp)" },
   };
   store.subscribe(() => {});
-  const globalStyle: GlobalStyleType = useSelector(
+  const globalStyle = useGlobalStyleStore(
     (store) => store.globalStyle
   );
 

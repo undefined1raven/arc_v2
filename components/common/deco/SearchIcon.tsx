@@ -1,18 +1,24 @@
 import store from "@/app/store";
 import { GlobalStyleType } from "@/hooks/globalStyles";
-import * as React from "react"
+import { useGlobalStyleStore } from "@/stores/globalStyles";
+import * as React from "react";
 import { View } from "react-native";
-import Svg, { SvgProps, Path, Defs, LinearGradient, Stop, G } from "react-native-svg"
-import { useSelector } from "react-redux";
+import Svg, {
+  SvgProps,
+  Path,
+  Defs,
+  LinearGradient,
+  Stop,
+  G,
+} from "react-native-svg";
 const SearchIcon = (props: SvgProps) => {
-    store.subscribe(() => { });
-    const globalStyle: GlobalStyleType = useSelector(store => store.globalStyle);
-    const [opacityArray, setOpacityArray] = React.useState([]);
-    const colorActual = props.color ? props.color : globalStyle.color;
+  store.subscribe(() => {});
+  const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
+  const [opacityArray, setOpacityArray] = React.useState([]);
+  const colorActual = props.color ? props.color : globalStyle.color;
 
-
-    return (
-      <Svg
+  return (
+    <Svg
       width={19}
       height={18}
       viewBox="0 0 19 18"
@@ -32,7 +38,7 @@ const SearchIcon = (props: SvgProps) => {
         d="M10.2361 9.92584H11.25971V21.185540000000003H10.2361z"
       />
     </Svg>
-    )
-}
+  );
+};
 
-export { SearchIcon }
+export { SearchIcon };

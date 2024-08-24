@@ -2,7 +2,6 @@ import { DecryptionWorker } from "@/components/common/DecryptionWorker";
 import RBox from "@/components/common/RBox";
 import { updateArcFeatureConfig } from "@/hooks/arcFeatureConfig";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 
 type FetureConfigDecryptorPropsType = {
   encryptedFeatureConfig: string | null;

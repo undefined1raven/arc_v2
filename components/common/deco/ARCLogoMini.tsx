@@ -1,12 +1,12 @@
 import store from "@/app/store";
 import { GlobalStyleType } from "@/hooks/globalStyles";
+import { useGlobalStyleStore } from "@/stores/globalStyles";
 import * as React from "react"
 import { View } from "react-native";
 import Svg, { SvgProps, Path } from "react-native-svg"
-import { useSelector } from "react-redux";
 const SvgComponent = (props: SvgProps) => {
     store.subscribe(() => { });
-    const globalStyle: GlobalStyleType = useSelector(store => store.globalStyle);
+    const globalStyle = useGlobalStyleStore(store => store.globalStyle);
     const colorActual = props.color ? props.color : globalStyle.color;
     return (
         <Svg

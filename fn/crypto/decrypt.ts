@@ -83,13 +83,15 @@ function encode(str) {
   const enc = new TextEncoder().encode(str);
   return JSON.stringify(enc);
 }
-console.log("[Decryption] string payload present: ", \`${payload}\`);
+console.log("[Decryption] string payload present: ", \`${payload?.length}\`);
 
 try {
   if (crypto.subtle !== undefined) {
     const jwk = JSON.parse(\`${symsk}\`);
     const charArray = JSON.parse(\`${payload}\`);
     const {iv, cipher} = JSON.parse(charCodeArrayToString(charArray));
+    console.log(iv, "iv");
+    console.log(cipher, "cipher");
     importSymmetricKey(jwk)
       .then((key) => {
         symmetricDecrypt(key, cipher, iv)

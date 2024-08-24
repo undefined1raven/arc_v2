@@ -19,7 +19,6 @@ import Animated, {
 import { useSharedValue } from "react-native-reanimated";
 import store from "@/app/store";
 import globalStyles, { GlobalStyleType } from "@/hooks/globalStyles";
-import { useSelector } from "react-redux";
 import { fontController } from "../../fn/fontController";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { BlurView } from "expo-blur";

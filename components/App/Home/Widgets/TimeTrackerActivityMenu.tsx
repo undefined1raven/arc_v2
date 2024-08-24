@@ -6,7 +6,6 @@ import {
   View,
 } from "react-native";
 import { useContext, useEffect, useState } from "react";
-import { Provider, useDispatch, useSelector } from "react-redux";
 import RBox from "@/components/common/RBox";
 import { LinearGradient } from "expo-linear-gradient";
 import globalStyles, {
@@ -21,6 +20,7 @@ import Animated, {
   FadeIn,
   FadeOut,
   FadeInUp,
+  useWorkletCallback,
 } from "react-native-reanimated";
 import { ARCLogoMini } from "@/components/common/deco/ARCLogoMini";
 import { ARCLogo } from "@/components/common/deco/ARCLogo";
@@ -29,7 +29,6 @@ import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
 import { widgetContainerConfig } from "../widgetContainerConfig";
 import { localStorageGet } from "@/fn/localStorage";
 import { useSQLiteContext } from "expo-sqlite";
-import { activeUserIDType } from "@/hooks/activeUserID";
 import RButton from "@/components/common/RButton";
 import { BlurView } from "expo-blur";
 import { BackHandler, Alert } from "react-native";
@@ -48,6 +47,7 @@ import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { getCurrentActivities } from "@/fn/dbUtils/getCurrentActivities";
 import { useMenuConfigStore } from "@/stores/mainMenu";
 import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
+import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 
 type TimeTrackingActivityMenuProps = {
   onBackButton: Function;
@@ -58,10 +58,10 @@ export default function TimeTrackingActivityMenu(
 ) {
   store.subscribe(() => {});
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
-  
-  const activeUserID: activeUserIDType = useSelector(
-    (store) => store.activeUserID
-  );
+
+  const activeUserID = useLocalUserIDsStore(
+    (store) => store.loaclUserIDs
+  ).filter((elm) => elm.isActive)[0].id;
 
   const hideMainMenu = useMenuConfigStore((store) => store.hideMenu);
   const showMainMenu = useMenuConfigStore((store) => store.showMenu);
@@ -80,7 +80,7 @@ export default function TimeTrackingActivityMenu(
     containerWidth: 354,
   };
   const db = useSQLiteContext();
-  const menuConfig: MenuConfigType = useSelector((store) => store.menuConfig);
+  const menuConfig = useMenuConfigStore((store) => store.menuConfig);
 
   function onBackTrigger() {
     props.onTriggerRerender();
@@ -277,7 +277,6 @@ export default function TimeTrackingActivityMenu(
             style={{ ...styles.defaultStyle }}
             renderItem={renderItem}
             keyExtractor={(item) => item.taskID}
-            ListEmptyComponent={() => {}}
             data={arcFeatureConfig.tasks.filter((task) => {
               if (searchInput === "") return true;
               const searchInputLowerCase = searchInput.toLocaleLowerCase();

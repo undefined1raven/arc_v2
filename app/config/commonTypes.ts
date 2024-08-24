@@ -5,7 +5,7 @@ type UserDataValues = {
   currentActivities: { taskID: string; tx: number }[];
   currentMood: { moodID: string; tx: number };
 };
-type ArcTaskLogType = {
+ type ArcTaskLogType = {
   taskID: string;
   tx: number;
 };
@@ -93,7 +93,9 @@ type UserData = {
   trustedDevices: string | null;
   oauthState: string | null;
   securityLogs: string | null;
-  featureConfig: string;
+  arcFeatureConfig: string;
+  SIDFeatureConfig: string;
+  tessFeatureConfig: string;
   version: "0.1.0";
 };
 
@@ -111,7 +113,6 @@ type Tess_ChunksType = {
   id: string;
   userID: string;
   encryptedContent: string;
-  iv: string;
   tx: number;
   version: "0.1.1";
 };
@@ -120,7 +121,6 @@ type SID_ChunksType = {
   id: string;
   userID: string;
   encryptedContent: string;
-  iv: string;
   tx: number;
   version: "0.1.1";
 };

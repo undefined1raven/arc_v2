@@ -2,12 +2,12 @@ import * as SecureStore from "expo-secure-store";
 import * as SQLite from "expo-sqlite";
 import { clearTempCredentials } from "./clearTempCredentials";
 import { createUsersTable } from "./dbOps";
-import { useDispatch, useSelector } from "react-redux";
 import store from "@/app/store";
 import { updateLocalUserIDs } from "@/hooks/localUserIDs";
 import { getInsertStringFromObject } from "./dbUtils";
 import { ARC_ChunksType } from "@/app/config/commonTypes";
 import { randomUUID } from "expo-crypto";
+import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 
 type InitializeReturnType = {
   status: "success" | "failed";
@@ -96,6 +96,9 @@ async function initialize(): Promise<InitializeReturnType> {
       });
   }
 
+  const updateLocalUserIDs = useLocalUserIDsStore(
+    (store) => store.updateLocalUserIDs
+  );
   async function checkCacheTable(
     tableName: "ARC_Chunks" | "SID_Chunks" | "Tess_Chunks"
   ) {
@@ -170,76 +173,9 @@ async function initialize(): Promise<InitializeReturnType> {
         };
       }
     }
-    store.dispatch(updateLocalUserIDs(localUserIDsArray));
+    updateLocalUserIDs(localUserIDsArray);
   }
-
-  return db
-    .getFirstAsync(`SELECT id FROM users`)
-    .then(async (res: { id: string }) => {
-      //check if users table exists
-      profile("asssess #1");
-      if (res !== null) {
-        
-        const usersInCache: UsersInCache = await db.getAllAsync(
-          `SELECT id FROM users`
-        );
-        await assessLocalUsers(usersInCache);
-        const createCacheTablesPromises = [];
-        const currentCacheTables = {
-          arc: { tableName: "ARC_Chunks" },
-          tess: { tableName: "Tess_Chunks" },
-          sid: { tableName: "SID_Chunks" },
-        };
-
-        for (let table in currentCacheTables) {
-          createCacheTablesPromises.push(
-            checkCacheTable(currentCacheTables[table].tableName)
-          );
-        }
-
-        return Promise.all(createCacheTablesPromises)
-          .then(async (responses) => {
-            const { status, error } = await checkUserDataTable();
-            const hasDataInCache = responses[0].hasData;
-            if (error === null && status === "success") {
-              if (hasDataInCache) {
-                //check if stale
-                return { status: "success", auth: true, hasCache: true };
-              } else {
-                return { status: "success", auth: true, hasCache: true };
-                //go to the backend and fetch latest
-              }
-            }
-          })
-          .catch((e) => {
-            return { status: "failed", error: "Failed to fix cache state" };
-          });
-      } else {
-        return {
-          status: "success",
-          mustCreateNewAccountCreds: true,
-          allowedAyncGen: true,
-        };
-      }
-    })
-    .catch(async (e) => {
-      profile("asssess #2");
-      console.log(e);
-      return db
-        .runAsync(
-          "CREATE TABLE users (id TEXT PRIMARY KEY, signupTime TEXT NOT NULL, publicKey TEXT NOT NULL, passwordHash TEXT, emailAddress TEXT, passkeys TEXT, PIKBackup TEXT, PSKBackup TEXT, RCKBackup TEXT, trustedDevices TEXT, oauthState TEXT, securityLogs TEXT, featureConfig TEXT NOT NULL, version TEXT NOT NULL);"
-        )
-        .then((res) => {
-          return {
-            status: "success",
-            mustCreateNewAccountCreds: true,
-            allowedAyncGen: true,
-          };
-        })
-        .catch((e) => {
-          return { status: "failed", error: e };
-        });
-    });
+  return {};
 }
 export type { InitializeReturnType };
 export { initialize };

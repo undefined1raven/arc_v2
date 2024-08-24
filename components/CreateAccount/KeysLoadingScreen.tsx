@@ -1,9 +1,7 @@
 import { Image, StyleSheet, Platform, View, useWindowDimensions, Button, ActivityIndicator } from 'react-native';
 import { useEffect, useState } from 'react';
-import { Provider, useDispatch, useSelector } from 'react-redux';
 import RBox from '@/components/common/RBox';
 import { LinearGradient } from 'expo-linear-gradient';
-import globalStyles, { GlobalStyleType, updateGlobalStyle } from '@/hooks/globalStyles';
 import RLabel from '@/components/common/RLabel';
 import { setStatusBarBackgroundColor, StatusBar } from 'expo-status-bar';
 import Animated, { FadeInDown, Easing } from 'react-native-reanimated';
@@ -11,11 +9,13 @@ import { ARCLogoMini } from '@/components/common/deco/ARCLogoMini';
 import { ARCLogo } from '@/components/common/deco/ARCLogo';
 import store from '@/app/store';
 import { globalEnteringConfig } from '@/app/config/defaultTransitionConfig';
+import { useGlobalStyleStore } from '@/stores/globalStyles';
+import { useLoadingScreenMessageStore } from '@/stores/loadingScreenMessage';
 
 
 export default function KeysLoadingScreen({ navigation }) {
-    const globalStyle: GlobalStyleType = useSelector((store) => store.globalStyle);
-    const loadingScreenMessage: { message: string, initialTime: number } = useSelector((store) => store.loadingScreenMessage);
+    const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
+    const loadingScreenMessage = useLoadingScreenMessageStore((store) => store.loadingScreenMessage);
     const [elepsedTime, setElepsedTime] = useState('');
     store.subscribe(() => { });
     const [hasMounted, setHasMounted] = useState(false);

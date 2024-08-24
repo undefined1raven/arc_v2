@@ -2,6 +2,8 @@ import { defaultFeatureConfig } from "@/app/config/defaultFeatureConfig";
 
 function genenerateAccountCode() {
   return `
+    document.title = 'Account Gen Worker';
+
         async function exportCryptoKey(key) {
     const exported = await crypto.subtle.exportKey("jwk", key);
     return JSON.stringify(exported);
@@ -46,8 +48,8 @@ async function exportCryptoKey(key) {
 
 
  function encodeEncrypted(encrypted){
-     JSON.stringify(
-        stringToCharCodeArray(encrypted)
+     return JSON.stringify(
+        stringToCharCodeArray(JSON.stringify(encrypted))
       );
  }
  async function symmetricEncrypt(plaintext, key) {
@@ -93,11 +95,15 @@ async function exportCryptoKey(key) {
                     configPromises.push(symmetricEncrypt('${JSON.stringify(
                       defaultFeatureConfig.tess
                     )}', key));
+
                     Promise.all(configPromises).then((encryptedConfigs) => {
-                        const rawEncryptedArcConfig = encryptedConfigs[0];
+                        const arcFeatureConfig = JSON.stringify(encryptedConfigs[0]);
+                        const SIDFeatureConfig = JSON.stringify(encryptedConfigs[1]);
+                        const tessFeatureConfig = JSON.stringify(encryptedConfigs[2]);
+                        sendMessage(JSON.stringify({publicKey: exportedPublicKey, pk: exportedPrivateKey, taskID: 'accountGen', status: 'success', symkey: jwk, error: null, arcFeatureConfig: arcFeatureConfig, SIDFeatureConfig: SIDFeatureConfig, tessFeatureConfig: tessFeatureConfig}));
+                    }).catch(e => {
+                       sendMessage(JSON.stringify({taskID: 'accountGen', status: 'failed', error: 'failed to encrypt default feature config'}))
                     });
-                      // sendMessage(JSON.stringify({publicKey: exportedPublicKey, pk: exportedPrivateKey, taskID: 'accountGen', status: 'success', symkey: jwk, error: null, featureConfig: encryptedDefaultFeatureConfig}));
-                      // sendMessage(JSON.stringify({taskID: 'accountGen', status: 'failed', error: 'failed to encrypt default feature config'}))
                     
 
 

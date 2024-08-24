@@ -6,7 +6,6 @@ import globalStyles, {
   updateGlobalStyle,
 } from "@/hooks/globalStyles";
 import store from "@/app/store";
-import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { getVal } from "@/app/config/defaultTransitionConfig";

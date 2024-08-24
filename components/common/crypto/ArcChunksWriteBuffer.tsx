@@ -17,7 +17,7 @@ function ArcChunksWriteBuffer() {
         }
       }
     }
-    console.log(changedChunks.length, " | changes detected");
+    // console.log(changedChunks.length, " | changes detected");
   }, [ARC_ChunksBuffer]);
 
   return <></>;

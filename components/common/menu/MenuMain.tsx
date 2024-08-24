@@ -1,6 +1,5 @@
 import { View, ActivityIndicator, StyleSheet, Dimensions } from "react-native";
 import { useEffect, useState } from "react";
-import { Provider, useDispatch, useSelector } from "react-redux";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import RBox from "@/components/common/RBox";
 import globalStyles, {

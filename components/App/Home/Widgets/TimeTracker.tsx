@@ -1,6 +1,5 @@
 import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 import { useContext, useEffect, useState } from "react";
-import { Provider, useDispatch, useSelector } from "react-redux";
 import RBox from "@/components/common/RBox";
 import { LinearGradient } from "expo-linear-gradient";
 import globalStyles, {
@@ -20,7 +19,6 @@ import {
 import { widgetContainerConfig } from "../widgetContainerConfig";
 import { localStorageGet } from "@/fn/localStorage";
 import { useSQLiteContext } from "expo-sqlite";
-import { activeUserIDType } from "@/hooks/activeUserID";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import RButton from "@/components/common/RButton";
 import { BlurView } from "expo-blur";
@@ -34,23 +32,21 @@ import { AddIcon } from "@/components/common/deco/AddIcon";
 import { updateArcChunks } from "@/hooks/arcChunks";
 import { MaxActivitiesInArcChunk } from "@/app/config/chunking";
 import { useStore } from "@/stores/arcChunks";
-import { act } from "react-test-renderer";
 import { newChunkID } from "@/fn/newChunkID";
 import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
+import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 
 export default function TimeTracker({ navigation }) {
   store.subscribe(() => {});
+  
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
-
-  const activeUserID: activeUserIDType = useSelector(
-    (store) => store.activeUserID
-  );
+  const activeUserID = useLocalUserIDsStore(
+    (store) => store.loaclUserIDs
+  ).filter((elm) => elm.isActive === true)[0];
   const arcFeatureConfig: FeatureConfigArcType = useArcFeatureConfigStore(
     (store) => store.arcFeatureConfig
   );
-  const addChunkToArcChunks: Function = useDispatch(
-    (state) => state.addChunkToArcChunks
-  );
+
   const [hasMounted, setHasMounted] = useState(false);
   const [displayDurationLabel, setDisplayDurationLabel] = useState("");
   const [displayStartedAtLabel, setDisplayStartedAtLabel] = useState("");
@@ -115,19 +111,11 @@ export default function TimeTracker({ navigation }) {
     // ]);
   }, [currentActivities]);
 
-  useEffect(() => {
-    // setInterval(() => {
-    //   db.getFirstAsync(`SELECT * FROM userData WHERE userID = ?, key = "currentActivities"`, [activeUserID]).then((r) => {
-    //     console.log(r, "current activities 4");
-    //   });
-    // }, 1000);
-  }, []);
-
   function mutateCurrentActivities(value?: any) {
     db.runAsync(`UPDATE userData SET value = ? WHERE key = ? AND userID = ?`, [
       JSON.stringify(getVal(value, currentActivities)),
       "currentActivities",
-      activeUserID,
+      activeUserID.id,
     ]);
   }
 
@@ -195,12 +183,12 @@ export default function TimeTracker({ navigation }) {
                   (a, b) => b.tx - a.tx
                 );
                 if (sortedBuffer.length === 0) {
-                  addChunkToArcChunks({
-                    chunkID: newChunkID(),
-                    tx: Date.now(),
-                    activities: [currentDisplayedActivity],
-                    version: "0.1.1",
-                  });
+                  // addChunkToArcChunks({
+                  //   chunkID: newChunkID(),
+                  //   tx: Date.now(),
+                  //   activities: [currentDisplayedActivity],
+                  //   version: "0.1.1",
+                  // });
                 } else {
                   const lastChunk = sortedBuffer[0];
                   if (lastChunk.activities.length < MaxActivitiesInArcChunk) {
@@ -290,7 +278,7 @@ export default function TimeTracker({ navigation }) {
               align="left"
               fontSize={21}
               text={
-                arcFeatureConfig.tasks.find(
+                arcFeatureConfig?.tasks?.find(
                   (elm) => currentDisplayedActivity?.taskID === elm.taskID
                 )?.name
               }

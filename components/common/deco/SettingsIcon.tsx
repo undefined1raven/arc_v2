@@ -12,7 +12,6 @@ import Svg, {
   G,
   Mask,
 } from "react-native-svg";
-import { useSelector } from "react-redux";
 const SettingdIcon = (props: SvgProps) => {
   store.subscribe(() => {});
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);

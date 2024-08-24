@@ -1,7 +1,47 @@
 import themeColors from "@/app/config/colors";
+import { ColorValueHex } from "@/components/common/CommonTypes";
 import { create } from "zustand";
 
-const useGlobalStyleStore = create((set) => ({
+interface GlobalStyleType {
+  borderRadius: number;
+  borderRadius20: number;
+  borderRadius10: number;
+  largeDesktopFont: number;
+  veryLargeDesktopFont: number;
+  verySmallDesktopFont: number;
+  titleDesktopFont: number;
+  regularDesktopFont: number;
+  smallDesktopFont: number;
+  mediumDesktopFont: number;
+  footnoteDesktopFont: number;
+  veryLargeMobileFont: number;
+  largeMobileFont: number;
+  regularMobileFont: number;
+  mediumMobileFont: number;
+  smallMobileFont: number;
+  footnoteMobileFont: number;
+  theme: "light" | "dark";
+  androidRippleColor: ColorValueHex;
+  statusBarColor: ColorValueHex;
+  pageBackgroundColors: ColorValueHex[];
+  color: ColorValueHex;
+  colorAccent: ColorValueHex;
+  textColor: ColorValueHex;
+  textColorAccent: ColorValueHex;
+  textColorInactive: ColorValueHex;
+  colorInactive: ColorValueHex;
+  successColor: ColorValueHex;
+  successTextColor: "#005843";
+  errorColor: ColorValueHex;
+  errorTextColor: ColorValueHex;
+}
+
+interface GlobalStyleStore {
+  globalStyle: GlobalStyleType;
+  updateGlobalStyle: (newStyles: Partial<GlobalStyleType>) => void;
+}
+
+const useGlobalStyleStore = create<GlobalStyleStore>((set) => ({
   globalStyle: {
     borderRadius: 5,
     borderRadius20: 20,

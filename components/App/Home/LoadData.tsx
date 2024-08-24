@@ -52,11 +52,12 @@ function LoadData(props: LoadDataProps) {
       //     });
       // }
 
-      db.getAllAsync("SELECT * FROM ARC_Chunks WHERE userID = ? ORDER BY tx DESC", [
-        props.activeUserID,
-      ])
+      db.getAllAsync(
+        "SELECT * FROM ARC_Chunks WHERE userID = ? ORDER BY tx DESC",
+        [props.activeUserID]
+      )
         .then((res) => {
-          for(let ix = 0; ix < 2; ix++) {
+          for (let ix = 0; ix < 2; ix++) {
             appendDecryptionQueue(res[ix].id);
           }
         })
@@ -69,8 +70,9 @@ function LoadData(props: LoadDataProps) {
     <>
       <SingleEncrypt
         symsk={props.symsk}
-        plainText={JSON.stringify([])}
+        plainText={JSON.stringify(defaultFeatureConfig.arc)}
         onEncrypted={(e) => {
+          console.log(e.length, "dssx");
           setEncoded(e);
         }}
       ></SingleEncrypt>
@@ -79,7 +81,6 @@ function LoadData(props: LoadDataProps) {
           symsk={props.symsk}
           encryptedObj={encoded}
           onDecrypted={(e) => {
-            console.log(e);
           }}
         ></SingleDecrypt>
       ) : (

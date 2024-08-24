@@ -12,7 +12,6 @@ import Svg, {
   G,
   Rect,
 } from "react-native-svg";
-import { useSelector } from "react-redux";
 const ThreeDotsIcon = (props: SvgProps) => {
   store.subscribe(() => {});
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);

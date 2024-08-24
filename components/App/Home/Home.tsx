@@ -19,7 +19,6 @@ import React, {
   useState,
 } from "react";
 import RButton from "@/components/common/RButton";
-import { Provider, useDispatch, useSelector } from "react-redux";
 import RBox from "@/components/common/RBox";
 import { LinearGradient } from "expo-linear-gradient";
 import globalStyles, {
@@ -56,6 +55,8 @@ import { ArcChunksBuffer } from "@/components/common/crypto/ArcChunksBuffer";
 import { ArcChunksWriteBuffer } from "@/components/common/crypto/ArcChunksWriteBuffer";
 import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
+import { SingleDecrypt } from "@/components/common/crypto/SingleDecrypt";
+import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 
 type HomeProps = { onRequestUserIDs: Function };
 export default function Home({ navigation, onRequestUserIDs }) {
@@ -69,8 +70,8 @@ export default function Home({ navigation, onRequestUserIDs }) {
   const arcFeatureConfig: FeatureConfigType = useArcFeatureConfigStore(
     (store) => store.arcFeatureConfig
   );
-  const localUserIDsActual: localUsersType = useSelector(
-    (store) => store.localUserIDs
+  const localUserIDsActual = useLocalUserIDsStore(
+    (store) => store.loaclUserIDs
   );
 
   const [hasMounted, setHasMounted] = useState(false);
@@ -108,27 +109,24 @@ export default function Home({ navigation, onRequestUserIDs }) {
   }, []);
 
   useEffect(() => {
-    console.log(arcFeatureConfig);
+    console.log(arcFeatureConfig, "xxsw");
   }, [arcFeatureConfig]);
-
+  function charCodeArrayToString(charCodeArray) {
+    let str = "";
+    for (let i = 0; i < charCodeArray.length; i++) {
+      str += String.fromCharCode(charCodeArray[i]);
+    }
+    return str;
+  }
   useEffect(() => {
     store.dispatch(updateActiveUser(activeUserID));
     function prepareFeatureConfigDecryption() {
-      const rawfeatureConfig = db.getFirstSync(
-        `SELECT featureConfig, id FROM users WHERE id='${activeUserID}'`
-      );
-      if (rawfeatureConfig === null) {
-        // onRequestUserIDs();
-      }
-      const parsedFeatureConfig = JSON.parse(
-        jsesc.default(rawfeatureConfig, { json: true })
-      );
-      if (rawfeatureConfig === null) {
-        reloadAppAsync();
-      }
-      setEncryptedFeatureConfig(parsedFeatureConfig.featureConfig);
       const symskLocal = SecureStore.getItem(`${activeUserID}-symsk`) as string;
       setUserSymsk(symskLocal);
+      const rawfeatureConfig = db.getFirstSync(
+        `SELECT arcFeatureConfig, tessFeatureConfig, SIDFeatureConfig FROM users WHERE id='${activeUserID}'`
+      );
+      setEncryptedFeatureConfig(rawfeatureConfig.arcFeatureConfig);
     }
     if (activeUserID !== null) {
       prepareFeatureConfigDecryption();
@@ -150,18 +148,19 @@ export default function Home({ navigation, onRequestUserIDs }) {
         symsk={userSymsk}
         activeUserID={activeUserID}
       ></ArcChunksBuffer>
-      <FeatureConfigDecryptor
-        onError={() => {}}
-        onDecryption={(e: string) => {
-          console.log(decryptedFC);
+      <SingleDecrypt
+        onDecrypted={(e) => {
+          console.log("fuck yeah");
           const decryptedFC = JSON.parse(e);
           updateArcFeatureConfig(decryptedFC.arc);
-          store.dispatch(updateArcFeatureConfig(decryptedFC.arc));
           setHasMounted(true);
         }}
-        encryptedFeatureConfig={encryptedFeatureConfig}
+        onError={(e) => {
+          console.log(e);
+        }}
+        encryptedObj={encryptedFeatureConfig}
         symsk={userSymsk}
-      ></FeatureConfigDecryptor>
+      ></SingleDecrypt>
       <LoadData activeUserID={activeUserID} symsk={userSymsk}></LoadData>
       <StatusBar backgroundColor={globalStyle.statusBarColor}></StatusBar>
       <LinearGradient
@@ -220,7 +219,7 @@ export default function Home({ navigation, onRequestUserIDs }) {
             figmaImport={{
               mobile: { left: 0, width: "100%", height: 50, top: 330 },
             }}
-            text="Decrypting"
+            text="[Decrypting]"
           ></RLabel>
           <RBox
             figmaImport={{

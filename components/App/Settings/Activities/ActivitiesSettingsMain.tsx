@@ -1,6 +1,5 @@
 import { View, ActivityIndicator } from "react-native";
 import { useEffect, useState } from "react";
-import { Provider, useDispatch, useSelector } from "react-redux";
 import RBox from "@/components/common/RBox";
 import globalStyles, {
   GlobalStyleType,

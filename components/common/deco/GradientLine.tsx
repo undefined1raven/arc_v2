@@ -1,16 +1,22 @@
-import * as React from "react"
-import Svg, { SvgProps, Path, Rect, RadialGradient, Stop, Defs } from "react-native-svg"
+import * as React from "react";
+import Svg, {
+  SvgProps,
+  Path,
+  Rect,
+  RadialGradient,
+  Stop,
+  Defs,
+} from "react-native-svg";
 import store from "@/app/store";
 import { GlobalStyleType } from "@/hooks/globalStyles";
-import { useSelector } from "react-redux";
-
+import { useGlobalStyleStore } from "@/stores/globalStyles";
 
 const SvgComponent = (props: SvgProps) => {
-  store.subscribe(() => { })
-  const globalStyle: GlobalStyleType = useSelector(store => store.globalStyle);
+  store.subscribe(() => {});
+  const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const colorActual = props.color ? props.color : globalStyle.color;
 
-  (<Svg
+  <Svg
     width="100%"
     height="100%"
     viewBox="0 0 360 1"
@@ -32,7 +38,7 @@ const SvgComponent = (props: SvgProps) => {
         <Stop offset={1} stopColor={colorActual} stopOpacity={0.15} />
       </RadialGradient>
     </Defs>
-  </Svg>)
-}
+  </Svg>;
+};
 
-export { SvgComponent as GradientLine }
+export { SvgComponent as GradientLine };
