@@ -3,6 +3,7 @@ import { useStore } from "@/stores/arcChunks";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useRef, useState, version } from "react";
 import { SingleDecrypt } from "./SingleDecrypt";
+import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 
 type ArcChunksBufferProps = {
   symsk: string | null;
@@ -24,15 +25,41 @@ function ArcChunksBuffer(props: ArcChunksBufferProps) {
     return array.filter((item, index) => array.indexOf(item) === index);
   }
   const ARC_ChunksBufferRef = useRef(ARC_ChunksBuffer);
+  const arcFeatureConfig = useArcFeatureConfigStore(
+    (state) => state.arcFeatureConfig
+  );
   useEffect(() => {
     if (props.symsk !== null && props.activeUserID !== null) {
       setIsReady(true);
     }
   }, [props.symsk, props.activeUserID]);
 
+  useEffect(() => {
+    if (ARC_ChunksBuffer.length > 0) {
+      const allActivities = [];
+      for (let ix = 0; ix < ARC_ChunksBuffer.length; ix++) {
+        allActivities.push(...ARC_ChunksBuffer[ix].activities);
+      }
+      console.log(
+        allActivities
+          .sort((a, b) => {
+            return b.tx - a.tx;
+          })
+          .map(
+            (activity) =>
+              arcFeatureConfig?.tasks.find(
+                (elm) => elm.taskID === activity.taskID
+              )?.name
+          )
+      );
+      // console.log(allActivities.map((activity) => activity.taskID));
+    }
+  }),
+    [ARC_ChunksBuffer];
+
   function updateEncryptedArcChunks(sqlReadyIDs: string[], append: boolean) {
     db.getAllAsync(
-      `SELECT * FROM ARC_Chunks WHERE userID = ? AND id IN ("${sqlReadyIDs}") ORDER BY tx DESC`,
+      `SELECT * FROM arcChunks WHERE userID = ? AND id IN ("${sqlReadyIDs}") ORDER BY tx DESC`,
       [props.activeUserID]
     )
       .then((res) => {
@@ -86,10 +113,11 @@ function ArcChunksBuffer(props: ArcChunksBufferProps) {
             ) {
               removeChunkFromDecryptionQueue(chunk.id);
               addChunkToArcChunks({
-                chunkID: chunk.id,
+                id: chunk.id,
                 tx: chunk.tx,
                 activities: e,
                 version: chunk.version,
+                userID: props.activeUserID,
               });
             }
           }}

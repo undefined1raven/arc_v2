@@ -39,13 +39,11 @@ function LoadData(props: LoadDataProps) {
       // };
       // const insertString = getInsertStringFromObject(chunkDefault);
       // if (insertString.error === null && insertString.queryString) {
-      //   console.log("here");
       //   db.runAsync(
       //     `INSERT INTO ARC_Chunks ${insertString.queryString}`,
       //     insertString.values
       //   )
       //     .then(() => {
-      //       console.log("inserted");
       //     })
       //     .catch((e) => {
       //       console.log(e)

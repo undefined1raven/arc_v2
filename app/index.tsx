@@ -49,6 +49,7 @@ import { FeatureConfigDecryptor } from "@/components/App/decryptors/FetureConfig
 import { stringToCharCodeArray } from "@/fn/stringToCharCode";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { InitializeApp } from "@/components/App/logic/InitializeApp";
+import { LoadData } from "@/components/App/Home/LoadData";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {

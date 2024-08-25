@@ -89,7 +89,7 @@ export default function OTSThree({ navigation }) {
           const placeholders = keys.map((_, i) => `?`).join(",");
           const aid = Crypto.randomUUID();
           db.runAsync(
-            `INSERT INTO users (${keys.join(",")}) VALUES (${placeholders})`,
+            `INSERT OR REPLACE INTO users (${keys.join(",")}) VALUES (${placeholders})`,
             Object.values(res)
           )
             .then(async (res) => {

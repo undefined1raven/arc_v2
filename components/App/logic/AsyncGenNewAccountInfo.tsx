@@ -1,5 +1,6 @@
 import { defaultFeatureConfig } from "@/app/config/defaultFeatureConfig";
 import { BackgroundTaskRunner } from "@/components/common/BackgroundTaskRunner";
+import { SingleDecrypt } from "@/components/common/crypto/SingleDecrypt";
 import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
 import { genenerateAccountCode } from "@/fn/generateAccountCode";
 import { setTempCredentials } from "@/fn/setTempCredentials";
@@ -90,7 +91,8 @@ function AsyncGenNewAccountInfo() {
           tessFeatureConfig: tessEncryptedFeatureConfig,
           SIDFeatureConfig: sidEncryptedFeatureConfig,
         }).then((res) => {
-          console.log("done");
+          // console.log(res);
+          // console.log(db.getFirstSync(`SELECT * FROM users WHERE id='temp'`));
         });
       }
       setCompletedFeatureConfigEncryption(true);

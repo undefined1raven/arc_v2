@@ -48,7 +48,6 @@ async function setTempCredentials(
       "0.1.0"
     )
     .then((res) => {
-      console.log(res);
       return { error: null, status: "success" };
     })
     .catch((e) => {

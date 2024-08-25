@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BackgroundTaskRunner } from "../BackgroundTaskRunner";
 import { decrypt } from "@/fn/crypto/decrypt";
+import { View } from "react-native";
 
 type SingleDecryptProps = {
   encryptedObj: string | null;
@@ -22,27 +23,29 @@ function SingleDecrypt(props: SingleDecryptProps) {
   }, [props.encryptedObj, props.symsk]);
 
   return isReady ? (
-    <BackgroundTaskRunner
-      code={decrypt(props.symsk as string, props.encryptedObj)}
-      tx={Date.now()}
-      messageHandler={(e) => {
-        const response = JSON.parse(e.nativeEvent.data);
-        if (response.status === "failed") {
-          if (props.onError) {
-            props.onError({ status: "failed", error: response.error });
-          }
-        } else {
-          try {
-            const decodedDecryptedData = JSON.parse(response.payload);
-            props.onDecrypted(decodedDecryptedData);
-          } catch (e) {
+    <View style={{ opacity: 0 }}>
+      <BackgroundTaskRunner
+        code={decrypt(props.symsk as string, props.encryptedObj)}
+        tx={Date.now()}
+        messageHandler={(e) => {
+          const response = JSON.parse(e.nativeEvent.data);
+          if (response.status === "failed") {
             if (props.onError) {
-              props.onError({ status: "failed", error: "Decryption failed" });
+              props.onError({ status: "failed", error: response.error });
+            }
+          } else {
+            try {
+              const decodedDecryptedData = JSON.parse(response.payload);
+              props.onDecrypted(decodedDecryptedData);
+            } catch (e) {
+              if (props.onError) {
+                props.onError({ status: "failed", error: "Decryption failed" });
+              }
             }
           }
-        }
-      }}
-    ></BackgroundTaskRunner>
+        }}
+      ></BackgroundTaskRunner>
+    </View>
   ) : (
     <></>
   );

@@ -84,6 +84,7 @@ export default function CreateAccountOffline({ navigation }) {
             ) {
               res = { ...res, id: aid };
               const keys = Object.keys(res);
+              console.log(res.id);
               const placeholders = keys.map((_, i) => `?`).join(",");
               db.runAsync(
                 `INSERT INTO users (${keys.join(

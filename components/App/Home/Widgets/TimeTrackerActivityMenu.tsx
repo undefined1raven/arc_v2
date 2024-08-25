@@ -48,6 +48,8 @@ import { getCurrentActivities } from "@/fn/dbUtils/getCurrentActivities";
 import { useMenuConfigStore } from "@/stores/mainMenu";
 import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
+import { randomUUID } from "expo-crypto";
+import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
 
 type TimeTrackingActivityMenuProps = {
   onBackButton: Function;
@@ -56,12 +58,8 @@ type TimeTrackingActivityMenuProps = {
 export default function TimeTrackingActivityMenu(
   props: TimeTrackingActivityMenuProps
 ) {
-  store.subscribe(() => {});
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
-
-  const activeUserID = useLocalUserIDsStore(
-    (store) => store.loaclUserIDs
-  ).filter((elm) => elm.isActive)[0].id;
+  const activeUserID = useLocalUserIDsStore((store) => store.getActiveUserID());
 
   const hideMainMenu = useMenuConfigStore((store) => store.hideMenu);
   const showMainMenu = useMenuConfigStore((store) => store.showMenu);
@@ -70,11 +68,19 @@ export default function TimeTrackingActivityMenu(
   const arcFeatureConfig: FeatureConfigArcType = useArcFeatureConfigStore(
     (store) => store.arcFeatureConfig
   );
-  const [hasMounted, setHasMounted] = useState(false);
-  const [currentActivity, setCurrentActivity] = useState<null | {
-    activityID: string;
-    tx: number;
-  }>(null);
+
+  const {
+    currentActivities: arcCurrentActivities,
+    ini: arcHasIniCurrentActivities,
+    setCurrentActivities: setArcCurrentActivities,
+    setIni: setArcCurrentActivitiesIni,
+  } = useArcCurrentActivitiesStore((store) => ({
+    currentActivities: store.currentActivities,
+    ini: store.ini,
+    setCurrentActivities: store.setCurrentActivities,
+    setIni: store.setIni,
+  }));
+
   const timeTrackingContainerConfig = {
     containerHeight: 163,
     containerWidth: 354,
@@ -95,65 +101,14 @@ export default function TimeTrackingActivityMenu(
       return true;
     });
     setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
-    localStorageGet(db, activeUserID, "currentActivity")
-      .then((r) => {
-        const { status, payload } = r;
-        if (status === "success") {
-          setCurrentActivity(payload);
-          setHasMounted(true);
-        }
-      })
-      .catch((e) => {});
   }, []);
 
-  async function addActivityToCurrentActivities(taskID: string) {
-    const currentActivities: UserDataValues["currentActivities"] =
-      await getCurrentActivities();
-    if (currentActivities === null || currentActivities.length === 0) {
-      const newCurrentActivities: UserDataValues["currentActivities"] = [
-        { taskID: taskID, tx: Date.now() },
-      ];
-      await db
-        .runAsync(
-          `INSERT OR REPLACE INTO userData (value, userID, key) VALUES (?, ?, ?)`,
-          [
-            JSON.stringify(newCurrentActivities),
-            activeUserID,
-            "currentActivities",
-          ]
-        )
-        .then((r) => {
-          db.getFirstAsync(`SELECT * FROM userData WHERE userID=? AND key=?`, [
-            activeUserID,
-            "currentActivities",
-          ])
-            .then((r) => {})
-            .catch((e) => {
-              console.log(e);
-            });
-          onBackTrigger();
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    } else {
-      if (currentActivities.find((elm) => elm.taskID === taskID)) {
-        return;
-      }
-      currentActivities.push({ taskID: taskID, tx: Date.now() });
-      await db
-        .runAsync(`UPDATE userData SET value=? WHERE userID=? AND key=?`, [
-          JSON.stringify(currentActivities),
-          activeUserID,
-          "currentActivities",
-        ])
-        .then((r) => {
-          onBackTrigger();
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    }
+  function addActivityToCurrentActivities(taskID: string) {
+    setArcCurrentActivities([
+      ...arcCurrentActivities,
+      { taskID: taskID, tx: Date.now() },
+    ]);
+    onBackTrigger();
   }
 
   const headerContainerConfig = { containerHeight: 34, containerWidth: 350 };

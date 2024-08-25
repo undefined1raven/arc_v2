@@ -1,3 +1,3 @@
-const MaxActivitiesInArcChunk = 15;
+const MaxActivitiesInArcChunk = 5;
 
 export { MaxActivitiesInArcChunk };

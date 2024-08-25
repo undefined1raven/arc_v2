@@ -9,6 +9,7 @@ import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 type GetLocalUsersSig = {
   status: "failed" | "success";
   error: null | string;
+  users?: LocalUserIDsType[];
 };
 
 async function getLocalUsers(): Promise<GetLocalUsersSig> {
@@ -21,6 +22,9 @@ async function getLocalUsers(): Promise<GetLocalUsersSig> {
       const activeUserID = getActiveUserID();
       for (let ix = 0; ix < result.length; ix++) {
         const userID = result[ix].id;
+        if (userID === "temp") {
+          continue;
+        }
         const splitByDot = userID.split(".");
         if (splitByDot.length === 2 && splitByDot[1] === "local") {
           ///local accounts
@@ -50,7 +54,7 @@ async function getLocalUsers(): Promise<GetLocalUsersSig> {
         }
       }
       updateLocalUsers(users);
-      return { status: "success", error: null };
+      return { status: "success", error: null, users: users };
     })
     .catch((error) => {
       return { status: "failed", error: "GLU-32" };

@@ -10,9 +10,10 @@ async function checkTables(): Promise<CheckTablesReturnSig> {
   const db = await SQLite.openDatabaseAsync("localCache");
   // db.runAsync("DROP TABLE users");
   // db.runAsync("DROP TABLE userData");
+  // db.runAsync("DROP TABLE arcChunks");
   var promiseArray: Promise<any>[] = [];
   const usersTablePromise = db.runAsync(
-    "CREATE TABLE IF NOT EXISTS users (id TEXT NOT NULL PRIMARY KEY, signupTime NUMBER NOT NULL, publicKey TEXT NOT NULL, passwordHash TEXT, emailAddress TEXT, passkeys TEXT, PIKBackup TEXT, PSKBackup TEXT, RCKBackup TEXT NOT NULL, trustedDevices TEXT, oauthState TEXT, securityLogs TEXT, arcFeatureConfig TEXT NOT NULL, SIDFeatureConfig TEXT NOT NULL, tessFeatureConfig TEXT NOT NULL, version TEXT NOT NULL);"
+    "CREATE TABLE IF NOT EXISTS users (id TEXT NOT NULL PRIMARY KEY, signupTime NUMBER NOT NULL, publicKey TEXT NOT NULL, passwordHash TEXT, emailAddress TEXT, passkeys TEXT, PIKBackup TEXT, PSKBackup TEXT, RCKBackup TEXT, trustedDevices TEXT, oauthState TEXT, securityLogs TEXT, arcFeatureConfig TEXT NOT NULL, SIDFeatureConfig TEXT NOT NULL, tessFeatureConfig TEXT NOT NULL, version TEXT NOT NULL);"
   );
   promiseArray.push(usersTablePromise);
   const userDataTablePromise = db.runAsync(

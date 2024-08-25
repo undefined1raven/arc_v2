@@ -4,7 +4,7 @@ type arcChunkStore = {
   chunkID: string;
   activities: { taskID: string; tx: number }[];
   tx: number;
-  version: '0.1.1';
+  version: "0.1.1";
 }[];
 const useStore = create((set) => ({
   arcChunks: [],
@@ -26,10 +26,11 @@ const useStore = create((set) => ({
     });
   },
   addChunkToArcChunks: (chunk: {
-    chunkID: string;
+    id: string;
     tx: number;
     activities: any[];
-    version: '0.1.1';
+    version: "0.1.1";
+    userID: string;
   }) => {
     set((state) => {
       return { arcChunks: [...state.arcChunks, chunk] };
@@ -41,7 +42,8 @@ const useStore = create((set) => ({
   ) =>
     set((state) => {
       const newArcChunks = state.arcChunks.map((arcChunk) => {
-        if (arcChunk.chunkID === id) {
+        console.log(activity, "activity");
+        if (arcChunk.id === id) {
           return {
             ...arcChunk,
             activities: [...arcChunk.activities, activity],
