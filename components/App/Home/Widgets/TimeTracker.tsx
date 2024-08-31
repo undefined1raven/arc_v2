@@ -36,6 +36,7 @@ import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
 import { randomUUID } from "expo-crypto";
+import { useCurrentArcChunkStore } from "@/stores/currentArcChunk";
 
 export default function TimeTracker() {
   store.subscribe(() => {});
@@ -59,9 +60,7 @@ export default function TimeTracker() {
   const arcHasIniCurrentActivities = useArcCurrentActivitiesStore(
     (store) => store.ini
   );
-  const setArcCurrentActivities = useArcCurrentActivitiesStore(
-    (store) => store.setCurrentActivities
-  );
+
   const setArcCurrentActivitiesIni = useArcCurrentActivitiesStore(
     (store) => store.setIni
   );
@@ -77,7 +76,7 @@ export default function TimeTracker() {
   const addActivityToArcChunk = useStore(
     (state) => state.addActivityToArcChunk
   );
-
+  const currentArcChunkAPI = useCurrentArcChunkStore();
   useEffect(() => {
     if (currentDisplayedActivity !== null) {
       setDisplayStartedAtLabel(timeOfDayFromUnix(currentDisplayedActivity.tx));
@@ -93,10 +92,14 @@ export default function TimeTracker() {
     }
   }, [currentDisplayedActivity]);
 
+
+  useEffect(() => {
+    console.log(currentArcChunkAPI.chunk?.activities)
+  }, [currentArcChunkAPI])
+
   useEffect(() => {
     if (arcHasIniCurrentActivities === false) {
       getCurrentActivities().then((activities) => {
-        setArcCurrentActivities(activities);
         setArcCurrentActivitiesIni(true);
       });
     } else {
@@ -184,41 +187,7 @@ export default function TimeTracker() {
                 mobile: { top: 109, left: 5, width: 344, height: 48 },
               }}
               onClick={() => {
-                const sortedBuffer = ARC_ChunksBuffer.sort(
-                  (a, b) => b.tx - a.tx
-                );
-                const lastChunk = sortedBuffer[0];
-                if (lastChunk.activities.length < MaxActivitiesInArcChunk) {
-                  console.log(currentDisplayedActivity?.taskID);
-                  addActivityToArcChunk(lastChunk.id, {
-                    taskID: currentDisplayedActivity?.taskID,
-                    tx: currentDisplayedActivity?.tx,
-                  });
-                  setArcCurrentActivities(
-                    currentActivities.filter(
-                      (elm) => elm.taskID !== currentDisplayedActivity?.taskID
-                    )
-                  );
-                } else {
-                  const newChunk = {
-                    id: newChunkID(),
-                    tx: Date.now(),
-                    activities: [
-                      {
-                        taskID: currentDisplayedActivity?.taskID,
-                        tx: currentDisplayedActivity?.tx,
-                      },
-                    ],
-                    version: "0.1.1",
-                    userID: activeUserID,
-                  };
-                  addChunkToArcChunks(newChunk);
-                  setArcCurrentActivities(
-                    currentActivities.filter(
-                      (elm) => elm.taskID !== currentDisplayedActivity?.taskID
-                    )
-                  );
-                }
+
               }}
               mobileFontSize={20}
               label="Done"

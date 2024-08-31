@@ -55,6 +55,7 @@ type RButtonProps = {
   transitions?: string | object;
   isSelected?: boolean;
   onLongPress?: Function;
+  onLayout?: Function;
 };
 
 export default function RBox(props: RButtonProps) {
@@ -151,6 +152,9 @@ export default function RBox(props: RButtonProps) {
 
   return (
     <Animated.View
+      onLayout={(e) => {
+        props.onLayout?.apply(null, [e]);
+      }}
       // entering={globalEnteringConfig(getVal(props.transitionDuration, 150), undefined, getVal(props.transitionIndex, 0))}
       ref={buttonRef}
       style={{

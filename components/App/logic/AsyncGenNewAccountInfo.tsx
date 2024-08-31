@@ -69,10 +69,10 @@ function AsyncGenNewAccountInfo() {
   const db = useSQLiteContext();
   const hasCheckedTables = useHasCheckedTablesStore().hasCheckedTables;
   useEffect(() => {
-    updateLoadingScreenMessage({
-      initialTime: Date.now(),
-      message: "Generating Secure Keys",
-    });
+    // updateLoadingScreenMessage({
+    //   initialTime: Date.now(),
+    //   message: "Generating Secure Keys",
+    // });
   }, []);
 
   useEffect(() => {

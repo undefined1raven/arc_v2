@@ -5,7 +5,7 @@ type UserDataValues = {
   currentActivities: { taskID: string; tx: number }[];
   currentMood: { moodID: string; tx: number };
 };
- type ArcTaskLogType = {
+type ArcTaskLogType = {
   taskID: string;
   tx: number;
 };
@@ -107,6 +107,7 @@ type ARC_ChunksType = {
   encryptedContent: string;
   tx: number;
   version: "0.1.1";
+  isComplete: boolean;
 };
 
 type Tess_ChunksType = {
@@ -115,6 +116,7 @@ type Tess_ChunksType = {
   encryptedContent: string;
   tx: number;
   version: "0.1.1";
+  isComplete: boolean;
 };
 
 type SID_ChunksType = {

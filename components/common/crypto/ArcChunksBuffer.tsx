@@ -4,7 +4,9 @@ import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useRef, useState, version } from "react";
 import { SingleDecrypt } from "./SingleDecrypt";
 import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
-
+import { encrypt } from "@/fn/crypto/encrypt";
+import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
+import { useCurrentArcChunkStore } from "@/stores/currentArcChunk";
 type ArcChunksBufferProps = {
   symsk: string | null;
   activeUserID: string | null;
@@ -16,11 +18,17 @@ function ArcChunksBuffer(props: ArcChunksBufferProps) {
   >([]);
   const db = useSQLiteContext();
   const decryptionQueue = useStore((state) => state.decryptionQueue);
+  const [initialLoadFlag, setInitialLoadFlag] = useState<boolean>(false);
   const ARC_ChunksBuffer = useStore((state) => state.arcChunks);
+  const ARC_ChunksBufferIni = useStore<boolean>((state) => state.ini);
+  const ARC_ChunksBufferSetIni = useStore<(ini: boolean) => void>(
+    (state) => state.setIni
+  );
   const addChunkToArcChunks = useStore((state) => state.addChunkToArcChunks);
   const removeChunkFromDecryptionQueue = useStore(
     (state) => state.removeChunkFromDecryptionQueue
   );
+  const arcChunkApi = useStore();
   function deduplicateArray(array: string[]) {
     return array.filter((item, index) => array.indexOf(item) === index);
   }
@@ -28,6 +36,23 @@ function ArcChunksBuffer(props: ArcChunksBufferProps) {
   const arcFeatureConfig = useArcFeatureConfigStore(
     (state) => state.arcFeatureConfig
   );
+
+  const currentArcChunkAPI = useCurrentArcChunkStore();
+
+  useEffect(() => {
+    if (
+      decryptionQueue.length === 0 &&
+      initialLoadFlag === true &&
+      ARC_ChunksBufferIni === false
+    ) {
+      setInitialLoadFlag(false);
+      ARC_ChunksBufferSetIni(true);
+    }
+    if (decryptionQueue.length > 0 && ARC_ChunksBuffer.length === 0) {
+      setInitialLoadFlag(true);
+    }
+  }, [decryptionQueue]);
+
   useEffect(() => {
     if (props.symsk !== null && props.activeUserID !== null) {
       setIsReady(true);
@@ -40,6 +65,20 @@ function ArcChunksBuffer(props: ArcChunksBufferProps) {
       for (let ix = 0; ix < ARC_ChunksBuffer.length; ix++) {
         allActivities.push(...ARC_ChunksBuffer[ix].activities);
       }
+      console.log(
+        JSON.stringify(
+          db
+            .getAllSync(
+              "SELECT * FROM arcChunks WHERE userID = ? ORDER BY tx DESC",
+              [props.activeUserID]
+            )
+            .sort((a, b) => {
+              return b.tx - a.tx;
+            })
+            .map((chunk) => chunk.encryptedContent.toString().length)
+        ),
+        "arcChunks"
+      );
       console.log(
         allActivities
           .sort((a, b) => {
@@ -75,6 +114,11 @@ function ArcChunksBuffer(props: ArcChunksBufferProps) {
         console.log(e);
       });
   }
+  const arcCurrentActivitiesAPI = useArcCurrentActivitiesStore();
+
+  useEffect(() => {
+    console.log("xx: ", arcCurrentActivitiesAPI.currentActivities);
+  }, [arcCurrentActivitiesAPI]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -97,7 +141,6 @@ function ArcChunksBuffer(props: ArcChunksBufferProps) {
       return prev.filter((chunk) => decryptionQueue.includes(chunk.id));
     });
   }, [decryptionQueue]);
-
   return isReady ? (
     encryptedArcChunks.map((chunk) => {
       return (
@@ -112,13 +155,9 @@ function ArcChunksBuffer(props: ArcChunksBufferProps) {
               ) === undefined
             ) {
               removeChunkFromDecryptionQueue(chunk.id);
-              addChunkToArcChunks({
-                id: chunk.id,
-                tx: chunk.tx,
-                activities: e,
-                version: chunk.version,
-                userID: props.activeUserID,
-              });
+              for (let ix = 0; ix < e.length; ix++) {
+                arcCurrentActivitiesAPI.appendCurrentActivities(e[ix]);
+              }
             }
           }}
           onError={(e) => {

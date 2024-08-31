@@ -50,6 +50,7 @@ import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 import { randomUUID } from "expo-crypto";
 import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
+import { useCurrentArcChunkStore } from "@/stores/currentArcChunk";
 
 type TimeTrackingActivityMenuProps = {
   onBackButton: Function;
@@ -68,6 +69,10 @@ export default function TimeTrackingActivityMenu(
   const arcFeatureConfig: FeatureConfigArcType = useArcFeatureConfigStore(
     (store) => store.arcFeatureConfig
   );
+
+  useEffect(() => {
+    console.log(arcFeatureConfig.tasks.map((task) => task.taskID));
+  }, [arcFeatureConfig.tasks]);
 
   const {
     currentActivities: arcCurrentActivities,
@@ -102,13 +107,15 @@ export default function TimeTrackingActivityMenu(
     });
     setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
   }, []);
+  const currentChunkAPI = useCurrentArcChunkStore();
 
   function addActivityToCurrentActivities(taskID: string) {
+    currentChunkAPI.appendActivity({ taskID: taskID, tx: Date.now() });
     setArcCurrentActivities([
       ...arcCurrentActivities,
       { taskID: taskID, tx: Date.now() },
     ]);
-    onBackTrigger();
+    // onBackTrigger();
   }
 
   const headerContainerConfig = { containerHeight: 34, containerWidth: 350 };
@@ -128,7 +135,9 @@ export default function TimeTrackingActivityMenu(
         }}
       >
         <RButton
-          onClick={() => addActivityToCurrentActivities(item.taskID)}
+          onClick={() => {
+            addActivityToCurrentActivities(item.taskID);
+          }}
           width="100%"
           height="100%"
           verticalAlign="center"

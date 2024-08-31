@@ -49,7 +49,7 @@ import { FeatureConfigDecryptor } from "@/components/App/decryptors/FetureConfig
 import { stringToCharCodeArray } from "@/fn/stringToCharCode";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { InitializeApp } from "@/components/App/logic/InitializeApp";
-import { LoadData } from "@/components/App/Home/LoadData";
+import SettingsMainMenu from "@/components/App/Settings/SettingsMainMenu";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -80,7 +80,7 @@ export default function App() {
       <InitializeApp></InitializeApp>
       <Stack.Navigator
         screenOptions={{
-          contentStyle: { backgroundColor: "#FF0000" },
+          contentStyle: { backgroundColor: "#000000" },
           headerShown: false,
         }}
       >
@@ -119,6 +119,10 @@ export default function App() {
         <Stack.Screen
           name="createAccountOffline"
           component={CreateAccountOffline}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="SettingsMain"
+          component={SettingsMainMenu}
         ></Stack.Screen>
       </Stack.Navigator>
     </SQLiteProvider>

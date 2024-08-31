@@ -27,11 +27,15 @@ import { MenuConfigType } from "@/hooks/menuConfig";
 import { useSQLiteContext } from "expo-sqlite";
 import * as SecureStore from "expo-secure-store";
 import { useMenuConfigStore } from "../../../stores/mainMenu";
+import { useNavigation } from "@react-navigation/native";
+import { useNavigatorStore } from "@/hooks/navigator";
+
 export default function MenuMain() {
-  
+  const navigation = useNavigation();
+
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const menuConfig = useMenuConfigStore((store) => store.menuConfig);
-
+  const navigator = useNavigatorStore((store) => store.navigator);
   store.subscribe(() => {});
   const [hasMounted, setHasMounted] = useState(false);
   const containerConfig = { containerHeight: 46, containerWidth: 354 };
@@ -89,15 +93,9 @@ export default function MenuMain() {
         </RButton>
         <RButton
           onClick={() => {
-            store.dispatch(
-              updateGlobalStyle({
-                ...themeColors[
-                  Object.keys(themeColors)[
-                    getRandomInt(0, Object.keys(themeColors).length - 1)
-                  ]
-                ],
-              })
-            );
+            if (navigator !== null) {
+              navigator.navigate("SettingsMain", { name: "SettingsMain" });
+            }
           }}
           figmaImportConfig={containerConfig}
           figmaImport={{

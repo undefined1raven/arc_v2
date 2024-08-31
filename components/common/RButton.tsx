@@ -7,7 +7,6 @@ import {
 } from "react-native";
 import { AlignType, ColorValueHex, FontSize } from "./CommonTypes";
 import { useEffect, useRef, useState } from "react";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import FigmaImporter from "../../fn/figmaImporter";
 import FigmaImportConfig from "../../fn/FigmaImportConfig";
 import Animated, {
@@ -53,7 +52,7 @@ type RButtonProps = {
   mobileFontSize?: number | FontSize;
   align?: AlignType;
   opacity?: number;
-  style?: object;
+  style?: StyleSheet;
   blur?: number;
   borderRadius?: number;
   alignPadding?: number | string;
@@ -67,6 +66,8 @@ type RButtonProps = {
   transitions?: string | object;
   isSelected?: boolean;
   onLongPress?: Function;
+  onTouchMove?: Function;
+  onLayout?: Function;
 };
 
 export default function RButton(props: RButtonProps) {
@@ -83,9 +84,7 @@ export default function RButton(props: RButtonProps) {
     bottom: { top: "100%", transform: "translateY(-10dp)" },
   };
   store.subscribe(() => {});
-  const globalStyle = useGlobalStyleStore(
-    (store) => store.globalStyle
-  );
+  const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
 
   const [isMouseHovering, setIsMouseHovering] = useState(false);
   const alignToPadding = {
@@ -187,6 +186,9 @@ export default function RButton(props: RButtonProps) {
 
   return (
     <View
+      onLayout={(e) => {
+        props.onLayout?.apply(null, [e]);
+      }}
       style={{
         position: "absolute",
         alignContent: "center",
@@ -228,7 +230,9 @@ export default function RButton(props: RButtonProps) {
       >
         {props.children}
         <Pressable
+          android_disableSound={true}
           android_ripple={{
+            radius: 0,
             color: getVal(props.androidRippleEnabled, true)
               ? getVal(props.isEnabled, true)
                 ? getVal(
@@ -245,13 +249,23 @@ export default function RButton(props: RButtonProps) {
             top: 0,
             left: 0,
           }}
+          hitSlop={70}
           onPressIn={() => setIsMouseHovering(true)}
           onLongPress={(e) => {
             props.onLongPress?.call(e);
             setIsMouseHovering(false);
           }}
+          onPress={(e) => {
+            props.onClick?.apply(null, [e]);
+          }}
+          onTouchStart={(e) => {
+            props.mouseEnter?.apply(null, [e]);
+          }}
+          onTouchMove={(e) => {
+            props.onTouchMove?.apply(null, [e]);
+          }}
           onPressOut={(e) => {
-            props.onClick?.call(e);
+            props.mouseLeave?.call(e);
             setIsMouseHovering(false);
           }}
         >

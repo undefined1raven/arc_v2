@@ -14,6 +14,7 @@ import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 import * as format from "jsesc";
 import { LoadUserData } from "./LoadUserData";
 import { ArcChunksWriteBuffer } from "@/components/common/crypto/ArcChunksWriteBuffer";
+import { ArcChunksWriteBufferActual } from "@/components/common/crypto/ArcChunksWriteBufferActual";
 function InitializeApp() {
   const db = useSQLiteContext();
   const updateHasCheckedTables =
@@ -115,6 +116,7 @@ function InitializeApp() {
       ></ArcChunksBuffer>
       <AsyncGenNewAccountInfo></AsyncGenNewAccountInfo>
       <ArcChunksWriteBuffer></ArcChunksWriteBuffer>
+      <ArcChunksWriteBufferActual></ArcChunksWriteBufferActual>
       <LoadUserData></LoadUserData>
     </>
   );

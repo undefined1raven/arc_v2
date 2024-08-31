@@ -1,15 +1,6 @@
-import {
-  Image,
-  StyleSheet,
-  Platform,
-  View,
-  useWindowDimensions,
-  Button,
-  ActivityIndicator,
-} from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import { useEffect, useState } from "react";
 import RBox from "@/components/common/RBox";
-import { LinearGradient } from "expo-linear-gradient";
 import globalStyles, {
   GlobalStyleType,
   updateGlobalStyle,
@@ -18,34 +9,30 @@ import RLabel from "@/components/common/RLabel";
 import { setStatusBarBackgroundColor, StatusBar } from "expo-status-bar";
 import Animated, { FadeInDown, Easing } from "react-native-reanimated";
 import { ARCLogoMini } from "@/components/common/deco/ARCLogoMini";
-import { ARCLogo } from "@/components/common/deco/ARCLogo";
 import store from "@/app/store";
 import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
+import { FeatureConfigArcType } from "@/app/config/commonTypes";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
-import { useLoadingScreenMessageStore } from "@/stores/loadingScreenMessage";
-import { useNavigatorStore } from "@/hooks/navigator";
+import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
+import LoadingScreen from "@/components/common/LoadingScreen";
+import { ARCLogo } from "@/components/common/deco/ARCLogo";
+import { LinearGradient } from "react-native-svg";
 
-export default function LoadingScreen({ navigation }) {
+export default function SettingsMainMenu() {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
-  const loadingScreenMessage = useLoadingScreenMessageStore(
-    (store) => store.loadingScreenMessage
-  );
+  const arcFeatureConfig: FeatureConfigArcType | null =
+    useArcFeatureConfigStore((store) => store.arcFeatureConfig);
+
   store.subscribe(() => {});
   const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => {
-    setHasMounted(true);
-    setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
+    setTimeout(() => {
+      setHasMounted(true);
+      setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
+    }, 150);
   }, []);
-  const setNavigator = useNavigatorStore((store) => store.setNavigator);
-  useEffect(() => {
-    if (loadingScreenMessage.redirect !== undefined) {
-      navigation.navigate(loadingScreenMessage.redirect);
-    }
-  }, [loadingScreenMessage]);
 
-  useEffect(() => {
-    setNavigator(navigation);
-  }, []);
+  useEffect(() => {}, [arcFeatureConfig]);
 
   return (
     <View
@@ -80,28 +67,7 @@ export default function LoadingScreen({ navigation }) {
             width: "100%",
             height: "100%",
           }}
-        >
-          <RBox
-            figmaImport={{
-              mobile: { left: 155, width: 50, height: 50, top: 264 },
-            }}
-          >
-            <ARCLogoMini width="100%" height="100%"></ARCLogoMini>
-          </RBox>
-          <RLabel
-            figmaImport={{
-              mobile: { left: 0, width: "100%", height: 50, top: 330 },
-            }}
-            text={loadingScreenMessage.message}
-          ></RLabel>
-          <RBox
-            figmaImport={{
-              mobile: { left: 155, width: 50, height: 50, top: 340 },
-            }}
-          >
-            <ActivityIndicator color={globalStyle.color}></ActivityIndicator>
-          </RBox>
-        </Animated.View>
+        ></Animated.View>
       ) : (
         <RBox></RBox>
       )}

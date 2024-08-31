@@ -7,15 +7,24 @@ import {
   FeatureConfigTessType,
   FeatureConfigSIDType,
 } from "./commonTypes";
+import { randomUUID } from "expo-crypto";
+
+const randomCatIDs = {
+  selfCare: randomUUID(),
+  social: randomUUID(),
+  relaxation: randomUUID(),
+  meal: randomUUID(),
+  workout: randomUUID(),
+};
 
 const arcDefaultConfig: FeatureConfigArcType = {
   tasks: [
     {
-      taskID: "TID-000000-0000-0000-000001",
+      taskID: `TID-${randomUUID()}`,
       name: "Sleeping",
       deleted: false,
       version: "0.1.0",
-      categoryID: "CID-000000-0000-0000-000001",
+      categoryID: randomCatIDs.selfCare,
       routineConfig: {
         enabledDays: [0, 1, 2, 3, 4, 5, 6],
         isActive: false,
@@ -24,11 +33,11 @@ const arcDefaultConfig: FeatureConfigArcType = {
       isSpecialStatus: false,
     },
     {
-      taskID: "TID-000000-0000-0000-000002",
+      taskID: `TID-${randomUUID()}`,
       name: "Breakfast",
       deleted: false,
       version: "0.1.0",
-      categoryID: "CID-000000-0000-0000-000004",
+      categoryID: randomCatIDs.meal,
       routineConfig: {
         enabledDays: [0, 1, 2, 3, 4, 5, 6],
         isActive: false,
@@ -37,11 +46,11 @@ const arcDefaultConfig: FeatureConfigArcType = {
       isSpecialStatus: false,
     },
     {
-      taskID: "TID-000000-0000-0000-000003",
+      taskID: `TID-${randomUUID()}`,
       name: "Dinner",
       deleted: false,
       version: "0.1.0",
-      categoryID: "CID-000000-0000-0000-000004",
+      categoryID: randomCatIDs.meal,
       routineConfig: {
         enabledDays: [0, 1, 2, 3, 4, 5, 6],
         isActive: false,
@@ -50,11 +59,11 @@ const arcDefaultConfig: FeatureConfigArcType = {
       isSpecialStatus: false,
     },
     {
-      taskID: "TID-000000-0000-0000-000004",
+      taskID: `TID-${randomUUID()}`,
       name: "Walk",
       deleted: false,
       version: "0.1.0",
-      categoryID: "CID-000000-0000-0000-000005",
+      categoryID: randomCatIDs.workout,
       routineConfig: {
         enabledDays: [0, 1, 2, 3, 4, 5, 6],
         isActive: false,
@@ -63,11 +72,11 @@ const arcDefaultConfig: FeatureConfigArcType = {
       isSpecialStatus: false,
     },
     {
-      taskID: "TID-000000-0000-0000-000024",
+      taskID: `TID-${randomUUID()}`,
       name: "Running",
       deleted: false,
       version: "0.1.0",
-      categoryID: "CID-000000-0000-0000-000005",
+      categoryID: randomCatIDs.workout,
       routineConfig: {
         enabledDays: [0, 1, 2, 3, 4, 5, 6],
         isActive: false,
@@ -76,11 +85,11 @@ const arcDefaultConfig: FeatureConfigArcType = {
       isSpecialStatus: false,
     },
     {
-      taskID: "TID-000000-0000-0000-000005",
+      taskID: `TID-${randomUUID()}`,
       name: "Shower",
       deleted: false,
       version: "0.1.0",
-      categoryID: "CID-000000-0000-0000-000001",
+      categoryID: randomCatIDs.selfCare,
       routineConfig: {
         enabledDays: [0, 1, 2, 3, 4, 5, 6],
         isActive: false,
@@ -89,11 +98,11 @@ const arcDefaultConfig: FeatureConfigArcType = {
       isSpecialStatus: false,
     },
     {
-      taskID: "TID-000000-0000-0000-000006",
+      taskID: `TID-${randomUUID()}`,
       name: "Hanging Out",
       deleted: false,
       version: "0.1.0",
-      categoryID: "CID-000000-0000-0000-000002",
+      categoryID: randomCatIDs.social,
       routineConfig: {
         enabledDays: [0, 1, 2, 3, 4, 5, 6],
         isActive: false,
@@ -102,11 +111,11 @@ const arcDefaultConfig: FeatureConfigArcType = {
       isSpecialStatus: false,
     },
     {
-      taskID: "TID-000000-0000-0000-000007",
+      taskID: `TID-${randomUUID()}`,
       name: "Skin Care",
       deleted: false,
       version: "0.1.0",
-      categoryID: "CID-000000-0000-0000-000001",
+      categoryID: randomCatIDs.selfCare,
       routineConfig: {
         enabledDays: [0, 1, 2, 3, 4, 5, 6],
         isActive: false,
@@ -117,31 +126,31 @@ const arcDefaultConfig: FeatureConfigArcType = {
   ],
   taskCategories: [
     {
-      categoryID: "CID-000000-0000-0000-000001",
+      categoryID: randomCatIDs.selfCare,
       name: "Self-care",
       version: "0.1.0",
       deleted: false,
     },
     {
-      categoryID: "CID-000000-0000-0000-000002",
+      categoryID: randomCatIDs.social,
       name: "Social",
       version: "0.1.0",
       deleted: false,
     },
     {
-      categoryID: "CID-000000-0000-0000-000003",
+      categoryID: randomCatIDs.relaxation,
       name: "Relaxation",
       version: "0.1.0",
       deleted: false,
     },
     {
-      categoryID: "CID-000000-0000-0000-000004",
+      categoryID: randomCatIDs.meal,
       name: "Meal",
       version: "0.1.0",
       deleted: false,
     },
     {
-      categoryID: "CID-000000-0000-0000-000005",
+      categoryID: randomCatIDs.workout,
       name: "Workout",
       version: "0.1.0",
       deleted: false,

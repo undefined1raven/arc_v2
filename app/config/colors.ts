@@ -184,5 +184,21 @@ const themeColors: Themes = {
     errorTextColor: "#FF004D",
   },
 };
+const y =   {dark: {
+  androidRippleColor: "#2400ff",
+  statusBarColor: "#04030E",
+  pageBackgroundColors: ["#04030E", "#0B0727"],
+  color: "#2400FF",
+  colorAccent: "#150098",
+  textColor: "#9E8EFF",
+  textColorAccent: "#584D99",
+  textColorInactive: "#343244",
+  colorInactive: "#373252",
+  successColor: "#4FFF96",
+  successTextColor: "#4FFF96",
+  errorColor: "#D7000D",
+  errorTextColor: "#FF004D",
+}}
+const x = ['#362a34', '#de98b0', '#ad61b4', '#8279d2']
 export type { ThemeColorsType, Themes };
 export default themeColors;

@@ -1,23 +1,6 @@
-import {
-  Image,
-  StyleSheet,
-  Platform,
-  View,
-  useWindowDimensions,
-  Button,
-  ActivityIndicator,
-  FlatList,
-} from "react-native";
-import { BlurView } from "expo-blur";
-import { reloadAppAsync } from "expo";
+import { View } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import React, {
-  Component,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { useContext, useEffect, useState } from "react";
 import RButton from "@/components/common/RButton";
 import RBox from "@/components/common/RBox";
 import { LinearGradient } from "expo-linear-gradient";
@@ -31,22 +14,18 @@ import Animated, { FadeInDown, Easing } from "react-native-reanimated";
 import { ARCLogoMini } from "@/components/common/deco/ARCLogoMini";
 import store from "@/app/store";
 import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
-
-import { useSQLiteContext } from "expo-sqlite";
-import { FeatureConfigType, UserData } from "@/app/config/commonTypes";
-import { Dimensions } from "react-native";
 import { Header } from "./Header";
-import ActivitiesSettingsMain from "../Settings/Activities/ActivitiesSettingsMain";
 import TimeTracker from "./Widgets/TimeTracker";
 import MenuMain from "@/components/common/menu/MenuMain";
-import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
-import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
+import QuickNavMain from "@/components/common/QuickNav/QuickNavMain";
+import { ARCLogo } from "@/components/common/deco/ARCLogo";
 
 type HomeProps = { onRequestUserIDs: Function };
 export default function Home({ navigation, onRequestUserIDs }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
-  
+
+  const x = 4;
   return (
     <View
       style={{
@@ -90,6 +69,45 @@ export default function Home({ navigation, onRequestUserIDs }) {
           <TimeTracker></TimeTracker>
         </RBox>
         <MenuMain></MenuMain>
+        <QuickNavMain
+          navMenuItems={[
+            {
+              buttonID: "cancel",
+              label: "x",
+              onClick: () => {
+                console.log("cancel");
+              },
+            },
+            {
+              buttonID: "remove",
+              label: "Remove",
+              onClick: () => {
+                console.log("remove");
+              },
+            },
+            {
+              buttonID: "hide",
+              label: "Hide",
+              onClick: () => {
+                console.log("hide");
+              },
+            },
+            {
+              buttonID: "hide2",
+              label: "Hide2",
+              onClick: () => {
+                console.log("hide2");
+              },
+            },
+            {
+              buttonID: "hide3",
+              label: "Hide3",
+              onClick: () => {
+                console.log("hide3");
+              },
+            },
+          ]}
+        ></QuickNavMain>
       </Animated.View>
     </View>
   );

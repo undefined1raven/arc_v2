@@ -35,6 +35,10 @@ import { useSQLiteContext } from "expo-sqlite";
 import * as Crypto from "expo-crypto";
 import { BackupFileDeco } from "../common/deco/BackupFileDeco";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
+import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
+import { defaultFeatureConfig } from "@/app/config/defaultFeatureConfig";
+import { useStore } from "@/stores/arcChunks";
+import { newChunkID } from "@/fn/newChunkID";
 export default function CreateAccountOffline({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   store.subscribe(() => {});
@@ -44,6 +48,10 @@ export default function CreateAccountOffline({ navigation }) {
 
   const [hasMounted, setHasMounted] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
+  const setArcFeatureConfig = useArcFeatureConfigStore(
+    (store) => store.setArcFeatureConfig
+  );
+  const addChunkToArcChunks = useStore((state) => state.addChunkToArcChunks);
   const db = useSQLiteContext();
   useEffect(() => {
     setTimeout(() => {
@@ -95,7 +103,18 @@ export default function CreateAccountOffline({ navigation }) {
                 .then(() => {
                   db.runAsync(`DELETE FROM users WHERE id='temp'`)
                     .then(() => {
-                      navigation.navigate("Home", { name: "Home" });
+                      setArcFeatureConfig(defaultFeatureConfig.arc);
+                      const newChunk = {
+                        id: newChunkID(),
+                        tx: Date.now(),
+                        activities: [],
+                        version: "0.1.1",
+                        userID: aid,
+                      };
+                      addChunkToArcChunks(newChunk);
+                      setTimeout(() => {
+                        navigation.navigate("Home", { name: "Home" });
+                      }, 100);
                     })
                     .catch((e) => {
                       console.log(e);
