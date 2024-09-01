@@ -9,7 +9,8 @@ import { useSQLiteContext } from "expo-sqlite";
 import { useCurrentArcChunkStore } from "@/stores/currentArcChunk";
 import { SingleDecrypt } from "./SingleDecrypt";
 import * as jsesc from "jsesc";
-function ArcChunksWriteBuffer() {
+
+function ArcLastChunkDecryptor() {
   const getActiveUserID = useLocalUserIDsStore(
     (store) => store.getActiveUserID
   );
@@ -64,4 +65,4 @@ function ArcChunksWriteBuffer() {
   );
 }
 
-export { ArcChunksWriteBuffer };
+export { ArcLastChunkDecryptor };

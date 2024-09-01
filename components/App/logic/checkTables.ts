@@ -21,7 +21,7 @@ async function checkTables(): Promise<CheckTablesReturnSig> {
   );
   promiseArray.push(userDataTablePromise);
   const arcChunksTablePromise = db.runAsync(
-    "CREATE TABLE IF NOT EXISTS arcChunks (id TEXT NOT NULL PRIMARY KEY, userID TEXT NOT NULL, encryptedContent TEXT NOT NULL, tx NUMBER NOT NULL, version TEXT NOT NULL);"
+    "CREATE TABLE IF NOT EXISTS arcChunks (id TEXT NOT NULL PRIMARY KEY, userID TEXT NOT NULL, encryptedContent TEXT NOT NULL, tx NUMBER NOT NULL, version TEXT NOT NULL, isComplete INTEGER NOT NULL);"
   );
   promiseArray.push(arcChunksTablePromise);
   const tessChunksTablePromise = db.runAsync(

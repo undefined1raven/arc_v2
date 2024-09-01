@@ -65,20 +65,7 @@ function ArcChunksBuffer(props: ArcChunksBufferProps) {
       for (let ix = 0; ix < ARC_ChunksBuffer.length; ix++) {
         allActivities.push(...ARC_ChunksBuffer[ix].activities);
       }
-      console.log(
-        JSON.stringify(
-          db
-            .getAllSync(
-              "SELECT * FROM arcChunks WHERE userID = ? ORDER BY tx DESC",
-              [props.activeUserID]
-            )
-            .sort((a, b) => {
-              return b.tx - a.tx;
-            })
-            .map((chunk) => chunk.encryptedContent.toString().length)
-        ),
-        "arcChunks"
-      );
+
       console.log(
         allActivities
           .sort((a, b) => {
@@ -117,7 +104,21 @@ function ArcChunksBuffer(props: ArcChunksBufferProps) {
   const arcCurrentActivitiesAPI = useArcCurrentActivitiesStore();
 
   useEffect(() => {
-    console.log("xx: ", arcCurrentActivitiesAPI.currentActivities);
+    console.log("xx: ", arcCurrentActivitiesAPI.currentActivities.length);
+    console.log(
+      JSON.stringify(
+        db
+          .getAllSync(
+            "SELECT * FROM arcChunks WHERE userID = ? ORDER BY tx DESC",
+            [props.activeUserID]
+          )
+          .sort((a, b) => {
+            return b.tx - a.tx;
+          })
+          .map((chunk) => chunk.encryptedContent.toString().length)
+      ),
+      "arcChunks"
+    );
   }, [arcCurrentActivitiesAPI]);
 
   useEffect(() => {

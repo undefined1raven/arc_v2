@@ -35,6 +35,7 @@ function ArcChunksWriteBufferActual() {
           activities: activities.slice(0, MaxActivitiesInArcChunk),
         });
       } else {
+        setPlainChunk(currentArcChunkAPI.chunk);
       }
     }
   }, [currentArcChunkAPI.chunk]);
@@ -57,13 +58,14 @@ function ArcChunksWriteBufferActual() {
         onEncrypted={(encryptedContent) => {
           if (plainChunk === null || activeUserID === null) return;
           db.runAsync(
-            `INSERT OR REPLACE INTO arcChunks (id, tx, userID, encryptedContent, isComplete) VALUES (?, ?, ?, ?, ?)`,
+            `INSERT OR REPLACE INTO arcChunks (id, tx, userID, encryptedContent, isComplete, version) VALUES (?, ?, ?, ?, ?, ?)`,
             [
               plainChunk.id,
               plainChunk.tx,
               activeUserID,
               encryptedContent,
               plainChunk.isComplete,
+              plainChunk.version,
             ]
           )
             .then(() => {
@@ -78,9 +80,12 @@ function ArcChunksWriteBufferActual() {
                   isComplete: false,
                 };
                 currentArcChunkAPI.setChunk(newChunk);
+                currentArcChunkAPI.setLastChunkID(newChunk.id);
               }
             })
-            .catch(() => {});
+            .catch((w) => {
+              console.log(w);
+            });
         }}
         onError={() => {
           console.log("error decrypting");

@@ -13,8 +13,8 @@ import { SingleDecrypt } from "@/components/common/crypto/SingleDecrypt";
 import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 import * as format from "jsesc";
 import { LoadUserData } from "./LoadUserData";
-import { ArcChunksWriteBuffer } from "@/components/common/crypto/ArcChunksWriteBuffer";
 import { ArcChunksWriteBufferActual } from "@/components/common/crypto/ArcChunksWriteBufferActual";
+import { ArcLastChunkDecryptor } from "@/components/common/crypto/ArcLastChunkDecryptor";
 function InitializeApp() {
   const db = useSQLiteContext();
   const updateHasCheckedTables =
@@ -115,7 +115,7 @@ function InitializeApp() {
         symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
       ></ArcChunksBuffer>
       <AsyncGenNewAccountInfo></AsyncGenNewAccountInfo>
-      <ArcChunksWriteBuffer></ArcChunksWriteBuffer>
+      <ArcLastChunkDecryptor></ArcLastChunkDecryptor>
       <ArcChunksWriteBufferActual></ArcChunksWriteBufferActual>
       <LoadUserData></LoadUserData>
     </>
