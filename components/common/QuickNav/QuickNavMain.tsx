@@ -51,6 +51,7 @@ export default function QuickNavMain(props: QuickNavMainProps) {
   const [trigerTimeout, setTrigerTimeout] = useState<NodeJS.Timeout | null>(
     null
   );
+  const [hitSlop, setHitSlop] = useState<number>(0);
   const [currentPointerY, setCurrentPointerY] = useState<number>(0);
   const activeButtonID = useQuickNavStore((store) => store.activeButtonID);
   const setActiveButtonID = useQuickNavStore(
@@ -83,6 +84,10 @@ export default function QuickNavMain(props: QuickNavMainProps) {
     top: 474,
   });
   const listItemRefs = useRef({});
+
+  useEffect(() => {
+    setHitSlop(isHovering ? 70 : 4);
+  }, [isHovering]);
 
   useEffect(() => {
     if (isHovering === false && activeButtonID !== null) {
@@ -281,6 +286,7 @@ export default function QuickNavMain(props: QuickNavMainProps) {
               }
               //   setIsHovering(false);
             }}
+            slopHit={hitSlop}
             mouseLeave={() => {
               if (trigerTimeout !== null) {
                 clearTimeout(trigerTimeout);

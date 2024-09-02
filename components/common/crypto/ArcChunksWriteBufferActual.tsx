@@ -35,10 +35,10 @@ function ArcChunksWriteBufferActual() {
           activities: activities.slice(0, MaxActivitiesInArcChunk),
         });
       } else {
-        setPlainChunk(currentArcChunkAPI.chunk);
+        setPlainChunk(currentArcChunkAPI?.chunk);
       }
     }
-  }, [currentArcChunkAPI.chunk]);
+  }, [currentArcChunkAPI?.chunk]);
 
   useEffect(() => {
     if (plainChunk !== null) {

@@ -120,10 +120,10 @@ export default function App() {
           name="createAccountOffline"
           component={CreateAccountOffline}
         ></Stack.Screen>
-        <Stack.Screen
+        {/* <Stack.Screen
           name="SettingsMain"
           component={SettingsMainMenu}
-        ></Stack.Screen>
+        ></Stack.Screen> */}
       </Stack.Navigator>
     </SQLiteProvider>
   );

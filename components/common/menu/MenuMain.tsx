@@ -93,6 +93,7 @@ export default function MenuMain() {
         </RButton>
         <RButton
           onClick={() => {
+            console.log('xx')
             if (navigator !== null) {
               navigator.navigate("SettingsMain", { name: "SettingsMain" });
             }

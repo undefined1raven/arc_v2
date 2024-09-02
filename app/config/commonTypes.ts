@@ -7,7 +7,8 @@ type UserDataValues = {
 };
 type ArcTaskLogType = {
   taskID: string;
-  tx: number;
+  start: number;
+  end: number | null;
 };
 type ARCTasksType = {
   taskID: string;

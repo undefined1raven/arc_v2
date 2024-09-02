@@ -1,40 +1,27 @@
 import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 import { useContext, useEffect, useState } from "react";
 import RBox from "@/components/common/RBox";
-import { LinearGradient } from "expo-linear-gradient";
-import globalStyles, {
-  GlobalStyleType,
-  updateGlobalStyle,
-} from "@/hooks/globalStyles";
 import RLabel from "@/components/common/RLabel";
 import { setStatusBarBackgroundColor, StatusBar } from "expo-status-bar";
 import Animated, { FadeInDown, Easing, FadeIn } from "react-native-reanimated";
-import { ARCLogoMini } from "@/components/common/deco/ARCLogoMini";
-import { ARCLogo } from "@/components/common/deco/ARCLogo";
 import store from "@/app/store";
 import {
   getVal,
   globalEnteringConfig,
 } from "@/app/config/defaultTransitionConfig";
 import { widgetContainerConfig } from "../widgetContainerConfig";
-import { localStorageGet } from "@/fn/localStorage";
 import { useSQLiteContext } from "expo-sqlite";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import RButton from "@/components/common/RButton";
-import { BlurView } from "expo-blur";
 import TimeTrackingActivityMenu from "./TimeTrackerActivityMenu";
-import { updateArcFeatureConfig } from "@/hooks/arcFeatureConfig";
-import { FeatureConfigArcType } from "@/app/config/commonTypes";
+import { ArcTaskLogType, FeatureConfigArcType } from "@/app/config/commonTypes";
 import { getCurrentActivities } from "@/fn/dbUtils/getCurrentActivities";
 import { displayTimeFromMsDuration } from "@/fn/timeUtils/displayTimeFromMsDuration";
 import { timeOfDayFromUnix } from "@/fn/timeUtils/timeOfDayFromUnix";
 import { AddIcon } from "@/components/common/deco/AddIcon";
-import { MaxActivitiesInArcChunk } from "@/app/config/chunking";
 import { useStore } from "@/stores/arcChunks";
-import { newChunkID } from "@/fn/newChunkID";
 import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
-import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
 import { randomUUID } from "expo-crypto";
 import { useCurrentArcChunkStore } from "@/stores/currentArcChunk";
 
@@ -46,86 +33,85 @@ export default function TimeTracker() {
   const arcFeatureConfig: FeatureConfigArcType = useArcFeatureConfigStore(
     (store) => store.arcFeatureConfig
   );
-  const addChunkToArcChunks = useStore((state) => state.addChunkToArcChunks);
   const [displayDurationLabel, setDisplayDurationLabel] = useState("");
   const [displayStartedAtLabel, setDisplayStartedAtLabel] = useState("");
   const [showMenu, setShowMenu] = useState(false);
   const [tickerInterval, setTickerInterval] = useState<null | any>(null);
-  const currentActivities = useArcCurrentActivitiesStore(
-    (store) => store.currentActivities
+  const [currentActivities, setCurrentActivities] = useState<ArcTaskLogType[]>(
+    []
   );
-  const arcCurrentActivities = useArcCurrentActivitiesStore(
-    (store) => store.currentActivities
-  );
-  const arcHasIniCurrentActivities = useArcCurrentActivitiesStore(
-    (store) => store.ini
-  );
+  const [
+    hasCurrentActivitiesFromUserData,
+    setHasCurrentActivitiesFromUserData,
+  ] = useState<boolean>(false);
 
-  const setArcCurrentActivitiesIni = useArcCurrentActivitiesStore(
-    (store) => store.setIni
-  );
   const [currentDisplayedActivity, setCurrentDisplayedActivity] =
-    useState<null | { taskID: string; tx: number }>(null);
+    useState<null | ArcTaskLogType>(null);
   const timeTrackingContainerConfig = {
     containerHeight: 163,
     containerWidth: 354,
   };
   const db = useSQLiteContext();
 
-  const ARC_ChunksBuffer = useStore((state) => state.arcChunks);
-  const addActivityToArcChunk = useStore(
-    (state) => state.addActivityToArcChunk
-  );
   const currentArcChunkAPI = useCurrentArcChunkStore();
+
   useEffect(() => {
     if (currentDisplayedActivity !== null) {
-      setDisplayStartedAtLabel(timeOfDayFromUnix(currentDisplayedActivity.tx));
+      setDisplayStartedAtLabel(
+        timeOfDayFromUnix(currentDisplayedActivity.start)
+      );
       if (tickerInterval !== null) {
         clearInterval(tickerInterval);
       }
       setTickerInterval(
         setInterval(() => {
-          const delta = Date.now() - currentDisplayedActivity.tx;
+          const delta = Date.now() - currentDisplayedActivity.start;
           setDisplayDurationLabel(displayTimeFromMsDuration(delta));
         }, 150)
       );
     }
   }, [currentDisplayedActivity]);
 
-
   useEffect(() => {
-    console.log(currentArcChunkAPI.chunk?.activities)
-  }, [currentArcChunkAPI])
-
-  useEffect(() => {
-    if (arcHasIniCurrentActivities === false) {
-      getCurrentActivities().then((activities) => {
-        setArcCurrentActivitiesIni(true);
+    if (hasCurrentActivitiesFromUserData === false) {
+      getCurrentActivities().then((retrievedActivities) => {
+        setHasCurrentActivitiesFromUserData(true);
+        setCurrentActivities(retrievedActivities);
       });
-    } else {
-      if (arcCurrentActivities !== null && arcCurrentActivities.length > 0) {
-        setCurrentDisplayedActivity(arcCurrentActivities[0]);
-      }
-      db.runAsync(
-        `INSERT OR REPLACE INTO userData (value, userID, key, id, version) VALUES (?, ?, ?, ?, ?)`,
-        [
-          JSON.stringify(arcCurrentActivities),
-          activeUserID,
-          "currentActivities",
-          randomUUID(),
-          "0.1.1",
-        ]
-      )
-        .then(() => {
-          console.log("updated current activities");
-        })
-        .catch((e) => {});
     }
-  }, [arcCurrentActivities]);
+    if (currentDisplayedActivity === null || currentActivities.length > 0) {
+      setCurrentDisplayedActivity(
+        currentActivities[currentActivities.length - 1]
+      );
+    }
+    if (currentActivities.length === 0) {
+      setCurrentDisplayedActivity(null);
+    }
+    if (hasCurrentActivitiesFromUserData === true) {
+      mutateCurrentActivities(currentActivities);
+    }
+  }, [currentActivities, hasCurrentActivitiesFromUserData]);
 
   useEffect(() => {
     setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
   }, []);
+
+  function mutateCurrentActivities(value: ArcTaskLogType[]) {
+    if (value === undefined) return;
+    if (value === null) return;
+    db.runAsync(
+      `INSERT OR REPLACE INTO userData (value, key, userID, id, version) VALUES (?, ?, ?, ?, ?) `,
+      [
+        JSON.stringify(value),
+        "currentActivities",
+        activeUserID,
+        randomUUID(),
+        "0.1.1",
+      ]
+    ).catch((e) => {});
+  }
+
+  const currentChunkAPI = useCurrentArcChunkStore();
 
   return (
     <RBox width="100%" height="100%" top={0} left={0}>
@@ -151,7 +137,7 @@ export default function TimeTracker() {
           fontSize={12}
           color={globalStyle.textColorAccent}
         ></RLabel>
-        {arcCurrentActivities === null || arcCurrentActivities.length === 0 ? (
+        {currentActivities.length === 0 || currentDisplayedActivity === null ? (
           <Animated.View
             style={styles.defaultStyle}
             entering={FadeInDown.duration(50).damping(15)}
@@ -187,7 +173,17 @@ export default function TimeTracker() {
                 mobile: { top: 109, left: 5, width: 344, height: 48 },
               }}
               onClick={() => {
-
+                currentChunkAPI.appendActivity({
+                  taskID: currentDisplayedActivity?.taskID as string,
+                  start: Date.now(),
+                  end: Date.now(),
+                });
+                setCurrentActivities((prev) => {
+                  if (currentDisplayedActivity === null) return prev;
+                  return prev.filter(
+                    (elm) => elm.taskID !== currentDisplayedActivity?.taskID
+                  );
+                });
               }}
               mobileFontSize={20}
               label="Done"
@@ -207,7 +203,8 @@ export default function TimeTracker() {
               }}
               figmaImportConfig={timeTrackingContainerConfig}
             >
-              {displayDurationLabel !== "" ? (
+              {displayDurationLabel !== "" ||
+              hasCurrentActivitiesFromUserData === false ? (
                 <RLabel
                   width="100%"
                   height="100%"
@@ -285,7 +282,18 @@ export default function TimeTracker() {
       {showMenu ? (
         <RBox style={styles.defaultStyle}>
           <TimeTrackingActivityMenu
-            onTriggerRerender={() => {}}
+            onTaskSelected={(taskID: string) => {
+              setCurrentActivities((prev) => {
+                return [
+                  ...prev,
+                  {
+                    taskID: taskID,
+                    start: Date.now(),
+                    end: null,
+                  },
+                ];
+              });
+            }}
             onBackButton={() => setShowMenu(false)}
           ></TimeTrackingActivityMenu>
         </RBox>

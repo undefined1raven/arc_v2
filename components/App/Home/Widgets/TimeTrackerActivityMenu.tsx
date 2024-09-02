@@ -54,7 +54,7 @@ import { useCurrentArcChunkStore } from "@/stores/currentArcChunk";
 
 type TimeTrackingActivityMenuProps = {
   onBackButton: Function;
-  onTriggerRerender: Function;
+  onTaskSelected: Function;
 };
 export default function TimeTrackingActivityMenu(
   props: TimeTrackingActivityMenuProps
@@ -69,21 +69,15 @@ export default function TimeTrackingActivityMenu(
   const arcFeatureConfig: FeatureConfigArcType = useArcFeatureConfigStore(
     (store) => store.arcFeatureConfig
   );
-
-  useEffect(() => {
-    console.log(arcFeatureConfig.tasks.map((task) => task.taskID));
-  }, [arcFeatureConfig.tasks]);
+  const [hasOngoingActivities, setHasOngoingActivities] =
+    useState<boolean>(false);
 
   const {
     currentActivities: arcCurrentActivities,
-    ini: arcHasIniCurrentActivities,
     setCurrentActivities: setArcCurrentActivities,
-    setIni: setArcCurrentActivitiesIni,
   } = useArcCurrentActivitiesStore((store) => ({
     currentActivities: store.currentActivities,
-    ini: store.ini,
     setCurrentActivities: store.setCurrentActivities,
-    setIni: store.setIni,
   }));
 
   const timeTrackingContainerConfig = {
@@ -94,7 +88,6 @@ export default function TimeTrackingActivityMenu(
   const menuConfig = useMenuConfigStore((store) => store.menuConfig);
 
   function onBackTrigger() {
-    props.onTriggerRerender();
     showMainMenu();
     props.onBackButton();
   }
@@ -107,15 +100,12 @@ export default function TimeTrackingActivityMenu(
     });
     setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
   }, []);
-  const currentChunkAPI = useCurrentArcChunkStore();
-
   function addActivityToCurrentActivities(taskID: string) {
-    currentChunkAPI.appendActivity({ taskID: taskID, tx: Date.now() });
     setArcCurrentActivities([
       ...arcCurrentActivities,
-      { taskID: taskID, tx: Date.now() },
+      { taskID: taskID, start: Date.now(), end: null },
     ]);
-    // onBackTrigger();
+    onBackTrigger();
   }
 
   const headerContainerConfig = { containerHeight: 34, containerWidth: 350 };
@@ -137,6 +127,8 @@ export default function TimeTrackingActivityMenu(
         <RButton
           onClick={() => {
             addActivityToCurrentActivities(item.taskID);
+            props.onTaskSelected(item.taskID);
+            onBackTrigger();
           }}
           width="100%"
           height="100%"

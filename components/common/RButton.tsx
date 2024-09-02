@@ -54,6 +54,7 @@ type RButtonProps = {
   opacity?: number;
   style?: StyleSheet;
   blur?: number;
+  slopHit?: number;
   borderRadius?: number;
   alignPadding?: number | string;
   hoverOpacityMax?: string;
@@ -249,7 +250,7 @@ export default function RButton(props: RButtonProps) {
             top: 0,
             left: 0,
           }}
-          hitSlop={70}
+          hitSlop={getVal(props.slopHit, 0)}
           onPressIn={() => setIsMouseHovering(true)}
           onLongPress={(e) => {
             props.onLongPress?.call(e);

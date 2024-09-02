@@ -9,11 +9,26 @@ async function getCurrentActivities() {
     `SELECT * FROM userData WHERE userID=? AND key=?`,
     [activeUserID, "currentActivities"]
   );
+  console.log(currentActivities.value, "from db");
   if (currentActivities === null) {
     return [];
   } else {
     try {
-      return JSON.parse(currentActivities.value);
+      if (
+        currentActivities !== undefined &&
+        currentActivities !== null &&
+        currentActivities.value !== undefined &&
+        currentActivities.value !== null
+      ) {
+        try {
+          return JSON.parse(currentActivities.value);
+        } catch (e) {
+          console.log(e);
+          return [];
+        }
+      } else {
+        return [];
+      }
     } catch (e) {
       return [];
     }

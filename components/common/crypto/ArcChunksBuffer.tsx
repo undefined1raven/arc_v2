@@ -103,23 +103,23 @@ function ArcChunksBuffer(props: ArcChunksBufferProps) {
   }
   const arcCurrentActivitiesAPI = useArcCurrentActivitiesStore();
 
-  useEffect(() => {
-    console.log("xx: ", arcCurrentActivitiesAPI.currentActivities.length);
-    console.log(
-      JSON.stringify(
-        db
-          .getAllSync(
-            "SELECT * FROM arcChunks WHERE userID = ? ORDER BY tx DESC",
-            [props.activeUserID]
-          )
-          .sort((a, b) => {
-            return b.tx - a.tx;
-          })
-          .map((chunk) => chunk.encryptedContent.toString().length)
-      ),
-      "arcChunks"
-    );
-  }, [arcCurrentActivitiesAPI]);
+  // useEffect(() => {
+  //   console.log("xx: ", arcCurrentActivitiesAPI.currentActivities.length);
+  //   console.log(
+  //     JSON.stringify(
+  //       db
+  //         .getAllSync(
+  //           "SELECT * FROM arcChunks WHERE userID = ? ORDER BY tx DESC",
+  //           [props.activeUserID]
+  //         )
+  //         .sort((a, b) => {
+  //           return b.tx - a.tx;
+  //         })
+  //         .map((chunk) => chunk.encryptedContent.toString().length)
+  //     ),
+  //     "arcChunks"
+  //   );
+  // }, [arcCurrentActivitiesAPI]);
 
   useEffect(() => {
     if (!isReady) return;

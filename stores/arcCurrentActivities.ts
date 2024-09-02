@@ -1,13 +1,13 @@
+import { ArcTaskLogType } from "@/app/config/commonTypes";
 import { create } from "zustand";
 
 interface ArcCurrentActivitiesStore {
-  currentActivities: { taskID: string; tx: number }[];
+  currentActivities: ArcTaskLogType[];
   ini: boolean;
-  setCurrentActivities: (newCurrentActivities: { taskID: string; tx: number }[]) => void;
-  appendCurrentActivities: (newActivity: {
-    taskID: string;
-    tx: number;
-  }) => void;
+  setCurrentActivities: (
+    newCurrentActivities: ArcTaskLogType[]
+  ) => void;
+  appendCurrentActivities: (newActivity: ArcTaskLogType) => void;
   removeActivityByID: (taskID: string) => void;
   setIni: (newIni: boolean) => void;
 }
