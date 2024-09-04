@@ -164,7 +164,7 @@ export default function QuickNavMain(props: QuickNavMainProps) {
           top: "0%",
           justifyContent: "center",
           width: "100%",
-          height: 35,
+          height: 50,
         }}
       >
         <RButton
@@ -238,7 +238,7 @@ export default function QuickNavMain(props: QuickNavMainProps) {
           {isHovering ? (
             <RBox
               figmaImport={{
-                mobile: { left: "0", top: "0", width: 150, height: "100%" },
+                mobile: { left: "0", top: "2%", width: 150, height: "100%" },
               }}
               figmaImportConfig={{
                 containerHeight: containerProps.height,

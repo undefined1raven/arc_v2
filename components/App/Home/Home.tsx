@@ -22,6 +22,8 @@ import QuickNavMain from "@/components/common/QuickNav/QuickNavMain";
 import { ARCLogo } from "@/components/common/deco/ARCLogo";
 import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 import { randomUUID } from "expo-crypto";
+import MenuList from "@/components/common/menu/MenuList";
+import { BlurView } from "expo-blur";
 
 type HomeProps = { onRequestUserIDs: Function };
 export default function Home({ navigation, onRequestUserIDs }) {
@@ -162,20 +164,6 @@ export default function Home({ navigation, onRequestUserIDs }) {
               },
             },
             {
-              buttonID: "remove",
-              label: "Remove",
-              onClick: () => {
-                console.log("remove");
-              },
-            },
-            {
-              buttonID: "hide",
-              label: "Hide",
-              onClick: () => {
-                console.log("hide");
-              },
-            },
-            {
               buttonID: "hide2",
               label: "Hide2",
               onClick: () => {
@@ -183,30 +171,32 @@ export default function Home({ navigation, onRequestUserIDs }) {
               },
             },
             {
-              buttonID: "hide3",
-              label: "Hide3",
+              buttonID: "timeStats",
+              label: "Time Stats",
               onClick: () => {
-                console.log("hide3");
+                navigation.navigate("timeStats", { name: "timeStats" });
+                console.log("remove");
               },
             },
           ]}
         ></QuickNavMain>
         {/* <GestureHandlerRootView>
           <RBox
-            figmaImport={{
-              mobile: { left: 5, width: 350, height: 508, top: 52 },
+          figmaImport={{
+            mobile: { left: 5, width: 350, height: 508, top: 52 },
             }}
-          >
+            >
             <FlatList
-              showsVerticalScrollIndicator={false}
-              style={{ ...styles.defaultStyle }}
-              renderItem={renderItem}
-              keyExtractor={(item) => item.tx}
-              data={t}
+            showsVerticalScrollIndicator={false}
+            style={{ ...styles.defaultStyle }}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.tx}
+            data={t}
             ></FlatList>
-          </RBox>
-        </GestureHandlerRootView> */}
+            </RBox>
+            </GestureHandlerRootView> */}
       </Animated.View>
+      <MenuList></MenuList>
     </View>
   );
 }

@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { getVal } from "@/app/config/defaultTransitionConfig";
 type HeaderProps = { show?: boolean };
-function Header(props: HeaderProps) {
+const Header = (props: HeaderProps) => {
   const [showActual, setShowActual] = useState(false);
 
   useEffect(() => {
@@ -44,6 +44,6 @@ function Header(props: HeaderProps) {
   ) : (
     <RBox></RBox>
   );
-}
+};
 
 export { Header };

@@ -1,12 +1,13 @@
 import {
   Pressable,
   View,
+  StyleSheet,
   Text,
   Button,
   useWindowDimensions,
 } from "react-native";
 import { AlignType, ColorValueHex, FontSize } from "./CommonTypes";
-import { useEffect, useRef, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import FigmaImporter from "../../fn/figmaImporter";
 import FigmaImportConfig from "../../fn/FigmaImportConfig";
@@ -26,6 +27,7 @@ import { useFonts } from "expo-font";
 import { Oxanium_400Regular } from "@expo-google-fonts/oxanium";
 import { IBMPlexMono_400Regular } from "@expo-google-fonts/ibm-plex-mono";
 import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
+import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 type RFlatListProps = {
   id?: string;
   fontType?: "regular" | "mono";
@@ -45,18 +47,22 @@ type RFlatListProps = {
   fontSize?: number | FontSize;
   align?: AlignType;
   opacity?: number;
+  renderItem: ReactElement;
+  data: object[];
   style?: object;
   blur?: number;
+  inverted?: boolean;
   borderRadius?: number;
   alignPadding?: number | string;
   horizontalCenter?: boolean;
+  keyExtractor: (item: any, index: number) => string;
   verticalCenter?: boolean;
   verticalAlign?: "top" | "bottom" | "center";
   figmaImportConfig?: object;
   transitions?: string | object;
 };
 
-export default function RFlatList(props: RButtonProps) {
+export default function RFlatList(props: RFlatListProps) {
   //Internal state
   let [fontsLoaded] = useFonts({
     Oxanium_400Regular,
@@ -67,7 +73,6 @@ export default function RFlatList(props: RButtonProps) {
   const { height, width } = useWindowDimensions();
   const p50Width = 0.5 * width;
   const p50Height = 0.5 * height;
-  store.subscribe(() => {});
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   function getVal(value: any, defaultVal: any) {
     if (value !== undefined) {
@@ -108,16 +113,9 @@ export default function RFlatList(props: RButtonProps) {
       setCurrentFontFamiliy("Oxanium_400Regular");
     }
   }, [fontsLoaded]);
-  useEffect(() => {
-    labelRef.current.measure((width, height, px, py, fx, fy) => {
-      setComponentWidth(width);
-      setComponentHeight(height);
-    });
-  }, [labelRef]);
+
   return (
     <Animated.View
-      // entering={getVal(props.entering, globalEnteringConfig())}
-      ref={labelRef}
       id={getVal(props.id, undefined)}
       style={{
         flex: 1,
@@ -131,10 +129,9 @@ export default function RFlatList(props: RButtonProps) {
           props.backgroundColor,
           `${globalStyle.color}00`
         ),
-        alignContent: "center",
-        justifyContent: "center",
-        alignItems: "center",
-        backdropFilter: "",
+        alignContent: "flex-start",
+        justifyContent: "flex-start",
+        alignItems: "flex-start",
         width: getVal(props.width, 100),
         left: getVal(props.left, 0),
         top: getVal(props.top, 0),
@@ -154,49 +151,28 @@ export default function RFlatList(props: RButtonProps) {
       }}
     >
       {/* <BlurView style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', ...styles.b }} intensity={getVal(props.blur, 0)}> */}
-      <Text
-        style={{
-          display: "flex",
-          position: "absolute",
-          top: 0,
-          left: "auto",
-          width: "100%",
-          height: "100%",
-          textAlignVertical: getVal(props.verticalAlign, "top"),
-          alignItems: "center",
-          color: getVal(props.color, globalStyle.textColor),
-          fontSize: fontController(
-            getVal(props.fontSize, globalStyle.regularMobileFont)
-          ),
-          justifyContent: getVal(props.align, "center"),
-          textAlign: getVal(props.align, "center"),
-          fontFamily: currentFontFamiliy,
-          paddingLeft: getVal(
-            props.align === "left" || props.align === "right"
-              ? props.alignPadding
-                ? props.alignPadding
-                : "2%"
-              : "0%",
-            "0%"
-          ),
-          paddingRight: getVal(
-            props.align === "right" || props.align === "end"
-              ? props.alignPadding
-                ? props.alignPadding
-                : "2%"
-              : "0%",
-            "0%"
-          ),
-        }}
-      >
-        {props.text}
-      </Text>
+      <GestureHandlerRootView>
+        <FlatList
+          inverted={getVal(props.inverted, false)}
+          showsVerticalScrollIndicator={false}
+          style={{ ...styles.defaultStyle }}
+          renderItem={props.renderItem}
+          keyExtractor={props.keyExtractor}
+          data={props.data}
+        ></FlatList>
+      </GestureHandlerRootView>
       {props.children}
       {/* </BlurView> */}
     </Animated.View>
   );
 }
 
-const styles = {
-  b: { backdropFilter: "" },
-};
+const styles = StyleSheet.create({
+  defaultStyle: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    left: 0,
+    top: 0,
+  },
+});

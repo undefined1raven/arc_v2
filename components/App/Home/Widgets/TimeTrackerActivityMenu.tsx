@@ -20,7 +20,6 @@ import Animated, {
   FadeIn,
   FadeOut,
   FadeInUp,
-  useWorkletCallback,
 } from "react-native-reanimated";
 import { ARCLogoMini } from "@/components/common/deco/ARCLogoMini";
 import { ARCLogo } from "@/components/common/deco/ARCLogo";

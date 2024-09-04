@@ -50,6 +50,7 @@ import { stringToCharCodeArray } from "@/fn/stringToCharCode";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { InitializeApp } from "@/components/App/logic/InitializeApp";
 import SettingsMainMenu from "@/components/App/Settings/SettingsMainMenu";
+import TimeStatsMain from "@/components/App/TimeStats/TimeStatsMain";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -108,6 +109,7 @@ export default function App() {
         <Stack.Screen name="OTSTwo" component={OTSTwo}></Stack.Screen>
         <Stack.Screen name="OTSThree" component={OTSThree}></Stack.Screen>
         <Stack.Screen name="Home" component={Home}></Stack.Screen>
+        <Stack.Screen name="timeStats" component={TimeStatsMain}></Stack.Screen>
         <Stack.Screen
           name="keysLoadingScreen"
           component={KeysLoadingScreen}
