@@ -11,6 +11,10 @@ import { useLoadingScreenMessageStore } from "@/stores/loadingScreenMessage";
 import { useNavigatorStore } from "@/hooks/navigator";
 import { useCurrentArcChunkStore } from "@/stores/currentArcChunk";
 import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
+import * as jsesc from "jsesc";
+import { symmetricDecrypt } from "../decryptors/symmetricDecrypt";
+import { ARC_ChunksType, ArcTaskLogType } from "@/app/config/commonTypes";
+import { symmetricEncrypt } from "../encryptors/symmetricEncrypt";
 function LoadUserData() {
   const getActiveUserID = useLocalUserIDsStore(
     (store) => store.getActiveUserID
@@ -30,9 +34,7 @@ function LoadUserData() {
     (store) => store.updateLoadingScreenMessage
   );
   const navigator = useNavigatorStore((state) => state.navigator);
-  const currentArcChunkAPI = useCurrentArcChunkStore();
   const currentActivities = useArcCurrentActivitiesStore();
-  const arcChunksApi = useStore();
   useEffect(() => {
     setHasArcChunks(arcChunks !== null);
   }, [arcChunks]);
@@ -46,27 +48,82 @@ function LoadUserData() {
   useEffect(() => {
     if (activeUserID !== null) {
       db.getAllAsync(
-        `SELECT id FROM arcChunks WHERE userID=? ORDER BY tx DESC LIMIT 3`,
+        `SELECT * FROM arcChunks WHERE userID=? ORDER BY tx DESC LIMIT 3`,
         [activeUserID]
       ).then((recentChunks) => {
         console.log(recentChunks.length, "recentChunks");
         if (recentChunks.length === 0) {
-          const NCID = newChunkID();
-          const newChunk = {
-            id: NCID,
-            tx: Date.now(),
-            activities: [],
-            version: "0.1.1",
-            userID: activeUserID,
-            isComplete: false,
-          };
-          currentArcChunkAPI.setChunk({ ...newChunk, encryptedContent: "xxx" });
-          currentActivities.currentActivities = [];
-        } else {
-          currentArcChunkAPI.setLastChunkID(recentChunks[0]?.id as string);
-          recentChunks.forEach((chunk) => {
-            appendDecryptionQueue(chunk.id);
+          symmetricEncrypt(JSON.stringify({ tasks: [] })).then((encrypted) => {
+            const NTID = newChunkID();
+            const newChunk: ARC_ChunksType = {
+              id: NTID,
+              userID: activeUserID,
+              tx: Date.now(),
+              version: "0.1.1",
+              encryptedContent: encrypted,
+            };
+            db.runAsync(
+              `INSERT INTO arcChunks (id, userID, encryptedContent, version, tx) VALUES (?, ?, ?, ?, ?)`,
+              [
+                newChunk.id,
+                newChunk.userID,
+                newChunk.encryptedContent,
+                newChunk.version,
+                newChunk.tx,
+              ]
+            ).then(() => {
+              currentActivities.setCurrentActivities([]);
+              currentActivities.setIni(true);
+              currentActivities.setLastChunk({
+                ...newChunk,
+                encryptedContent: { tasks: [] },
+              });
+              console.log("initialized empty chunk");
+            });
           });
+        } else {
+          let encryptedChunks = recentChunks;
+          const decryptedChunks = [];
+          function recursiveCall() {
+            console.log("called at", Date.now());
+            if (encryptedChunks.length > 0) {
+              const chunk = encryptedChunks.pop();
+              console.log(chunk.tx.toString().slice(-3), "chunk");
+              const encryptedContent = chunk.encryptedContent;
+              symmetricDecrypt(encryptedContent).then((decrypted) => {
+                decryptedChunks.push(decrypted);
+                setTimeout(() => {
+                  recursiveCall();
+                }, 100);
+              });
+            } else {
+              console.log("decryption done", decryptedChunks);
+              try {
+                const activities = [];
+                const lastChunkDecryptedData = {};
+                for (let ix = 0; ix < decryptedChunks.length; ix++) {
+                  const parsedChunk = jsesc.default(decryptedChunks[ix], {
+                    json: true,
+                  });
+                  const chunk: { tasks: ArcTaskLogType[] } =
+                    JSON.parse(parsedChunk);
+                  activities.push(...chunk.tasks);
+                  if (ix === 0) {
+                    lastChunkDecryptedData["tasks"] = chunk.tasks;
+                  }
+                }
+                currentActivities.setCurrentActivities(activities);
+                currentActivities.setLastChunk({
+                  ...recentChunks[0],
+                  encryptedContent: lastChunkDecryptedData,
+                });
+                currentActivities.setIni(true);
+              } catch (e) {
+                console.log(e, "initial chunks parsing failed");
+              }
+            }
+          }
+          recursiveCall();
         }
       });
     }

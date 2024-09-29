@@ -39,6 +39,7 @@ import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 import { defaultFeatureConfig } from "@/app/config/defaultFeatureConfig";
 import { useStore } from "@/stores/arcChunks";
 import { newChunkID } from "@/fn/newChunkID";
+import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 export default function CreateAccountOffline({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   store.subscribe(() => {});
@@ -52,6 +53,8 @@ export default function CreateAccountOffline({ navigation }) {
     (store) => store.setArcFeatureConfig
   );
   const addChunkToArcChunks = useStore((state) => state.addChunkToArcChunks);
+
+  const useLocalUserIDsStoreAPI = useLocalUserIDsStore();
   const db = useSQLiteContext();
   useEffect(() => {
     setTimeout(() => {
@@ -104,14 +107,9 @@ export default function CreateAccountOffline({ navigation }) {
                   db.runAsync(`DELETE FROM users WHERE id='temp'`)
                     .then(() => {
                       setArcFeatureConfig(defaultFeatureConfig.arc);
-                      const newChunk = {
-                        id: newChunkID(),
-                        tx: Date.now(),
-                        activities: [],
-                        version: "0.1.1",
-                        userID: aid,
-                      };
-                      addChunkToArcChunks(newChunk);
+                      useLocalUserIDsStoreAPI.updateLocalUserIDs([
+                        { authenticated: true, id: aid, isActive: true },
+                      ]);
                       setTimeout(() => {
                         navigation.navigate("Home", { name: "Home" });
                       }, 100);

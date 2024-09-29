@@ -17,11 +17,11 @@ async function checkTables(): Promise<CheckTablesReturnSig> {
   );
   promiseArray.push(usersTablePromise);
   const userDataTablePromise = db.runAsync(
-    "CREATE TABLE IF NOT EXISTS userData (id TEXT NOT NULL PRIMARY KEY, userID TEXT NOT NULL, key TEXT NOT NULL, value TEXT NOT NULL, version TEXT NOT NULL);"
+    "CREATE TABLE IF NOT EXISTS userData (userID TEXT NOT NULL, key TEXT NOT NULL, value TEXT NOT NULL, version TEXT NOT NULL, PRIMARY KEY (userID, key));"
   );
   promiseArray.push(userDataTablePromise);
   const arcChunksTablePromise = db.runAsync(
-    "CREATE TABLE IF NOT EXISTS arcChunks (id TEXT NOT NULL PRIMARY KEY, userID TEXT NOT NULL, encryptedContent TEXT NOT NULL, tx NUMBER NOT NULL, version TEXT NOT NULL, isComplete INTEGER NOT NULL);"
+    "CREATE TABLE IF NOT EXISTS arcChunks (id TEXT NOT NULL PRIMARY KEY, userID TEXT NOT NULL, encryptedContent TEXT NOT NULL, tx NUMBER NOT NULL, version TEXT NOT NULL);"
   );
   promiseArray.push(arcChunksTablePromise);
   const tessChunksTablePromise = db.runAsync(
@@ -39,6 +39,7 @@ async function checkTables(): Promise<CheckTablesReturnSig> {
         return { status: "success", error: null, isEmpty: isEmpty };
       })
       .catch((e) => {
+        console.log(e);
         return { status: "failed", error: "e" };
       });
   });

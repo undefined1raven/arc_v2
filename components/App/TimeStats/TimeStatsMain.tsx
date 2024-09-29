@@ -47,6 +47,8 @@ import {
 import MenuList from "@/components/common/menu/MenuList";
 import { Circle } from "@shopify/react-native-skia";
 import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
+import { symmetricDecrypt } from "../decryptors/symmetricDecrypt";
+import useDecryptionStore from "../decryptors/decryptionStore";
 export default function TimeStatsMain({}) {
   const menuApi = useMenuConfigStore();
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
@@ -66,7 +68,7 @@ export default function TimeStatsMain({}) {
     return <Circle cx={x} cy={y} r={8} color="black" />;
   }
   const { state, isActive } = useChartPressState({ x: 0, y: { highTmp: 0 } });
-
+  const menuOverlayStatus = useMenuConfigStore();
   function generateRandomColor(): string {
     // Generating a random number between 0 and 0xFFFFFF
     const randomColor = Math.floor(Math.random() * 0xffffff);
@@ -81,6 +83,8 @@ export default function TimeStatsMain({}) {
       label: `Label ${index + 1}`,
     }));
   };
+
+  const currentActivities = useArcCurrentActivitiesStore();
 
   const HalfDonutChart = () => {
     const [data] = useState(DATA(2));
@@ -111,7 +115,6 @@ export default function TimeStatsMain({}) {
     );
   };
   const renderItem = ({ item, index }: { item: MenuOverlayButtonType }) => {
-    console.log(index);
     return (
       <Animated.View
         entering={FadeInRight.duration(75)
@@ -127,7 +130,10 @@ export default function TimeStatsMain({}) {
         }}
       >
         <RButton
-          onClick={() => {}}
+          onClick={() => {
+            decryptionApi.setDecryptedData("xxx");
+            console.log("clicked did it");
+          }}
           width="100%"
           height="100%"
           verticalAlign="center"
@@ -141,8 +147,8 @@ export default function TimeStatsMain({}) {
             fontSize={globalStyle.mediumMobileFont}
             text={item.start.toString()}
           ></RLabel>
-          <RBox width="30%" top="10%" height="80%" left="75%">
-            <Animated.View
+          <RBox width="30%" top="10%" height="50%" left="75%">
+            <View
               style={{
                 position: "absolute",
                 top: 0,
@@ -152,17 +158,13 @@ export default function TimeStatsMain({}) {
               }}
             >
               <HalfDonutChart></HalfDonutChart>
-            </Animated.View>
+            </View>
           </RBox>
         </RButton>
       </Animated.View>
     );
   };
-  const currentActivities = useArcCurrentActivitiesStore();
 
-  useEffect(() => {
-    console.log(currentActivities.currentActivities.length);
-  }, [currentActivities]);
 
   return (
     <View
@@ -189,7 +191,7 @@ export default function TimeStatsMain({}) {
       />
       <Header show={true}></Header>
 
-      {hasMounted ? (
+      {hasMounted && menuOverlayStatus.menuOverlayConfig.visible === false ? (
         <Animated.View
           entering={globalEnteringConfig(150, 20)}
           style={{
@@ -218,12 +220,12 @@ export default function TimeStatsMain({}) {
               left="0%"
             ></RFlatList>
           </RBox>
-          <MenuMain></MenuMain>
-          <MenuList></MenuList>
         </Animated.View>
       ) : (
         <RBox></RBox>
       )}
+      <MenuMain></MenuMain>
+      <MenuList></MenuList>
     </View>
   );
 }

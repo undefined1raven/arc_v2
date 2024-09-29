@@ -15,10 +15,9 @@ function BackgroundTaskRunner(props: BackgroundTaskRunnerProps) {
 
     return (
         <WebView
-            injectedJavaScriptObject={{"what": "whattt"}}
             ref={worker}
             webviewDebuggingEnabled={true}
-            style={{ width: 0, height: 0, position: 'absolute', opacity: 0 }}
+            style={{ width: 0, height: 0, opacity: 0, display: 'none' }}
             originWhitelist={['*']}
             injectedJavaScript={getVal(props.code, '')}
             onMessage={getVal(props.messageHandler, () => { })}

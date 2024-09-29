@@ -43,13 +43,9 @@ import { ColorValueHex } from "@/components/common/CommonTypes";
 import { SearchIcon } from "@/components/common/deco/SearchIcon";
 import { AddIcon } from "@/components/common/deco/AddIcon";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
-import { getCurrentActivities } from "@/fn/dbUtils/getCurrentActivities";
 import { useMenuConfigStore } from "@/stores/mainMenu";
 import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
-import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 import { randomUUID } from "expo-crypto";
-import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
-import { useCurrentArcChunkStore } from "@/stores/currentArcChunk";
 
 type TimeTrackingActivityMenuProps = {
   onBackButton: Function;
@@ -59,32 +55,13 @@ export default function TimeTrackingActivityMenu(
   props: TimeTrackingActivityMenuProps
 ) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
-  const activeUserID = useLocalUserIDsStore((store) => store.getActiveUserID());
 
   const hideMainMenu = useMenuConfigStore((store) => store.hideMenu);
   const showMainMenu = useMenuConfigStore((store) => store.showMenu);
 
   const [searchInput, setSearchInput] = useState("");
-  const arcFeatureConfig: FeatureConfigArcType = useArcFeatureConfigStore(
-    (store) => store.arcFeatureConfig
-  );
-  const [hasOngoingActivities, setHasOngoingActivities] =
-    useState<boolean>(false);
-
-  const {
-    currentActivities: arcCurrentActivities,
-    setCurrentActivities: setArcCurrentActivities,
-  } = useArcCurrentActivitiesStore((store) => ({
-    currentActivities: store.currentActivities,
-    setCurrentActivities: store.setCurrentActivities,
-  }));
-
-  const timeTrackingContainerConfig = {
-    containerHeight: 163,
-    containerWidth: 354,
-  };
-  const db = useSQLiteContext();
-  const menuConfig = useMenuConfigStore((store) => store.menuConfig);
+  const arcFeatureConfig: FeatureConfigArcType | null =
+    useArcFeatureConfigStore((store) => store.arcFeatureConfig);
 
   function onBackTrigger() {
     showMainMenu();
@@ -99,13 +76,6 @@ export default function TimeTrackingActivityMenu(
     });
     setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
   }, []);
-  function addActivityToCurrentActivities(taskID: string) {
-    setArcCurrentActivities([
-      ...arcCurrentActivities,
-      { taskID: taskID, start: Date.now(), end: null },
-    ]);
-    onBackTrigger();
-  }
 
   const headerContainerConfig = { containerHeight: 34, containerWidth: 350 };
   const renderItem = ({ item, index }: { item: { name: string } }) => {
@@ -125,7 +95,6 @@ export default function TimeTrackingActivityMenu(
       >
         <RButton
           onClick={() => {
-            addActivityToCurrentActivities(item.taskID);
             props.onTaskSelected(item.taskID);
             onBackTrigger();
           }}
@@ -232,7 +201,7 @@ export default function TimeTrackingActivityMenu(
             style={{ ...styles.defaultStyle }}
             renderItem={renderItem}
             keyExtractor={(item) => item.taskID}
-            data={arcFeatureConfig.tasks.filter((task) => {
+            data={arcFeatureConfig?.tasks.filter((task) => {
               if (searchInput === "") return true;
               const searchInputLowerCase = searchInput.toLocaleLowerCase();
               const filteredTaskCategories =

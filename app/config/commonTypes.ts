@@ -108,7 +108,6 @@ type ARC_ChunksType = {
   encryptedContent: string;
   tx: number;
   version: "0.1.1";
-  isComplete: boolean;
 };
 
 type Tess_ChunksType = {

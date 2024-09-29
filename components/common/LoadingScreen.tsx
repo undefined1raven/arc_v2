@@ -24,6 +24,7 @@ import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { useLoadingScreenMessageStore } from "@/stores/loadingScreenMessage";
 import { useNavigatorStore } from "@/hooks/navigator";
+import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
 
 export default function LoadingScreen({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
@@ -36,6 +37,7 @@ export default function LoadingScreen({ navigation }) {
     setHasMounted(true);
     setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
   }, []);
+  const currentActivities = useArcCurrentActivitiesStore();
   const setNavigator = useNavigatorStore((store) => store.setNavigator);
   useEffect(() => {
     if (loadingScreenMessage.redirect !== undefined) {

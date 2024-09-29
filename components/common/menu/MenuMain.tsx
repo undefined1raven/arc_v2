@@ -63,21 +63,26 @@ export default function MenuMain() {
         style={styles.defaultStyle}
         entering={FadeInDown.duration(100).damping(1)}
       >
-          <RButton
-            onClick={() => {
-              console.log("xx");
-              if (navigator !== null) {
-                navigator.navigate("SettingsMain", { name: "SettingsMain" });
-              }
-            }}
-            figmaImportConfig={containerConfig}
-            figmaImport={{
-              mobile: { left: "0%", height: "100%", width: 116, top: "0%" },
-            }}
-          >
-            <SettingdIcon width="50%" height="50%"></SettingdIcon>
-          </RButton>
         <RButton
+          onClick={() => {
+            console.log("xx");
+            if (navigator !== null) {
+              navigator.navigate("SettingsMain", { name: "SettingsMain" });
+            }
+          }}
+          figmaImportConfig={containerConfig}
+          figmaImport={{
+            mobile: { left: "0%", height: "100%", width: 116, top: "0%" },
+          }}
+        >
+          <SettingdIcon width="50%" height="50%"></SettingdIcon>
+        </RButton>
+        <RButton
+          onClick={() => {
+            if (navigator !== null) {
+              navigator.navigate("Home", { name: "Home" });
+            }
+          }}
           verticalAlign="center"
           figmaImportConfig={containerConfig}
           figmaImport={{
@@ -86,17 +91,17 @@ export default function MenuMain() {
         >
           <HomeIcon width="60%" height="60%"></HomeIcon>
         </RButton>
-          <RButton
-            figmaImportConfig={containerConfig}
-            onClick={() => {
-              menuApi.setOverlayMenuVisibility(true);
-            }}
-            figmaImport={{
-              mobile: { left: 238, height: "100%", width: 116, top: "0%" },
-            }}
-          >
-            <ThreeDotsIcon width="22%" height="30%"></ThreeDotsIcon>
-          </RButton>
+        <RButton
+          figmaImportConfig={containerConfig}
+          onClick={() => {
+            menuApi.setOverlayMenuVisibility(true);
+          }}
+          figmaImport={{
+            mobile: { left: 238, height: "100%", width: 116, top: "0%" },
+          }}
+        >
+          <ThreeDotsIcon width="22%" height="30%"></ThreeDotsIcon>
+        </RButton>
       </Animated.View>
     </RBox>
   ) : (

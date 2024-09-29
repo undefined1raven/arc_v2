@@ -14,22 +14,31 @@ import { useSQLiteContext } from "expo-sqlite";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import RButton from "@/components/common/RButton";
 import TimeTrackingActivityMenu from "./TimeTrackerActivityMenu";
-import { ArcTaskLogType, FeatureConfigArcType } from "@/app/config/commonTypes";
-import { getCurrentActivities } from "@/fn/dbUtils/getCurrentActivities";
+import {
+  ARC_ChunksType,
+  ArcTaskLogType,
+  FeatureConfigArcType,
+} from "@/app/config/commonTypes";
+import * as jsesc from "jsesc";
 import { displayTimeFromMsDuration } from "@/fn/timeUtils/displayTimeFromMsDuration";
 import { timeOfDayFromUnix } from "@/fn/timeUtils/timeOfDayFromUnix";
 import { AddIcon } from "@/components/common/deco/AddIcon";
-import { useStore } from "@/stores/arcChunks";
 import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 import { randomUUID } from "expo-crypto";
-import { useCurrentArcChunkStore } from "@/stores/currentArcChunk";
+import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
+import { MaxActivitiesInArcChunk } from "@/app/config/chunking";
+import { symmetricEncrypt } from "../../encryptors/symmetricEncrypt";
+import { newChunkID } from "@/fn/newChunkID";
+import { symmetricDecrypt } from "../../decryptors/symmetricDecrypt";
+import useEncryptionStore from "../../encryptors/encryptionStore";
 
 export default function TimeTracker() {
   store.subscribe(() => {});
-
+  const encryptionAPI = useEncryptionStore();
+  const currentArcActivitiesAPI = useArcCurrentActivitiesStore();
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
-  const activeUserID = useLocalUserIDsStore((store) => store.getActiveUserID());
+  const activeUserID = useLocalUserIDsStore().getActiveUserID();
   const arcFeatureConfig: FeatureConfigArcType = useArcFeatureConfigStore(
     (store) => store.arcFeatureConfig
   );
@@ -53,7 +62,14 @@ export default function TimeTracker() {
   };
   const db = useSQLiteContext();
 
-  const currentArcChunkAPI = useCurrentArcChunkStore();
+  useEffect(() => {
+    if (currentActivities.length > 0) {
+      setCurrentDisplayedActivity(currentActivities[0]);
+    } else {
+      setCurrentDisplayedActivity(null);
+    }
+    mutateCurrentActivities(currentActivities);
+  }, [currentActivities]);
 
   useEffect(() => {
     if (currentDisplayedActivity !== null) {
@@ -73,45 +89,129 @@ export default function TimeTracker() {
   }, [currentDisplayedActivity]);
 
   useEffect(() => {
-    if (hasCurrentActivitiesFromUserData === false) {
-      getCurrentActivities().then((retrievedActivities) => {
-        setHasCurrentActivitiesFromUserData(true);
-        setCurrentActivities(retrievedActivities);
-      });
-    }
-    if (currentDisplayedActivity === null || currentActivities.length > 0) {
-      setCurrentDisplayedActivity(
-        currentActivities[currentActivities.length - 1]
-      );
-    }
-    if (currentActivities.length === 0) {
-      setCurrentDisplayedActivity(null);
-    }
-    if (hasCurrentActivitiesFromUserData === true) {
-      mutateCurrentActivities(currentActivities);
-    }
-  }, [currentActivities, hasCurrentActivitiesFromUserData]);
-
-  useEffect(() => {
     setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
+    getActivitiesFromUserData();
   }, []);
 
+  function getActivitiesFromUserData() {
+    if (hasCurrentActivitiesFromUserData === true) return;
+    db.getFirstAsync(
+      `SELECT value, userID FROM userData WHERE key=? AND userID=?`,
+      ["ongoingActivities", activeUserID]
+    )
+      .then((res) => {
+        if (res === undefined || res === null) {
+          setHasCurrentActivitiesFromUserData(true);
+          setCurrentActivities([]);
+        } else {
+          const parsed = JSON.parse(res.value);
+          setCurrentActivities(parsed);
+          setHasCurrentActivitiesFromUserData(true);
+        }
+      })
+      .catch((e) => {
+        setHasCurrentActivitiesFromUserData(true);
+        setCurrentActivities([]);
+      });
+  }
+
   function mutateCurrentActivities(value: ArcTaskLogType[]) {
+    if (hasCurrentActivitiesFromUserData === false) return;
     if (value === undefined) return;
     if (value === null) return;
     db.runAsync(
-      `INSERT OR REPLACE INTO userData (value, key, userID, id, version) VALUES (?, ?, ?, ?, ?) `,
-      [
-        JSON.stringify(value),
-        "currentActivities",
-        activeUserID,
-        randomUUID(),
-        "0.1.1",
-      ]
-    ).catch((e) => {});
+      `INSERT OR REPLACE INTO userData (value, key, userID, version) VALUES (?, ?, ?, ?)`,
+      [JSON.stringify(value), "ongoingActivities", activeUserID, "0.1.1"]
+    )
+      .then((r) => {
+        // console.log(r);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   }
 
-  const currentChunkAPI = useCurrentArcChunkStore();
+  function updateLocalCache(newActivity: ArcTaskLogType) {
+    if (encryptionAPI.plain !== null) return;
+    const prevActivities =
+      currentArcActivitiesAPI.lastChunk?.encryptedContent.tasks;
+    
+    console.log(prevActivities.map(i => i.start.toString().slice(-3)), "prevActivities");
+    function updateLastChunk(
+      isNew: boolean,
+      newActivity?: ArcTaskLogType,
+      newChunk?: ARC_ChunksType
+    ) {
+      if (isNew === false) {
+        const newActivitiesInLastChunk = {
+          tasks: [...prevActivities, newActivity],
+        };
+        const newLastChunk = {
+          ...currentArcActivitiesAPI.lastChunk,
+          encryptedContent: newActivitiesInLastChunk,
+        };
+        currentArcActivitiesAPI.setLastChunk(newLastChunk);
+      } else {
+        if (newChunk === undefined || newActivity === undefined) return;
+        const newLastChunk = {
+          ...newChunk,
+          encryptedContent: { tasks: [newActivity] },
+        };
+        currentArcActivitiesAPI.setLastChunk(newLastChunk);
+      }
+    }
+    function saveChunkToDB(chunk) {
+      console.log(chunk.encryptedContent.length, "saving this bad boy");
+      db.runAsync(
+        `INSERT OR REPLACE INTO arcChunks (id, userID, encryptedContent, tx, version) VALUES (?, ?, ?, ?, ?)`,
+        [
+          chunk.id,
+          chunk.userID,
+          chunk.encryptedContent,
+          chunk.tx,
+          chunk.version,
+        ]
+      ).then((r) => {
+        console.log("saved chunk");
+      });
+    }
+
+    ////save changes to locak db
+    if (prevActivities.length >= MaxActivitiesInArcChunk) {
+      symmetricEncrypt(JSON.stringify({ tasks: [newActivity] })).then(
+        (encrypted) => {
+          const newChunk = {
+            id: newChunkID(),
+            userID: activeUserID,
+            encryptedContent: encrypted,
+            tx: Date.now(),
+            version: "0.1.1",
+          };
+          saveChunkToDB(newChunk);
+          updateLastChunk(true, newActivity, newChunk);
+        }
+      );
+    } else {
+      symmetricEncrypt(
+        JSON.stringify({ tasks: [...prevActivities, newActivity] })
+      ).then((encrypted) => {
+        setTimeout(() => {
+          symmetricEncrypt(
+            JSON.stringify({ tasks: [...prevActivities, newActivity] })
+          ).then((encryptedf) => {
+            const newChunk = {
+              ...currentArcActivitiesAPI.lastChunk,
+              encryptedContent: encryptedf,
+            };
+            saveChunkToDB(newChunk);
+            updateLastChunk(false, newActivity);
+          });
+        }, 100);
+      });
+    }
+    console.log("last chunk acc", prevActivities.length);
+    console.log("trigger local cache update");
+  }
 
   return (
     <RBox width="100%" height="100%" top={0} left={0}>
@@ -172,18 +272,20 @@ export default function TimeTracker() {
               figmaImport={{
                 mobile: { top: 109, left: 5, width: 344, height: 48 },
               }}
-              onClick={() => {
-                currentChunkAPI.appendActivity({
+              onClick={async () => {
+                const newActivity = {
                   taskID: currentDisplayedActivity?.taskID as string,
                   start: Date.now(),
                   end: Date.now(),
-                });
+                };
                 setCurrentActivities((prev) => {
                   if (currentDisplayedActivity === null) return prev;
                   return prev.filter(
                     (elm) => elm.taskID !== currentDisplayedActivity?.taskID
                   );
                 });
+                currentArcActivitiesAPI.appendCurrentActivities(newActivity);
+                updateLocalCache(newActivity);
               }}
               mobileFontSize={20}
               label="Done"

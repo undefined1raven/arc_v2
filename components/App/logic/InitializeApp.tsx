@@ -5,7 +5,6 @@ import { getLocalUsers } from "./getLocalUsers";
 import { AsyncGenNewAccountInfo } from "./AsyncGenNewAccountInfo";
 import { useLoadingScreenMessageStore } from "@/stores/loadingScreenMessage";
 import { useHasCheckedTablesStore } from "@/stores/hasCheckedTables";
-import { ArcChunksBuffer } from "@/components/common/crypto/ArcChunksBuffer";
 import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 import * as SecureStore from "expo-secure-store";
 import { getUserDataByID } from "@/fn/dbUtils/getUserDataByID";
@@ -13,10 +12,13 @@ import { SingleDecrypt } from "@/components/common/crypto/SingleDecrypt";
 import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 import * as format from "jsesc";
 import { LoadUserData } from "./LoadUserData";
-import { ArcChunksWriteBufferActual } from "@/components/common/crypto/ArcChunksWriteBufferActual";
-import { ArcLastChunkDecryptor } from "@/components/common/crypto/ArcLastChunkDecryptor";
+import useDecryptionStore from "../decryptors/decryptionStore";
+import useEncryptionStore from "../encryptors/encryptionStore";
+import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
 function InitializeApp() {
   const db = useSQLiteContext();
+  const decryptionAPI = useDecryptionStore();
+  const encryptionAPI = useEncryptionStore();
   const updateHasCheckedTables =
     useHasCheckedTablesStore.getState().updateHasCheckedTables;
   const updateLoadingMessage =
@@ -110,13 +112,35 @@ function InitializeApp() {
           symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
         ></SingleDecrypt>
       )}
-      <ArcChunksBuffer
-        activeUserID={activeUserID}
-        symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
-      ></ArcChunksBuffer>
+      {decryptionAPI.cipherText !== null && (
+        <SingleDecrypt
+          encryptedObj={decryptionAPI.cipherText}
+          onDecrypted={(e) => {
+            decryptionAPI.setCipherText(null);
+            decryptionAPI.setDecryptedData(e);
+          }}
+          onError={(e) => {
+            decryptionAPI.setCipherText(null);
+            decryptionAPI.setDecryptedData("error");
+          }}
+          symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
+        ></SingleDecrypt>
+      )}
+      {encryptionAPI.plain !== null && (
+        <SingleEncrypt
+          plainText={encryptionAPI.plain}
+          onEncrypted={(e) => {
+            encryptionAPI.setEncryptedData(e);
+            encryptionAPI.setPlain(null);
+          }}
+          onError={(e) => {
+            encryptionAPI.setEncryptedData("error");
+            encryptionAPI.setPlain(null);
+          }}
+          symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
+        ></SingleEncrypt>
+      )}
       <AsyncGenNewAccountInfo></AsyncGenNewAccountInfo>
-      <ArcLastChunkDecryptor></ArcLastChunkDecryptor>
-      <ArcChunksWriteBufferActual></ArcChunksWriteBufferActual>
       <LoadUserData></LoadUserData>
     </>
   );
