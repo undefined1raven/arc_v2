@@ -21,10 +21,19 @@ export default function Home({ navigation, onRequestUserIDs }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   useEffect(() => {
     console.log(
-      currentActivitiesAPI.currentActivities.map((activity) => activity.start.toString().slice(-3)),
+      currentActivitiesAPI.currentActivities.map((activity) =>
+        activity.start.toString().slice(-3)
+      ),
       "currentActivities"
     );
   }, [currentActivitiesAPI.currentActivities]);
+
+  useEffect(() => {
+    for (let ix = 0; ix < 2; ix++) {
+      symmetricEncrypt(JSON.stringify({ test: ix })).then((encrypted) => {});
+    }
+  }, []);
+
   return (
     <View
       style={{

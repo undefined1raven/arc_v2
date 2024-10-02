@@ -15,6 +15,7 @@ import { LoadUserData } from "./LoadUserData";
 import useDecryptionStore from "../decryptors/decryptionStore";
 import useEncryptionStore from "../encryptors/encryptionStore";
 import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
+import { CryptoMain } from "../CryptoMain";
 function InitializeApp() {
   const db = useSQLiteContext();
   const decryptionAPI = useDecryptionStore();
@@ -126,7 +127,8 @@ function InitializeApp() {
           symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
         ></SingleDecrypt>
       )}
-      {encryptionAPI.plain !== null && (
+      <CryptoMain></CryptoMain>
+      {/* {encryptionAPI.plain !== null && (
         <SingleEncrypt
           plainText={encryptionAPI.plain}
           onEncrypted={(e) => {
@@ -139,7 +141,7 @@ function InitializeApp() {
           }}
           symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
         ></SingleEncrypt>
-      )}
+      )} */}
       <AsyncGenNewAccountInfo></AsyncGenNewAccountInfo>
       <LoadUserData></LoadUserData>
     </>
