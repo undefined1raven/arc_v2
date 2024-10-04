@@ -14,6 +14,7 @@ import MenuList from "@/components/common/menu/MenuList";
 import { symmetricDecrypt } from "../decryptors/symmetricDecrypt";
 import { symmetricEncrypt } from "../encryptors/symmetricEncrypt";
 import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
+import { CryptoMain } from "../CryptoMain";
 
 type HomeProps = { onRequestUserIDs: Function };
 export default function Home({ navigation, onRequestUserIDs }) {
@@ -27,12 +28,6 @@ export default function Home({ navigation, onRequestUserIDs }) {
       "currentActivities"
     );
   }, [currentActivitiesAPI.currentActivities]);
-
-  useEffect(() => {
-    for (let ix = 0; ix < 2; ix++) {
-      symmetricEncrypt(JSON.stringify({ test: ix })).then((encrypted) => {});
-    }
-  }, []);
 
   return (
     <View
@@ -105,6 +100,7 @@ export default function Home({ navigation, onRequestUserIDs }) {
           ]}
         ></QuickNavMain>
       </Animated.View>
+      {/* <CryptoMain></CryptoMain> */}
       <MenuList></MenuList>
     </View>
   );

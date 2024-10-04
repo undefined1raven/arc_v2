@@ -16,6 +16,7 @@ import useDecryptionStore from "../decryptors/decryptionStore";
 import useEncryptionStore from "../encryptors/encryptionStore";
 import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
 import { CryptoMain } from "../CryptoMain";
+import { MultiDecrypt } from "@/components/common/crypto/MultiDecrypt";
 function InitializeApp() {
   const db = useSQLiteContext();
   const decryptionAPI = useDecryptionStore();
@@ -113,22 +114,19 @@ function InitializeApp() {
           symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
         ></SingleDecrypt>
       )}
-      {decryptionAPI.cipherText !== null && (
-        <SingleDecrypt
-          encryptedObj={decryptionAPI.cipherText}
-          onDecrypted={(e) => {
-            decryptionAPI.setCipherText(null);
-            decryptionAPI.setDecryptedData(e);
-          }}
-          onError={(e) => {
-            decryptionAPI.setCipherText(null);
-            decryptionAPI.setDecryptedData("error");
-          }}
-          symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
-        ></SingleDecrypt>
-      )}
-      <CryptoMain></CryptoMain>
-      {/* {encryptionAPI.plain !== null && (
+      <MultiDecrypt
+        encryptedObj={decryptionAPI.cipherText}
+        onDecrypted={(e) => {
+          decryptionAPI.setCipherText(null);
+          decryptionAPI.setDecryptedData(e);
+        }}
+        onError={(e) => {
+          decryptionAPI.setCipherText(null);
+          decryptionAPI.setDecryptedData("error");
+        }}
+        symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
+      ></MultiDecrypt>
+      {encryptionAPI.plain !== null && (
         <SingleEncrypt
           plainText={encryptionAPI.plain}
           onEncrypted={(e) => {
@@ -141,7 +139,7 @@ function InitializeApp() {
           }}
           symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
         ></SingleEncrypt>
-      )} */}
+      )}
       <AsyncGenNewAccountInfo></AsyncGenNewAccountInfo>
       <LoadUserData></LoadUserData>
     </>

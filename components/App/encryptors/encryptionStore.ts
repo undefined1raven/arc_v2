@@ -1,20 +1,19 @@
 import { create } from "zustand";
 
 interface EncryptionState {
-  encryptedData: { [key: string]: string };
-  plain: { [key: string]: string };
-  setPlain: (newPlain: { [key: string]: string }) => void;
-  setEncryptedData: (data: { [key: string]: string }) => void;
+  encryptedData: string | null;
+  plain: string | null;
+  setPlain: (newPlain: string | null) => void;
+  setEncryptedData: (data: string | null) => void;
 }
 
 const useEncryptionStore = create<EncryptionState>((set, get) => ({
-  encryptedData: {},
-  plain: {},
-  setPlain: (newPlain: { [key: string]: string }) => {
-    set({ plain: { ...get().plain, ...newPlain } });
+  encryptedData: null,
+  plain: null,
+  setPlain: (newPlain: string | null) => {
+    set({ plain: newPlain });
   },
-  setEncryptedData: (data) =>
-    set({ encryptedData: { ...get().encryptedData, ...data } }),
+  setEncryptedData: (data) => set({ encryptedData: data }),
 }));
 
 export default useEncryptionStore;

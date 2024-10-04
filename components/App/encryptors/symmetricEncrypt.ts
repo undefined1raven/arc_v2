@@ -6,7 +6,7 @@ function symmetricEncrypt(plain: string): Promise<string> {
   const transactionID = randomUUID();
   const prom = new Promise<string>((resolve, reject) => {
     useEncryptionStore.subscribe((change) => {
-      const response = change.encryptedData[transactionID];
+      const response = change.encryptedData;
       if (response !== null && response !== undefined) {
         if (response !== "error") {
           resolve(response);
@@ -15,7 +15,7 @@ function symmetricEncrypt(plain: string): Promise<string> {
         }
       }
     });
-    encryptionAPI.setPlain({ [transactionID]: plain });
+    encryptionAPI.setPlain(plain);
   });
   return prom;
 }

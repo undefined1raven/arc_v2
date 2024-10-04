@@ -82,48 +82,39 @@ function LoadUserData() {
             });
           });
         } else {
-          let encryptedChunks = recentChunks;
-          const decryptedChunks = [];
-          function recursiveCall() {
-            console.log("called at", Date.now());
-            if (encryptedChunks.length > 0) {
-              const chunk = encryptedChunks.pop();
-              console.log(chunk.tx.toString().slice(-3), "chunk");
-              const encryptedContent = chunk.encryptedContent;
-              symmetricDecrypt(encryptedContent).then((decrypted) => {
-                decryptedChunks.push(decrypted);
-                setTimeout(() => {
-                  recursiveCall();
-                }, 100);
-              });
-            } else {
-              console.log("decryption done", decryptedChunks);
+          const encryptedContents = recentChunks.map((chunk) => {
+            return chunk.encryptedContent;
+          });
+          symmetricDecrypt(JSON.stringify(encryptedContents))
+            .then((res) => {
+              const decryptedChunks: ARC_ChunksType[] = [];
+              const results = JSON.parse(jsesc.default(res, { json: true }));
+              for (let ix = 0; ix < results.length; ix++) {
+                const tasks = JSON.parse(results[ix]);
+                decryptedChunks.push({
+                  ...recentChunks[ix],
+                  encryptedContent: tasks,
+                });
+              }
               try {
-                const activities = [];
-                const lastChunkDecryptedData = {};
+                let activities = [];
                 for (let ix = 0; ix < decryptedChunks.length; ix++) {
-                  const parsedChunk = jsesc.default(decryptedChunks[ix], {
-                    json: true,
-                  });
-                  const chunk: { tasks: ArcTaskLogType[] } =
-                    JSON.parse(parsedChunk);
-                  activities.push(...chunk.tasks);
-                  if (ix === 0) {
-                    lastChunkDecryptedData["tasks"] = chunk.tasks;
-                  }
+                  const na = decryptedChunks[ix].encryptedContent.tasks;
+                  activities = [...activities, ...na];
                 }
                 currentActivities.setCurrentActivities(activities);
                 currentActivities.setLastChunk({
                   ...recentChunks[0],
-                  encryptedContent: lastChunkDecryptedData,
+                  encryptedContent: results[0],
                 });
                 currentActivities.setIni(true);
               } catch (e) {
                 console.log(e, "initial chunks parsing failed");
               }
-            }
-          }
-          recursiveCall();
+            })
+            .catch((e) => {
+              console.log(e, "decryption failed");
+            });
         }
       });
     }
