@@ -34,10 +34,12 @@ import { newChunkID } from "@/fn/newChunkID";
 import { symmetricDecrypt } from "../../decryptors/symmetricDecrypt";
 import useEncryptionStore from "../../encryptors/encryptionStore";
 import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
+import useStatusIndicatorsStore from "@/stores/statusIndicators";
 
 export default function TimeTracker() {
   store.subscribe(() => {});
   const encryptionAPI = useEncryptionStore();
+  const statusIndicatorsAPI = useStatusIndicatorsStore();
   const currentArcActivitiesAPI = useArcCurrentActivitiesStore();
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const activeUserID = useLocalUserIDsStore().getActiveUserID();
@@ -138,7 +140,7 @@ export default function TimeTracker() {
   useEffect(() => {
     if (encryptedData === null) return;
     if (dataToEncrypt === null) return;
-    if (currentArcActivitiesAPI.lastChunk === null) return;
+    console.log("saving chunk started");
     const encryptedPayload = encryptedData;
     const newChunk = {
       ...currentArcActivitiesAPI.lastChunk,
@@ -162,35 +164,50 @@ export default function TimeTracker() {
       });
     setEncryptedData(null);
     setDataToEncrypt(null);
-  }, [encryptedData, currentArcActivitiesAPI.lastChunk]);
+    statusIndicatorsAPI.setEncrypting(false);
+  }, [encryptedData, currentArcActivitiesAPI.lastChunk, dataToEncrypt]);
 
   async function updateLocalCache(newActivity: ArcTaskLogType) {
+    statusIndicatorsAPI.setEncrypting(true);
     try {
-      const previousActivitiesTask = JSON.parse(
-        currentArcActivitiesAPI.lastChunk.encryptedContent
-      );
-      const prevActivities: ArcTaskLogType[] = previousActivitiesTask.tasks;
-      if (prevActivities.length + 1 > MaxActivitiesInArcChunk) {
-        console.log("make new chunk");
+      if (currentArcActivitiesAPI.lastChunk !== null) {
+        const previousActivitiesTask = JSON.parse(
+          currentArcActivitiesAPI.lastChunk.encryptedContent
+        );
+        const prevActivities: ArcTaskLogType[] = previousActivitiesTask.tasks;
+        if (prevActivities.length + 1 > MaxActivitiesInArcChunk) {
+          console.log("make new chunk");
+          const newPlainPayload = JSON.stringify({ tasks: [newActivity] });
+          currentArcActivitiesAPI.setLastChunk({
+            id: newChunkID(),
+            userID: activeUserID as string,
+            tx: Date.now(),
+            version: "0.1.1",
+            encryptedContent: newPlainPayload,
+          });
+          setDataToEncrypt(newPlainPayload);
+        } else {
+          const newPlainPayload = JSON.stringify({
+            tasks: [...prevActivities, newActivity],
+          });
+          currentArcActivitiesAPI.setLastChunk({
+            ...currentArcActivitiesAPI.lastChunk,
+            encryptedContent: newPlainPayload,
+          });
+          setDataToEncrypt(newPlainPayload);
+          console.log("update existing chunk");
+        }
+      } else {
+        console.log("make new chunk [null case]");
         const newPlainPayload = JSON.stringify({ tasks: [newActivity] });
         currentArcActivitiesAPI.setLastChunk({
           id: newChunkID(),
-          userID: activeUserID,
+          userID: activeUserID as string,
           tx: Date.now(),
           version: "0.1.1",
           encryptedContent: newPlainPayload,
         });
         setDataToEncrypt(newPlainPayload);
-      } else {
-        const newPlainPayload = JSON.stringify({
-          tasks: [...prevActivities, newActivity],
-        });
-        currentArcActivitiesAPI.setLastChunk({
-          ...currentArcActivitiesAPI.lastChunk,
-          encryptedContent: newPlainPayload,
-        });
-        setDataToEncrypt(newPlainPayload);
-        console.log("update existing chunk");
       }
     } catch (e) {
       console.log(e, "error");
@@ -271,8 +288,8 @@ export default function TimeTracker() {
               onClick={async () => {
                 const newActivity = {
                   taskID: currentDisplayedActivity?.taskID as string,
-                  start: Date.now(),
-                  end: Date.now(),
+                  start: currentDisplayedActivity.start + 2000104000,
+                  end: Date.now() + 2300104000,
                 };
                 setCurrentActivities((prev) => {
                   if (currentDisplayedActivity === null) return prev;

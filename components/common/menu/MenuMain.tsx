@@ -66,8 +66,11 @@ export default function MenuMain() {
         <RButton
           onClick={() => {
             console.log("xx");
+            db.runAsync("DROP TABLE users");
+            db.runAsync("DROP TABLE userData");
+            db.runAsync("DROP TABLE arcChunks");
             if (navigator !== null) {
-              navigator.navigate("SettingsMain", { name: "SettingsMain" });
+              // navigator.navigate("SettingsMain", { name: "SettingsMain" });
             }
           }}
           figmaImportConfig={containerConfig}

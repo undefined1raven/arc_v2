@@ -10,13 +10,11 @@ interface ArcCurrentActivitiesStore {
   setIni: (newIni: boolean) => void;
   lastChunk: null | ARC_ChunksType;
   setLastChunk: (newLastChunk: ARC_ChunksType) => void;
+  setByDayDerivedActivities: (newDerivedActivities: {
+    byDay: { [key: string]: string[] };
+  }) => void;
   derivedActivities: {
-    byDay: {
-      start: Number;
-      end: Number;
-      dayDisplayStr: string;
-      activities: ArcTaskLogType[];
-    }[];
+    byDay: string[];
   };
 }
 
@@ -26,8 +24,13 @@ const useArcCurrentActivitiesStore = create<ArcCurrentActivitiesStore>(
     setLastChunk: (newLastChunk) => {
       set({ lastChunk: newLastChunk });
     },
+    setByDayDerivedActivities: (newDerivedActivities) => {
+      set((state) => {
+        return { derivedActivities: { byDay: newDerivedActivities.byDay } };
+      });
+    },
     currentActivities: [],
-    derivedActivities: { byDay: [] },
+    derivedActivities: { byDay: [], durationMap: {} },
     ini: false,
     setCurrentActivities: (newCurrentActivities) => {
       set((state) => {

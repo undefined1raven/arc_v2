@@ -11,6 +11,7 @@ interface GlobalStyleType {
   verySmallDesktopFont: number;
   titleDesktopFont: number;
   regularDesktopFont: number;
+  colorAlt: ColorValueHex;
   smallDesktopFont: number;
   mediumDesktopFont: number;
   footnoteDesktopFont: number;

@@ -51,36 +51,9 @@ function LoadUserData() {
         `SELECT * FROM arcChunks WHERE userID=? ORDER BY tx DESC LIMIT 3`,
         [activeUserID]
       ).then((recentChunks) => {
-        console.log(recentChunks.length, "recentChunks");
         if (recentChunks.length === 0) {
-          symmetricEncrypt(JSON.stringify({ tasks: [] })).then((encrypted) => {
-            const NTID = newChunkID();
-            const newChunk: ARC_ChunksType = {
-              id: NTID,
-              userID: activeUserID,
-              tx: Date.now(),
-              version: "0.1.1",
-              encryptedContent: encrypted,
-            };
-            db.runAsync(
-              `INSERT INTO arcChunks (id, userID, encryptedContent, version, tx) VALUES (?, ?, ?, ?, ?)`,
-              [
-                newChunk.id,
-                newChunk.userID,
-                newChunk.encryptedContent,
-                newChunk.version,
-                newChunk.tx,
-              ]
-            ).then(() => {
-              currentActivities.setCurrentActivities([]);
-              currentActivities.setIni(true);
-              currentActivities.setLastChunk({
-                ...newChunk,
-                encryptedContent: { tasks: [] },
-              });
-              console.log("initialized empty chunk");
-            });
-          });
+          currentActivities.setCurrentActivities([]);
+          currentActivities.setIni(true);
         } else {
           const encryptedContents = recentChunks.map((chunk) => {
             return chunk.encryptedContent;

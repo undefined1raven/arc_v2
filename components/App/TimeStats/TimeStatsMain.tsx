@@ -130,10 +130,6 @@ export default function TimeStatsMain({}) {
         }}
       >
         <RButton
-          onClick={() => {
-            decryptionApi.setDecryptedData("xxx");
-            console.log("clicked did it");
-          }}
           width="100%"
           height="100%"
           verticalAlign="center"
@@ -145,7 +141,7 @@ export default function TimeStatsMain({}) {
             height="100%"
             verticalAlign="center"
             fontSize={globalStyle.mediumMobileFont}
-            text={item.start.toString()}
+            text={item}
           ></RLabel>
           <RBox width="30%" top="10%" height="50%" left="75%">
             <View
@@ -209,7 +205,7 @@ export default function TimeStatsMain({}) {
           >
             <RFlatList
               inverted={false}
-              data={currentActivities.currentActivities}
+              data={Object.keys(currentActivities.derivedActivities.byDay)}
               keyExtractor={(item, index) => {
                 return index.toString();
               }}

@@ -15,6 +15,7 @@ import { symmetricDecrypt } from "../decryptors/symmetricDecrypt";
 import { symmetricEncrypt } from "../encryptors/symmetricEncrypt";
 import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
 import { CryptoMain } from "../CryptoMain";
+import { ActivitiesDeriver } from "../logic/ActivitiesDeriver";
 
 type HomeProps = { onRequestUserIDs: Function };
 export default function Home({ navigation, onRequestUserIDs }) {
@@ -100,7 +101,7 @@ export default function Home({ navigation, onRequestUserIDs }) {
           ]}
         ></QuickNavMain>
       </Animated.View>
-      {/* <CryptoMain></CryptoMain> */}
+      <ActivitiesDeriver></ActivitiesDeriver>
       <MenuList></MenuList>
     </View>
   );

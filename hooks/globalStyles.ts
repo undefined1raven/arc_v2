@@ -25,6 +25,7 @@ type GlobalStyleType = {
   theme: Themes;
   color: ColorValueHex;
   colorAccent: ColorValueHex;
+  colorAlt: ColorValueHex;
   textColor: ColorValueHex;
   textColorAccent: ColorValueHex;
   textColorInactive: ColorValueHex;

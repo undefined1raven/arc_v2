@@ -9,6 +9,7 @@ type ThemeColorsType = {
   colorInactive: ColorValueHex;
   successColor: ColorValueHex;
   successTextColor: ColorValueHex;
+  colorAlt: ColorValueHex;
   errorColor: ColorValueHex;
   errorTextColor: ColorValueHex;
   pageBackgroundColors: PageBackgroundColorArrayType;
@@ -33,6 +34,7 @@ const themeColors: Themes = {
   light: {
     androidRippleColor: "#000000",
     statusBarColor: "#391665",
+    colorAlt: "#AD79EF",
     pageBackgroundColors: ["#391665", "#230746"],
     color: "#A57EF8",
     colorAccent: "#514792",
@@ -50,6 +52,7 @@ const themeColors: Themes = {
     statusBarColor: "#BEB4FF",
     pageBackgroundColors: ["#471F5B", "#885C9D"],
     color: "#412D5B",
+    colorAlt: "#AD79EF",
     colorAccent: "#514792",
     textColor: "#412D5B",
     textColorAccent: "#312772",
@@ -71,6 +74,7 @@ const themeColors: Themes = {
     textColorInactive: "#212121",
     colorInactive: "#585186",
     successColor: "#008464",
+    colorAlt: "#AD79EF",
     successTextColor: "#005843",
     errorColor: "#ff0000",
     errorTextColor: "#ae0000",
@@ -81,6 +85,7 @@ const themeColors: Themes = {
     pageBackgroundColors: ["#228B22", "#50C878"],
     color: "#BBAFA2",
     colorAccent: "#514792",
+    colorAlt: "#AD79EF",
     textColor: "#BBAFA2",
     textColorAccent: "#312772",
     textColorInactive: "#212121",
@@ -94,6 +99,7 @@ const themeColors: Themes = {
     androidRippleColor: "#000000",
     statusBarColor: "#BEB4FF",
     pageBackgroundColors: ["#1E7326", "#68B970"],
+    colorAlt: "#AD79EF",
     color: "#BBAFA2",
     colorAccent: "#514792",
     textColor: "#BBAFA2",
@@ -114,6 +120,7 @@ const themeColors: Themes = {
     colorAccent: "#514792",
     textColor: "#BBAFA2",
     textColorAccent: "#312772",
+    colorAlt: "#AD79EF",
     textColorInactive: "#212121",
     colorInactive: "#585186",
     successColor: "#008464",
@@ -127,6 +134,7 @@ const themeColors: Themes = {
     pageBackgroundColors: ["#9DC10D", "#9DC10D"],
     color: "#123143",
     colorAccent: "#514792",
+    colorAlt: "#AD79EF",
     textColor: "#123143",
     textColorAccent: "#312772",
     textColorInactive: "#212121",
@@ -145,6 +153,7 @@ const themeColors: Themes = {
     textColor: "#232B0F",
     textColorAccent: "#4E5931",
     textColorInactive: "#7B8D4A",
+    colorAlt: "#AD79EF",
     colorInactive: "#585186",
     successColor: "#0B6E27",
     successTextColor: "#042B0F",
@@ -161,6 +170,7 @@ const themeColors: Themes = {
     textColor: "#0b004f",
     textColorAccent: "#312772",
     textColorInactive: "#212121",
+    colorAlt: "#AD79EF",
     colorInactive: "#585186",
     successColor: "#008464",
     successTextColor: "#005843",
@@ -177,6 +187,7 @@ const themeColors: Themes = {
     textColor: "#9E8EFF",
     textColorAccent: "#584D99",
     textColorInactive: "#343244",
+    colorAlt: "#644BFF",
     colorInactive: "#373252",
     successColor: "#4FFF96",
     successTextColor: "#4FFF96",
@@ -192,7 +203,8 @@ const y =   {dark: {
   colorAccent: "#150098",
   textColor: "#9E8EFF",
   textColorAccent: "#584D99",
-  textColorInactive: "#343244",
+    colorAlt: "#AD79EF",
+    textColorInactive: "#343244",
   colorInactive: "#373252",
   successColor: "#4FFF96",
   successTextColor: "#4FFF96",
