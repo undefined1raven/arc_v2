@@ -11,6 +11,7 @@ import {
 } from "@/app/config/defaultTransitionConfig";
 import { widgetContainerConfig } from "../widgetContainerConfig";
 import { useSQLiteContext } from "expo-sqlite";
+import * as SecureStore from "expo-secure-store";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import RButton from "@/components/common/RButton";
 import TimeTrackingActivityMenu from "./TimeTrackerActivityMenu";
@@ -32,6 +33,7 @@ import { symmetricEncrypt } from "../../encryptors/symmetricEncrypt";
 import { newChunkID } from "@/fn/newChunkID";
 import { symmetricDecrypt } from "../../decryptors/symmetricDecrypt";
 import useEncryptionStore from "../../encryptors/encryptionStore";
+import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
 
 export default function TimeTracker() {
   store.subscribe(() => {});
@@ -45,6 +47,8 @@ export default function TimeTracker() {
   const [displayDurationLabel, setDisplayDurationLabel] = useState("");
   const [displayStartedAtLabel, setDisplayStartedAtLabel] = useState("");
   const [showMenu, setShowMenu] = useState(false);
+  const [dataToEncrypt, setDataToEncrypt] = useState<null | string>(null);
+  const [encryptedData, setEncryptedData] = useState<null | string>(null);
   const [tickerInterval, setTickerInterval] = useState<null | any>(null);
   const [currentActivities, setCurrentActivities] = useState<ArcTaskLogType[]>(
     []
@@ -131,90 +135,82 @@ export default function TimeTracker() {
       });
   }
 
-  function updateLocalCache(newActivity: ArcTaskLogType) {
-    if (encryptionAPI.plain !== null) return;
-    const prevActivities =
-      currentArcActivitiesAPI.lastChunk?.encryptedContent.tasks;
-    
-    console.log(prevActivities.map(i => i.start.toString().slice(-3)), "prevActivities");
-    function updateLastChunk(
-      isNew: boolean,
-      newActivity?: ArcTaskLogType,
-      newChunk?: ARC_ChunksType
-    ) {
-      if (isNew === false) {
-        const newActivitiesInLastChunk = {
-          tasks: [...prevActivities, newActivity],
-        };
-        const newLastChunk = {
-          ...currentArcActivitiesAPI.lastChunk,
-          encryptedContent: newActivitiesInLastChunk,
-        };
-        currentArcActivitiesAPI.setLastChunk(newLastChunk);
-      } else {
-        if (newChunk === undefined || newActivity === undefined) return;
-        const newLastChunk = {
-          ...newChunk,
-          encryptedContent: { tasks: [newActivity] },
-        };
-        currentArcActivitiesAPI.setLastChunk(newLastChunk);
-      }
-    }
-    function saveChunkToDB(chunk) {
-      console.log(chunk.encryptedContent.length, "saving this bad boy");
-      db.runAsync(
-        `INSERT OR REPLACE INTO arcChunks (id, userID, encryptedContent, tx, version) VALUES (?, ?, ?, ?, ?)`,
-        [
-          chunk.id,
-          chunk.userID,
-          chunk.encryptedContent,
-          chunk.tx,
-          chunk.version,
-        ]
-      ).then((r) => {
-        console.log("saved chunk");
+  useEffect(() => {
+    if (encryptedData === null) return;
+    if (dataToEncrypt === null) return;
+    if (currentArcActivitiesAPI.lastChunk === null) return;
+    const encryptedPayload = encryptedData;
+    const newChunk = {
+      ...currentArcActivitiesAPI.lastChunk,
+      encryptedContent: encryptedPayload,
+    };
+    db.runAsync(
+      `INSERT OR REPLACE INTO arcChunks (id, userID, encryptedContent, tx, version) VALUES (?, ?, ?, ?, ?)`,
+      [
+        newChunk.id,
+        newChunk.userID,
+        newChunk.encryptedContent,
+        newChunk.tx,
+        newChunk.version,
+      ]
+    )
+      .then((r) => {
+        console.log(r, "saved chunk");
+      })
+      .catch((e) => {
+        console.log(e, "error while saving");
       });
-    }
+    setEncryptedData(null);
+    setDataToEncrypt(null);
+  }, [encryptedData, currentArcActivitiesAPI.lastChunk]);
 
-    ////save changes to locak db
-    if (prevActivities.length >= MaxActivitiesInArcChunk) {
-      symmetricEncrypt(JSON.stringify({ tasks: [newActivity] })).then(
-        (encrypted) => {
-          const newChunk = {
-            id: newChunkID(),
-            userID: activeUserID,
-            encryptedContent: encrypted,
-            tx: Date.now(),
-            version: "0.1.1",
-          };
-          saveChunkToDB(newChunk);
-          updateLastChunk(true, newActivity, newChunk);
-        }
+  async function updateLocalCache(newActivity: ArcTaskLogType) {
+    try {
+      const previousActivitiesTask = JSON.parse(
+        currentArcActivitiesAPI.lastChunk.encryptedContent
       );
-    } else {
-      symmetricEncrypt(
-        JSON.stringify({ tasks: [...prevActivities, newActivity] })
-      ).then((encrypted) => {
-        setTimeout(() => {
-          symmetricEncrypt(
-            JSON.stringify({ tasks: [...prevActivities, newActivity] })
-          ).then((encryptedf) => {
-            const newChunk = {
-              ...currentArcActivitiesAPI.lastChunk,
-              encryptedContent: encryptedf,
-            };
-            saveChunkToDB(newChunk);
-            updateLastChunk(false, newActivity);
-          });
-        }, 100);
-      });
+      const prevActivities: ArcTaskLogType[] = previousActivitiesTask.tasks;
+      if (prevActivities.length + 1 > MaxActivitiesInArcChunk) {
+        console.log("make new chunk");
+        const newPlainPayload = JSON.stringify({ tasks: [newActivity] });
+        currentArcActivitiesAPI.setLastChunk({
+          id: newChunkID(),
+          userID: activeUserID,
+          tx: Date.now(),
+          version: "0.1.1",
+          encryptedContent: newPlainPayload,
+        });
+        setDataToEncrypt(newPlainPayload);
+      } else {
+        const newPlainPayload = JSON.stringify({
+          tasks: [...prevActivities, newActivity],
+        });
+        currentArcActivitiesAPI.setLastChunk({
+          ...currentArcActivitiesAPI.lastChunk,
+          encryptedContent: newPlainPayload,
+        });
+        setDataToEncrypt(newPlainPayload);
+        console.log("update existing chunk");
+      }
+    } catch (e) {
+      console.log(e, "error");
     }
-    console.log("last chunk acc", prevActivities.length);
-    console.log("trigger local cache update");
   }
 
   return (
     <RBox width="100%" height="100%" top={0} left={0}>
+      {dataToEncrypt !== null && (
+        <SingleEncrypt
+          plainText={dataToEncrypt}
+          onEncrypted={(e) => {
+            setEncryptedData(e);
+          }}
+          onError={(e) => {
+            console.log(e);
+          }}
+          symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
+        ></SingleEncrypt>
+      )}
       <RBox
         backgroundColor={globalStyle.color + "10"}
         figmaImportConfig={widgetContainerConfig}

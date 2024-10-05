@@ -89,6 +89,7 @@ function LoadUserData() {
             .then((res) => {
               const decryptedChunks: ARC_ChunksType[] = [];
               const results = JSON.parse(jsesc.default(res, { json: true }));
+              console.log(results.length, "results len");
               for (let ix = 0; ix < results.length; ix++) {
                 const tasks = JSON.parse(results[ix]);
                 decryptedChunks.push({
@@ -102,11 +103,12 @@ function LoadUserData() {
                   const na = decryptedChunks[ix].encryptedContent.tasks;
                   activities = [...activities, ...na];
                 }
-                currentActivities.setCurrentActivities(activities);
-                currentActivities.setLastChunk({
+                const lastDecryptedChunk = {
                   ...recentChunks[0],
                   encryptedContent: results[0],
-                });
+                };
+                currentActivities.setCurrentActivities(activities);
+                currentActivities.setLastChunk(lastDecryptedChunk);
                 currentActivities.setIni(true);
               } catch (e) {
                 console.log(e, "initial chunks parsing failed");
