@@ -37,7 +37,7 @@ import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
 import useStatusIndicatorsStore from "@/stores/statusIndicators";
 import { EditDeco } from "@/components/common/deco/EditDeco";
 
-export default function TimeTracker() {
+export default function TimeTracker({ navigation }) {
   store.subscribe(() => {});
   const encryptionAPI = useEncryptionStore();
   const statusIndicatorsAPI = useStatusIndicatorsStore();
@@ -378,12 +378,19 @@ export default function TimeTracker() {
           </Animated.View>
         )}
         <RButton
+          onClick={() => {
+            navigation.navigate("activitiesSettingsMain", { name: "activitiesSettingsMain" });
+          }}
           figmaImportConfig={timeTrackingContainerConfig}
           figmaImport={{
             mobile: { top: 5, left: 227, width: 59, height: 26 },
           }}
         >
-          <EditDeco color={globalStyle.color} width="100%" height="70%"></EditDeco>
+          <EditDeco
+            color={globalStyle.color}
+            width="100%"
+            height="70%"
+          ></EditDeco>
         </RButton>
         <RButton
           onClick={() => {

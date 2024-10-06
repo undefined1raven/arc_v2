@@ -71,7 +71,7 @@ export default function Home({ navigation, onRequestUserIDs }) {
             mobile: { top: 22, left: "0", width: "100%", height: 618 },
           }}
         >
-          <TimeTracker></TimeTracker>
+          <TimeTracker navigation={navigation}></TimeTracker>
         </RBox>
         <MenuMain></MenuMain>
         <QuickNavMain

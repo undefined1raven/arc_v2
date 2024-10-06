@@ -20,6 +20,7 @@ import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { InitializeApp } from "@/components/App/logic/InitializeApp";
 import TimeStatsMain from "@/components/App/TimeStats/TimeStatsMain";
 import { DayView } from "@/components/App/TimeStats/DayView";
+import { ActivitiesSettingsMain } from "@/components/App/Settings/Activities/ActivitiesSettingsMain";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -82,6 +83,10 @@ export default function App() {
         <Stack.Screen
           name="timeStatsDayView"
           component={DayView}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="activitiesSettingsMain"
+          component={ActivitiesSettingsMain}
         ></Stack.Screen>
         <Stack.Screen
           name="keysLoadingScreen"
