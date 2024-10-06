@@ -1,8 +1,7 @@
 import store from "@/app/store";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
-import { Mask } from "@shopify/react-native-skia";
 import * as React from "react";
-import Svg, { SvgProps, Path, Rect } from "react-native-svg";
+import Svg, { SvgProps, Path, Rect, Mask } from "react-native-svg";
 const PadlockIcon = (props: SvgProps) => {
   store.subscribe(() => {});
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
@@ -10,6 +9,9 @@ const PadlockIcon = (props: SvgProps) => {
 
   return (
     <Svg width={8} height={11} viewBox="0 0 8 11" fill="none" {...props}>
+      <Mask id="a" fill="#fff">
+        <Path d="M6.602 3.6c.33 0 .603-.27.548-.596a3.6 3.6 0 00-7.1 0c-.055.326.218.596.548.596.33 0 .591-.272.673-.592a2.403 2.403 0 014.658 0c.082.32.342.592.673.592z" />
+      </Mask>
       <Path
         d="M6.602 3.6c.33 0 .603-.27.548-.596a3.6 3.6 0 00-7.1 0c-.055.326.218.596.548.596v0c.33 0 .591-.272.673-.592a2.403 2.403 0 014.658 0c.082.32.342.592.673.592v0z"
         fill={colorActual}

@@ -37,9 +37,9 @@ const themeColors: Themes = {
     colorAlt: "#AD79EF",
     pageBackgroundColors: ["#391665", "#230746"],
     color: "#A57EF8",
-    colorAccent: "#514792",
+    colorAccent: "#845FD0",
     textColor: "#9871EB",
-    textColorAccent: "#312772",
+    textColorAccent: "#8058C1",
     textColorInactive: "#212121",
     colorInactive: "#585186",
     successColor: "#008464",
@@ -162,7 +162,7 @@ const themeColors: Themes = {
   },
 
   ravenPurp: {
-    androidRippleColor: "#000000",
+    androidRippleColor: "#BEB4FF",
     statusBarColor: "#BEB4FF",
     pageBackgroundColors: ["#BEB4FF", "#ACA0FD"],
     color: "#0b004f",

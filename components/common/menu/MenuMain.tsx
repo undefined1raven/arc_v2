@@ -64,7 +64,7 @@ export default function MenuMain() {
         entering={FadeInDown.duration(100).damping(1)}
       >
         <RButton
-          onClick={() => {
+          onLongPress={() => {
             console.log("xx");
             db.runAsync("DROP TABLE users");
             db.runAsync("DROP TABLE userData");

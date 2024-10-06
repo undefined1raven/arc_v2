@@ -19,6 +19,7 @@ import CreateAccountOffline from "@/components/CreateAccount/CreateAccountOfflin
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { InitializeApp } from "@/components/App/logic/InitializeApp";
 import TimeStatsMain from "@/components/App/TimeStats/TimeStatsMain";
+import { DayView } from "@/components/App/TimeStats/DayView";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -79,6 +80,10 @@ export default function App() {
         <Stack.Screen name="Home" component={Home}></Stack.Screen>
         <Stack.Screen name="timeStats" component={TimeStatsMain}></Stack.Screen>
         <Stack.Screen
+          name="timeStatsDayView"
+          component={DayView}
+        ></Stack.Screen>
+        <Stack.Screen
           name="keysLoadingScreen"
           component={KeysLoadingScreen}
         ></Stack.Screen>
@@ -90,6 +95,7 @@ export default function App() {
           name="createAccountOffline"
           component={CreateAccountOffline}
         ></Stack.Screen>
+
         {/* <Stack.Screen
           name="SettingsMain"
           component={SettingsMainMenu}

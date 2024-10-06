@@ -11,10 +11,16 @@ interface ArcCurrentActivitiesStore {
   lastChunk: null | ARC_ChunksType;
   setLastChunk: (newLastChunk: ARC_ChunksType) => void;
   setByDayDerivedActivities: (newDerivedActivities: {
-    byDay: { [key: string]: string[] };
+    byDay: { [key: string]: ArcTaskLogType[] };
+  }) => void;
+  setDurationMap: (newDurationMap: { [key: string]: number }) => void;
+  setCumulativeDuration: (newCumulativeDuration: {
+    [key: string]: number;
   }) => void;
   derivedActivities: {
     byDay: string[];
+    durationMap: { [key: string]: number };
+    cumulativeDurationMap: { [key: string]: number };
   };
 }
 
@@ -26,11 +32,40 @@ const useArcCurrentActivitiesStore = create<ArcCurrentActivitiesStore>(
     },
     setByDayDerivedActivities: (newDerivedActivities) => {
       set((state) => {
-        return { derivedActivities: { byDay: newDerivedActivities.byDay } };
+        return {
+          derivedActivities: {
+            ...state.derivedActivities,
+            byDay: newDerivedActivities.byDay,
+          },
+        };
       });
     },
     currentActivities: [],
-    derivedActivities: { byDay: [], durationMap: {} },
+    setDurationMap: (newDurationMap) => {
+      set((state) => {
+        return {
+          derivedActivities: {
+            ...state.derivedActivities,
+            durationMap: newDurationMap,
+          },
+        };
+      });
+    },
+    setCumulativeDuration: (newCumulativeDuration) => {
+      set((state) => {
+        return {
+          derivedActivities: {
+            ...state.derivedActivities,
+            cumulativeDurationMap: newCumulativeDuration,
+          },
+        };
+      });
+    },
+    derivedActivities: {
+      byDay: [],
+      durationMap: {},
+      cumulativeDurationMap: {},
+    },
     ini: false,
     setCurrentActivities: (newCurrentActivities) => {
       set((state) => {

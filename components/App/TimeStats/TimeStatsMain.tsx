@@ -6,6 +6,7 @@ import {
   useWindowDimensions,
   Button,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import RBox from "@/components/common/RBox";
@@ -49,24 +50,24 @@ import { Circle } from "@shopify/react-native-skia";
 import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
 import { symmetricDecrypt } from "../decryptors/symmetricDecrypt";
 import useDecryptionStore from "../decryptors/decryptionStore";
-export default function TimeStatsMain({}) {
+import { DayView } from "./DayView";
+import { useTimeStatsStore } from "./selectedTimeRange";
+import { itemTextToLabel } from "./fn/DayToLabel";
+import { emptyRenderItem } from "@/components/common/EmptyListItem";
+export default function TimeStatsMain({ navigation }) {
   const menuApi = useMenuConfigStore();
+  const timeStatsAPI = useTimeStatsStore();
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => {
     setHasMounted(true);
     setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
+    BackHandler.addEventListener("hardwareBackPress", () => {
+      navigation.navigate("Home", { name: "Home" });
+      return true;
+    });
   }, []);
 
-  function ToolTip({
-    x,
-    y,
-  }: {
-    x: SharedValue<number>;
-    y: SharedValue<number>;
-  }) {
-    return <Circle cx={x} cy={y} r={8} color="black" />;
-  }
   const { state, isActive } = useChartPressState({ x: 0, y: { highTmp: 0 } });
   const menuOverlayStatus = useMenuConfigStore();
   function generateRandomColor(): string {
@@ -87,7 +88,7 @@ export default function TimeStatsMain({}) {
   const currentActivities = useArcCurrentActivitiesStore();
 
   const HalfDonutChart = () => {
-    const [data] = useState(DATA(2));
+    const [data] = useState(DATA(5));
 
     return (
       <PolarChart
@@ -114,7 +115,8 @@ export default function TimeStatsMain({}) {
       </PolarChart>
     );
   };
-  const renderItem = ({ item, index }: { item: MenuOverlayButtonType }) => {
+
+  const renderItem = ({ item, index }: { item: string; index: number }) => {
     return (
       <Animated.View
         entering={FadeInRight.duration(75)
@@ -130,6 +132,12 @@ export default function TimeStatsMain({}) {
         }}
       >
         <RButton
+          onClick={() => {
+            timeStatsAPI.setSelectedDay(item);
+            navigation.navigate("timeStatsDayView", {
+              name: "timeStatsDayView",
+            });
+          }}
           width="100%"
           height="100%"
           verticalAlign="center"
@@ -141,16 +149,16 @@ export default function TimeStatsMain({}) {
             height="100%"
             verticalAlign="center"
             fontSize={globalStyle.mediumMobileFont}
-            text={item}
+            text={itemTextToLabel(item)}
           ></RLabel>
-          <RBox width="30%" top="10%" height="50%" left="75%">
+          <RBox width="30%" top="10%" height="100%" left="75%">
             <View
               style={{
                 position: "absolute",
-                top: 0,
+                top: 10,
                 left: 0,
                 width: "100%",
-                height: "100%",
+                height: "50%",
               }}
             >
               <HalfDonutChart></HalfDonutChart>
@@ -160,7 +168,6 @@ export default function TimeStatsMain({}) {
       </Animated.View>
     );
   };
-
 
   return (
     <View
@@ -198,13 +205,48 @@ export default function TimeStatsMain({}) {
             height: "100%",
           }}
         >
+          <RLabel
+            figmaImport={{
+              mobile: { left: 3, width: 93, height: 18, top: 35 },
+            }}
+            fontSize={globalStyle.mediumMobileFont}
+            text="Showing from"
+          ></RLabel>
+          <RButton
+            mobileFontSize={globalStyle.mediumMobileFont}
+            label="1w ago"
+            onClick={() => {
+              console.log("clicked");
+            }}
+            figmaImport={{
+              mobile: { left: 98, width: 84, height: 29, top: 28 },
+            }}
+          ></RButton>
+          <RLabel
+            figmaImport={{
+              mobile: { left: 184, width: 14, height: 18, top: 35 },
+            }}
+            fontSize={globalStyle.mediumMobileFont}
+            text="to"
+          ></RLabel>
+          <RButton
+            mobileFontSize={globalStyle.mediumMobileFont}
+            label="now"
+            onClick={() => {
+              console.log("clicked");
+            }}
+            figmaImport={{
+              mobile: { left: 200, width: 84, height: 29, top: 28 },
+            }}
+          ></RButton>
           <RBox
             figmaImport={{
-              mobile: { top: 25, left: 15, width: 329, height: 500 },
+              mobile: { top: 63, left: 3, width: 354, height: 464 },
             }}
           >
             <RFlatList
               inverted={false}
+              emptyComponent={emptyRenderItem(globalStyle)}
               data={Object.keys(currentActivities.derivedActivities.byDay)}
               keyExtractor={(item, index) => {
                 return index.toString();

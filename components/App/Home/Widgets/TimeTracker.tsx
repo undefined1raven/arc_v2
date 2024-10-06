@@ -35,6 +35,7 @@ import { symmetricDecrypt } from "../../decryptors/symmetricDecrypt";
 import useEncryptionStore from "../../encryptors/encryptionStore";
 import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
 import useStatusIndicatorsStore from "@/stores/statusIndicators";
+import { EditDeco } from "@/components/common/deco/EditDeco";
 
 export default function TimeTracker() {
   store.subscribe(() => {});
@@ -288,8 +289,8 @@ export default function TimeTracker() {
               onClick={async () => {
                 const newActivity = {
                   taskID: currentDisplayedActivity?.taskID as string,
-                  start: currentDisplayedActivity.start + 2000104000,
-                  end: Date.now() + 2300104000,
+                  start: currentDisplayedActivity.start,
+                  end: Date.now(),
                 };
                 setCurrentActivities((prev) => {
                   if (currentDisplayedActivity === null) return prev;
@@ -381,7 +382,9 @@ export default function TimeTracker() {
           figmaImport={{
             mobile: { top: 5, left: 227, width: 59, height: 26 },
           }}
-        ></RButton>
+        >
+          <EditDeco color={globalStyle.color} width="100%" height="70%"></EditDeco>
+        </RButton>
         <RButton
           onClick={() => {
             setShowMenu(true);

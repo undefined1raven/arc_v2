@@ -48,6 +48,7 @@ type RFlatListProps = {
   align?: AlignType;
   opacity?: number;
   renderItem: ReactElement;
+  emptyComponent?: ReactElement;
   data: object[];
   style?: object;
   blur?: number;
@@ -157,6 +158,8 @@ export default function RFlatList(props: RFlatListProps) {
           showsVerticalScrollIndicator={false}
           style={{ ...styles.defaultStyle }}
           renderItem={props.renderItem}
+          tvParallaxShiftDistanceX={3}
+          ListEmptyComponent={props.emptyComponent}
           keyExtractor={props.keyExtractor}
           data={props.data}
         ></FlatList>
