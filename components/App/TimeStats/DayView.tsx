@@ -191,6 +191,24 @@ function DayView({ navigation }) {
             height: "100%",
           }}
         >
+          <RFlatList
+            figmaImport={{
+              mobile: { top: 97, left: 3, width: 354, height: 449 },
+            }}
+            emptyComponent={emptyRenderItem(globalStyle, "No activities")}
+            inverted={false}
+            data={
+              currentActivities.derivedActivities.byDay[
+                timeStatsAPI.selectedDay
+              ]
+            }
+            keyExtractor={(item, index) => {
+              return index.toString();
+            }}
+            renderItem={activitiesRenderItem}
+            top="0%"
+            left="0%"
+          ></RFlatList>
           <RLabel
             figmaImport={{
               mobile: { top: 28, left: 3, width: 96, height: 20 },
@@ -309,29 +327,6 @@ function DayView({ navigation }) {
               }
             ></RBox>
           </RButton>
-          <RBox
-            figmaImport={{
-              mobile: { top: 97, left: 3, width: 354, height: 449 },
-            }}
-          >
-            <RFlatList
-              emptyComponent={emptyRenderItem(globalStyle, "No activities")}
-              inverted={false}
-              data={
-                currentActivities.derivedActivities.byDay[
-                  timeStatsAPI.selectedDay
-                ]
-              }
-              keyExtractor={(item, index) => {
-                return index.toString();
-              }}
-              width="100%"
-              height="100%"
-              renderItem={activitiesRenderItem}
-              top="0%"
-              left="0%"
-            ></RFlatList>
-          </RBox>
         </Animated.View>
       ) : (
         <RBox></RBox>

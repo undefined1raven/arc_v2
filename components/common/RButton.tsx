@@ -186,15 +186,30 @@ export default function RButton(props: RButtonProps) {
   }, [fontsLoaded]);
 
   return (
-    <View
+    <Animated.View
+      // entering={globalEnteringConfig(
+      //   getVal(props.transitionDuration, 150),
+      //   undefined,
+      //   getVal(props.transitionIndex, 0)
+      // )}
       onLayout={(e) => {
         props.onLayout?.apply(null, [e]);
       }}
+      ref={buttonRef}
       style={{
         position: "absolute",
-        alignContent: "center",
-        backdropFilter: "",
+        display: "flex",
         justifyContent: "center",
+        alignItems: "center",
+        borderRadius: getVal(props.borderRadius, globalStyle.borderRadius),
+        borderColor: getVal(props.isEnabled, true)
+          ? getVal(props.borderColor, globalStyle.color)
+          : globalStyle.colorInactive,
+        borderWidth: 1,
+        padding: 0,
+        backgroundColor: `${backgroundColorActual}${backgroundOpacityActual}`,
+        margin: 0,
+        alignContent: "center",
         width: getVal(props.width, "auto"),
         left: getVal(props.left, "auto"),
         top: getVal(props.top, "auto"),
@@ -203,94 +218,67 @@ export default function RButton(props: RButtonProps) {
         ...props.style,
       }}
     >
-      <Animated.View
-        // entering={globalEnteringConfig(
-        //   getVal(props.transitionDuration, 150),
-        //   undefined,
-        //   getVal(props.transitionIndex, 0)
-        // )}
-        ref={buttonRef}
+      {props.children}
+      <Pressable
+        android_disableSound={true}
+        android_ripple={{
+          radius: 0,
+          color: getVal(props.androidRippleEnabled, true)
+            ? getVal(props.isEnabled, true)
+              ? getVal(
+                  props.androidRippleColor,
+                  globalStyle.androidRippleColor + "10"
+                )
+              : "transparent"
+            : "transparent",
+        }}
         style={{
+          width: "100%",
+          height: "100%",
           position: "absolute",
           top: 0,
           left: 0,
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          borderRadius: getVal(props.borderRadius, globalStyle.borderRadius),
-          borderColor: getVal(props.isEnabled, true)
-            ? getVal(props.borderColor, globalStyle.color)
-            : globalStyle.colorInactive,
-          borderWidth: 1,
-          padding: 0,
-          margin: 0,
-          backgroundColor: `${backgroundColorActual}${backgroundOpacityActual}`,
+        }}
+        hitSlop={getVal(props.slopHit, 0)}
+        onPressIn={() => setIsMouseHovering(true)}
+        onLongPress={(e) => {
+          props.onLongPress?.call(e);
+          setIsMouseHovering(false);
+        }}
+        onPress={(e) => {
+          props.onClick?.apply(null, [e]);
+        }}
+        onTouchStart={(e) => {
+          props.mouseEnter?.apply(null, [e]);
+        }}
+        onTouchMove={(e) => {
+          props.onTouchMove?.apply(null, [e]);
+        }}
+        onPressOut={(e) => {
+          props.mouseLeave?.call(e);
+          setIsMouseHovering(false);
         }}
       >
-        {props.children}
-        <Pressable
-          android_disableSound={true}
-          android_ripple={{
-            radius: 0,
-            color: getVal(props.androidRippleEnabled, true)
-              ? getVal(props.isEnabled, true)
-                ? getVal(
-                    props.androidRippleColor,
-                    globalStyle.androidRippleColor + "10"
-                  )
-                : "transparent"
-              : "transparent",
-          }}
+        <RLabel
+          color={
+            getVal(props.isEnabled, true)
+              ? getVal(props.color, globalStyle.textColor)
+              : globalStyle.textColorInactive
+          }
+          text={props.label}
+          verticalAlign={getVal(props.verticalAlign, "center")}
+          align={getVal(props.align, "center")}
+          alignPadding={getVal(props.alignPadding, "2%")}
+          width="100%"
+          height="100%"
+          left={0}
+          top={0}
           style={{
-            width: "100%",
-            height: "100%",
-            position: "absolute",
-            top: 0,
-            left: 0,
+            fontSize: getVal(props.mobileFontSize, 18),
+            fontFamily: currentFontFamiliy,
           }}
-          hitSlop={getVal(props.slopHit, 0)}
-          onPressIn={() => setIsMouseHovering(true)}
-          onLongPress={(e) => {
-            props.onLongPress?.call(e);
-            setIsMouseHovering(false);
-          }}
-          onPress={(e) => {
-            props.onClick?.apply(null, [e]);
-          }}
-          onTouchStart={(e) => {
-            props.mouseEnter?.apply(null, [e]);
-          }}
-          onTouchMove={(e) => {
-            props.onTouchMove?.apply(null, [e]);
-          }}
-          onPressOut={(e) => {
-            props.mouseLeave?.call(e);
-            setIsMouseHovering(false);
-          }}
-        >
-          <RLabel
-            color={
-              getVal(props.isEnabled, true)
-                ? getVal(props.color, globalStyle.textColor)
-                : globalStyle.textColorInactive
-            }
-            text={props.label}
-            verticalAlign={getVal(props.verticalAlign, "center")}
-            align={getVal(props.align, "center")}
-            alignPadding={getVal(props.alignPadding, "2%")}
-            width="100%"
-            height="100%"
-            left={0}
-            top={0}
-            style={{
-              fontSize: getVal(props.mobileFontSize, 18),
-              fontFamily: currentFontFamiliy,
-            }}
-          ></RLabel>
-        </Pressable>
-      </Animated.View>
-    </View>
+        ></RLabel>
+      </Pressable>
+    </Animated.View>
   );
 }

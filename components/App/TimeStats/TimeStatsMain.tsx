@@ -239,25 +239,21 @@ export default function TimeStatsMain({ navigation }) {
               mobile: { left: 200, width: 84, height: 29, top: 28 },
             }}
           ></RButton>
-          <RBox
+          <RFlatList
             figmaImport={{
               mobile: { top: 63, left: 3, width: 354, height: 464 },
             }}
-          >
-            <RFlatList
-              inverted={false}
-              emptyComponent={emptyRenderItem(globalStyle)}
-              data={Object.keys(currentActivities.derivedActivities.byDay)}
-              keyExtractor={(item, index) => {
-                return index.toString();
-              }}
-              width="100%"
-              height="100%"
-              renderItem={renderItem}
-              top="0%"
-              left="0%"
-            ></RFlatList>
-          </RBox>
+            emptyComponent={emptyRenderItem(globalStyle)}
+            data={Object.keys(currentActivities.derivedActivities.byDay)}
+            keyExtractor={(item, index) => {
+              return index.toString();
+            }}
+            width="100%"
+            height="100%"
+            renderItem={renderItem}
+            top="0%"
+            left="0%"
+          ></RFlatList>
         </Animated.View>
       ) : (
         <RBox></RBox>

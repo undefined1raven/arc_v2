@@ -116,12 +116,9 @@ export default function RFlatList(props: RFlatListProps) {
   }, [fontsLoaded]);
 
   return (
-    <Animated.View
-      id={getVal(props.id, undefined)}
+    <GestureHandlerRootView
       style={{
-        flex: 1,
         position: "absolute",
-        display: "flex",
         alignSelf: "center",
         borderRadius: getVal(props.borderRadius, 5),
         borderColor: getVal(props.borderColor, globalStyle.color),
@@ -130,9 +127,6 @@ export default function RFlatList(props: RFlatListProps) {
           props.backgroundColor,
           `${globalStyle.color}00`
         ),
-        alignContent: "flex-start",
-        justifyContent: "flex-start",
-        alignItems: "flex-start",
         width: getVal(props.width, 100),
         left: getVal(props.left, 0),
         top: getVal(props.top, 0),
@@ -151,22 +145,23 @@ export default function RFlatList(props: RFlatListProps) {
         ...props.style,
       }}
     >
-      {/* <BlurView style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', ...styles.b }} intensity={getVal(props.blur, 0)}> */}
-      <GestureHandlerRootView>
-        <FlatList
-          inverted={getVal(props.inverted, false)}
-          showsVerticalScrollIndicator={false}
-          style={{ ...styles.defaultStyle }}
-          renderItem={props.renderItem}
-          tvParallaxShiftDistanceX={3}
-          ListEmptyComponent={props.emptyComponent}
-          keyExtractor={props.keyExtractor}
-          data={props.data}
-        ></FlatList>
-      </GestureHandlerRootView>
-      {props.children}
-      {/* </BlurView> */}
-    </Animated.View>
+      <FlatList
+        inverted={getVal(props.inverted, false)}
+        showsVerticalScrollIndicator={false}
+        style={{
+          position: "absolute",
+          overflow: "scroll",
+          width: "100%",
+          height: "100%",
+          left: 0,
+          top: 0,
+        }}
+        renderItem={props.renderItem}
+        ListEmptyComponent={props.emptyComponent}
+        keyExtractor={props.keyExtractor}
+        data={props.data}
+      ></FlatList>
+    </GestureHandlerRootView>
   );
 }
 

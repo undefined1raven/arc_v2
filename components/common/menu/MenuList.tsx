@@ -126,13 +126,11 @@ export default function MenuList({}) {
             height: "100%",
           }}
         >
-          <RBox
+            <RFlatList
             figmaImport={{
               mobile: { top: 230, left: 15, width: 329, height: 339 },
             }}
-          >
-            <RFlatList
-              inverted={true}
+              inverted={false}
               data={menuApi.menuOverlayConfig.buttons}
               keyExtractor={(item, index) => {
                 return index.toString();
@@ -143,7 +141,6 @@ export default function MenuList({}) {
               top="0%"
               left="0%"
             ></RFlatList>
-          </RBox>
           <RButton
             onClick={() => {
               menuApi.setOverlayMenuVisibility(false);

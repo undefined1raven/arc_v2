@@ -18,11 +18,19 @@ import RButton from "@/components/common/RButton";
 import RFlatList from "@/components/common/RFlatList";
 import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
 import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
-import { ArcTaskLogType, FeatureConfigArcType } from "@/app/config/commonTypes";
+import {
+  ARCCategoryType,
+  ArcTaskLogType,
+  ARCTasksType,
+  FeatureConfigArcType,
+} from "@/app/config/commonTypes";
 import { Header } from "../../Home/Header";
 import { AddIcon } from "@/components/common/deco/AddIcon";
 import { ArrowDeco } from "@/components/common/deco/ArrowDeco";
 import { transform } from "@babel/core";
+import { emptyRenderItem } from "@/components/common/EmptyListItem";
+import { EditDeco } from "@/components/common/deco/EditDeco";
+import { TrashIcon } from "@/components/common/deco/TrashIcon";
 
 function ActivitiesSettingsMain({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
@@ -42,6 +50,94 @@ function ActivitiesSettingsMain({ navigation }) {
     });
     setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
   }, []);
+
+  function getTaskOrCategoryName(id: string) {
+    const split = id.split("-");
+    if (split[0] === "TID") {
+      return (
+        arcFeatureConfig.tasks.find((task) => task.taskID === id)?.name ||
+        "Unknown"
+      );
+    } else {
+      return (
+        arcFeatureConfig.taskCategories.find(
+          (category) => category.categoryID === id
+        )?.name || "Unknown"
+      );
+    }
+  }
+
+  function listRenderItem({ item, index }) {
+    return (
+      <Animated.View
+        entering={FadeInRight.duration(75)
+          .damping(30)
+          .delay(25 * index)}
+        style={{
+          position: "relative",
+          paddingBottom: "3%",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          height: 80,
+        }}
+      >
+        <RBox
+          width="100%"
+          height="100%"
+          borderWidth={1}
+          borderColor={globalStyle.color}
+        >
+          <RButton
+            onClick={() => {
+              console.log("edit");
+            }}
+            borderColor="#00000000"
+            left="0%"
+            width="85%"
+            height="100%"
+          >
+            <RLabel
+              left="2%"
+              width="90%"
+              height="100%"
+              verticalAlign="center"
+              align="left"
+              text={
+                selectedView === "activities"
+                  ? getTaskOrCategoryName(item.taskID)
+                  : getTaskOrCategoryName(item.categoryID)
+              }
+            ></RLabel>
+
+            <EditDeco
+              style={{ left: "42%" }}
+              width="10%"
+              height="40%"
+            ></EditDeco>
+          </RButton>
+          <RBox
+            width={1}
+            top="10%"
+            height="80%"
+            left="85%"
+            backgroundColor={globalStyle.color}
+          ></RBox>
+          <RButton
+            borderColor="#00000000"
+            onClick={() => {
+              console.log("delete");
+            }}
+            width="15%"
+            height="100%"
+            left="85%"
+          >
+            <TrashIcon width="70%" color={globalStyle.errorColor}></TrashIcon>
+          </RButton>
+        </RBox>
+      </Animated.View>
+    );
+  }
 
   return (
     <Animated.View
@@ -101,6 +197,7 @@ function ActivitiesSettingsMain({ navigation }) {
               ></RLabel>
             </RBox>
             <RButton
+              transitionIndex={2}
               borderColor={
                 selectedView === "categories"
                   ? globalStyle.color
@@ -136,12 +233,15 @@ function ActivitiesSettingsMain({ navigation }) {
               ></RBox>
             </RButton>
             <RButton
+              transitionIndex={2}
               borderColor={
                 selectedView === "activities"
                   ? globalStyle.color
                   : globalStyle.colorAccent
               }
-              onClick={() => setSelectedView("activities")}
+              onClick={() => {
+                setSelectedView("activities");
+              }}
               figmaImport={{
                 mobile: { top: 73, left: 2, width: 173, height: 37 },
               }}
@@ -170,67 +270,100 @@ function ActivitiesSettingsMain({ navigation }) {
                 }
               ></RBox>
             </RButton>
+            <RFlatList
+              figmaImport={{
+                mobile: { top: 119, left: 2, width: 356, height: 464 },
+              }}
+              emptyComponent={emptyRenderItem(
+                globalStyle,
+                `No ${
+                  selectedView === "activities" ? "activities" : "categories"
+                } to show`
+              )}
+              inverted={false}
+              data={
+                selectedView === "activities"
+                  ? arcFeatureConfig.tasks
+                  : arcFeatureConfig.taskCategories
+              }
+              keyExtractor={(item, index) => {
+                return selectedView === "activities"
+                  ? item.taskID
+                  : item.categoryID;
+              }}
+              renderItem={listRenderItem}
+            ></RFlatList>
           </Animated.View>
-          <Animated.View
-            entering={FadeInDown.duration(150).damping(15)}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
+          <RBox
+            figmaImport={{
+              mobile: { left: 2, width: 356, height: 48, top: 589 },
             }}
           >
-            <RButton
-              figmaImport={{
-                mobile: { left: 183, width: 174, height: 48, top: 589 },
+            <Animated.View
+              entering={FadeInDown.duration(150).damping(15)}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
               }}
             >
-              <RLabel
-                text="Add category"
-                width="80%"
-                height="100%"
-                left="2%"
-                align="left"
-                verticalAlign="center"
-              ></RLabel>
-              <RBox width="20%" height="100%" left="80%">
-                <AddIcon width="50%" height="70%"></AddIcon>
-              </RBox>
-            </RButton>
-            <RButton
-              onClick={() => {
-                navigation.goBack();
-              }}
-              borderColor={globalStyle.colorAccent}
-              figmaImport={{
-                mobile: { left: 2, width: 174, height: 48, top: 589 },
-              }}
-            >
-              <RLabel
-                color={globalStyle.textColorAccent}
-                text="Back"
-                width="58%"
-                height="100%"
-                left="40%"
-                align="right"
-                verticalAlign="center"
-              ></RLabel>
-              <RBox
-                width="42%"
-                height="100%"
-                style={{ transform: "rotate(180deg)" }}
-                left="0%"
+              <RButton
+                figmaImportConfig={{ containerHeight: 48, containerWidth: 356 }}
+                figmaImport={{
+                  mobile: { left: 183, width: 174, height: 48, top: "0" },
+                }}
               >
-                <ArrowDeco
-                  style={{ left: "11%" }}
-                  width="60%"
-                  height="80%"
-                  color={globalStyle.colorAccent}
-                ></ArrowDeco>
-              </RBox>
-            </RButton>
-          </Animated.View>
+                <RLabel
+                  text={`Add ${
+                    selectedView === "activities" ? "activity" : "category"
+                  }`}
+                  width="80%"
+                  height="100%"
+                  left="2%"
+                  align="left"
+                  verticalAlign="center"
+                ></RLabel>
+                <RBox width="20%" height="100%" left="80%">
+                  <AddIcon width="50%" height="70%"></AddIcon>
+                </RBox>
+              </RButton>
+              <RButton
+                onClick={() => {
+                  navigation.goBack();
+                }}
+                figmaImportConfig={{ containerHeight: 48, containerWidth: 356 }}
+                borderColor={globalStyle.colorAccent}
+                figmaImport={{
+                  mobile: { left: 2, width: 174, height: 48, top: "0" },
+                }}
+              >
+                <RLabel
+                  color={globalStyle.textColorAccent}
+                  text="Back"
+                  width="58%"
+                  height="100%"
+                  left="40%"
+                  align="right"
+                  verticalAlign="center"
+                ></RLabel>
+                <RBox
+                  width="42%"
+                  height="100%"
+                  style={{ transform: "rotate(180deg)" }}
+                  left="0%"
+                >
+                  <ArrowDeco
+                    style={{ left: "11%" }}
+                    width="60%"
+                    height="80%"
+                    color={globalStyle.colorAccent}
+                  ></ArrowDeco>
+                </RBox>
+              </RButton>
+            </Animated.View>
+          </RBox>
         </>
       ) : (
         <RBox></RBox>
