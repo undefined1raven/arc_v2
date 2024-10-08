@@ -21,6 +21,7 @@ import { InitializeApp } from "@/components/App/logic/InitializeApp";
 import TimeStatsMain from "@/components/App/TimeStats/TimeStatsMain";
 import { DayView } from "@/components/App/TimeStats/DayView";
 import { ActivitiesSettingsMain } from "@/components/App/Settings/Activities/ActivitiesSettingsMain";
+import { EditActivities } from "@/components/App/Settings/Activities/EditActivities";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -80,6 +81,7 @@ export default function App() {
         <Stack.Screen name="OTSThree" component={OTSThree}></Stack.Screen>
         <Stack.Screen name="Home" component={Home}></Stack.Screen>
         <Stack.Screen name="timeStats" component={TimeStatsMain}></Stack.Screen>
+        <Stack.Screen name="editActivities" component={EditActivities}></Stack.Screen>
         <Stack.Screen
           name="timeStatsDayView"
           component={DayView}

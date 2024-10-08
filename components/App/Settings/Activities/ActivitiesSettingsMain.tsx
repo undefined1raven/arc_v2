@@ -90,6 +90,7 @@ function ActivitiesSettingsMain({ navigation }) {
         >
           <RButton
             onClick={() => {
+              navigation.navigate("editActivities", { name: "editActivities" });
               console.log("edit");
             }}
             borderColor="#00000000"
@@ -191,6 +192,7 @@ function ActivitiesSettingsMain({ navigation }) {
             >
               <RLabel
                 width="100%"
+                height="100%"
                 align="left"
                 verticalAlign="center"
                 text="Config / Time tracking"
