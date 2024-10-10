@@ -31,9 +31,11 @@ import { transform } from "@babel/core";
 import { emptyRenderItem } from "@/components/common/EmptyListItem";
 import { EditDeco } from "@/components/common/deco/EditDeco";
 import { TrashIcon } from "@/components/common/deco/TrashIcon";
+import { useSelectedObjects } from "./selectedObjects";
 
 function ActivitiesSettingsMain({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
+  const selectedObjectsAPI = useSelectedObjects();
   const currentActivities = useArcCurrentActivitiesStore();
   const arcFeatureConfig: FeatureConfigArcType = useArcFeatureConfigStore()
     .arcFeatureConfig as FeatureConfigArcType;
@@ -90,7 +92,17 @@ function ActivitiesSettingsMain({ navigation }) {
         >
           <RButton
             onClick={() => {
-              navigation.navigate("editActivities", { name: "editActivities" });
+              if (selectedView === "activities") {
+                selectedObjectsAPI.setSelectedActivity(item);
+                navigation.navigate("editActivities", {
+                  name: "editActivities",
+                });
+              } else {
+                selectedObjectsAPI.setSelectedCategory(item);
+                navigation.navigate("editCategories", {
+                  name: "editCategories",
+                });
+              }
               console.log("edit");
             }}
             borderColor="#00000000"

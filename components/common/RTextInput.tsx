@@ -67,6 +67,7 @@ type RButtonProps = {
   align?: AlignType;
   opacity?: number;
   style?: object;
+  defaultValue?: string;
   blur?: number;
   borderRadius?: number;
   alignPadding?: number | string;
@@ -221,6 +222,7 @@ export default function RTextInput(props: RButtonProps) {
             onChangeText={(e) => {
               getVal(props.onInput(e), () => {});
             }}
+            defaultValue={getVal(props.defaultValue, "")}
             placeholder={getVal(props.placeholder, "")}
             keyboardType={getVal(props.keyboardType, "default")}
             textContentType={getVal(props.textContentType, "none")}

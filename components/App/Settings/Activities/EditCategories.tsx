@@ -5,12 +5,9 @@ import RTextInput from "@/components/common/RTextInput";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { ActivityIndicator } from "react-native";
 import { useSelectedObjects } from "./selectedObjects";
-import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
-
-function EditActivities({ navigation }) {
+function EditCategories({ navigation }) {
   const selectedObjectsAPI = useSelectedObjects();
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
-  const arcFeatureConfig = useArcFeatureConfigStore();
   return (
     <EmptyView navigation={navigation} showMenu={false}>
       <>
@@ -30,7 +27,7 @@ function EditActivities({ navigation }) {
             align="left"
             height="100%"
             verticalAlign="center"
-            text="Config / Edit Activity"
+            text="Config / Edit Category"
           ></RLabel>
         </RBox>
         <RLabel
@@ -49,29 +46,8 @@ function EditActivities({ navigation }) {
           text="Name"
         ></RLabel>
         <RTextInput
-          onInput={(e) => {
-            if (!selectedObjectsAPI.selectedActivity) return;
-            const newArcConfig = { ...arcFeatureConfig.arcFeatureConfig };
-            const selectedActivityIndex = newArcConfig.tasks?.findIndex(
-              (elm) =>
-                elm.taskID === selectedObjectsAPI.selectedActivity?.taskID
-            );
-            if (!newArcConfig.tasks || selectedActivityIndex === -1) return;
-            const newTasks = newArcConfig.tasks.splice(selectedActivityIndex as number, 1);
-            newTasks.push({
-              ...selectedObjectsAPI.selectedActivity,
-              name: e,
-            });
-            console.log(newTasks);
-            newArcConfig['tasks'] = newTasks;
-            console.log(
-              newArcConfig.tasks?.filter(
-                (elm) =>
-                  elm.taskID === selectedObjectsAPI.selectedActivity?.taskID
-              )[0].name
-            );
-          }}
-          defaultValue={selectedObjectsAPI.selectedActivity?.name}
+          onInput={() => {}}
+          defaultValue={selectedObjectsAPI.selectedCategory?.name}
           figmaImport={{
             mobile: {
               left: 112,
@@ -86,4 +62,4 @@ function EditActivities({ navigation }) {
   );
 }
 
-export { EditActivities };
+export { EditCategories };

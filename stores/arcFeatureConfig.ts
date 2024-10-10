@@ -20,7 +20,7 @@ const useArcFeatureConfigStore = create<ArcFeatureConfigStoreType>(
     },
     updateArcFeatureConfig: (update) => {
       set((state) => {
-        return { arcFeatureConfig: { ...state, ...update } };
+        return { arcFeatureConfig: { ...state.arcFeatureConfig, ...update } };
       });
     },
   })
