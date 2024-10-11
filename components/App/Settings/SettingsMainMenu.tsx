@@ -32,8 +32,6 @@ export default function SettingsMainMenu() {
     }, 150);
   }, []);
 
-  useEffect(() => {}, [arcFeatureConfig]);
-
   return (
     <View
       style={{

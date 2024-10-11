@@ -1,4 +1,8 @@
-function encrypt(symsk: string, payload: string | null) {
+function encrypt(
+  symsk: string,
+  payload: string | null,
+  transactionID: string | undefined | null
+) {
   //payload is either JSONstring to be encrypted or encryptedJSONstring containing iv and cipher params
   return `
     document.title = 'Encryption Worker';
@@ -68,33 +72,43 @@ function encode(str) {
     const enc = new TextEncoder().encode(str);
     return JSON.stringify(enc);
   }
-  console.log('[Encryption] string payload present: ', \`${payload}\`)
+  console.log('[Encryption] string payload present: ', \`${payload}\`, " | Tid: ",\`${transactionID}\`)
    try {
        if (crypto.subtle !== undefined) {
+        console.log("1")
           const jwk = JSON.parse('${symsk}');
           importSymmetricKey(jwk).then(key => {
+          console.log("2")
            symmetricEncrypt('${payload}', key).then(res => {
+           console.log("300")
            const stringifiedRes = JSON.stringify(res);
-                        sendMessage(JSON.stringify({taskID: 'encrypt', status: 'success', error: null, payload: stringifiedRes}));
+           console.log("305")
+            window.ReactNativeWebView.postMessage(JSON.stringify({taskID: 'encrypt', status: 'success', error: null, payload: stringifiedRes, transactionID: '${transactionID}'}));
                     }).catch(e => {
-                        sendMessage(JSON.stringify({taskID: 'dataEncryption', error: 'Encryption error', status: 'failed'}));
+           console.log("315")
+                        window.ReactNativeWebView.postMessage(JSON.stringify({taskID: 'dataEncryption', error: 'Encryption error', status: 'failed'}));
                     })
           }).catch(e => {
+          console.log("3")
               sendMessage(JSON.stringify({
                taskID: 'dataEncryption',
                error: 'Key import failed',
                status: 'failed'
            }));
+            return;
   
           })
        } else {
+          console.log("4")
           sendMessage(JSON.stringify({
                taskID: 'dataEncryption',
                error: 'Subtle Crypto INOP',
                status: 'failed'
            }));
+            return;
        }
    } catch (e) {
+          console.log("5")
        sendMessage(JSON.stringify({
            taskID: 'dataEncryption',
            error: e,

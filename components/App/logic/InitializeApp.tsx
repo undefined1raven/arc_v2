@@ -130,13 +130,26 @@ function InitializeApp() {
         <SingleEncrypt
           plainText={encryptionAPI.plain}
           onEncrypted={(e) => {
-            encryptionAPI.setEncryptedData(e);
+            // encryptionAPI.setEncryptedData(e);
             encryptionAPI.setPlain(null);
           }}
           onError={(e) => {
-            encryptionAPI.setEncryptedData("error");
+            encryptionAPI.setTransactionID(null);
+            encryptionAPI.setEncryptedData({
+              transactionID: null,
+              encryptedData: "error",
+            });
             encryptionAPI.setPlain(null);
           }}
+          onEncryptedWatching={(e) => {
+            encryptionAPI.setTransactionID(null);
+            encryptionAPI.setEncryptedData({
+              transactionID: e.transactionID,
+              encryptedData: e.payload,
+            });
+            console.log("encrypted watching", e);
+          }}
+          transactionID={encryptionAPI.transactionID}
           symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
         ></SingleEncrypt>
       )}

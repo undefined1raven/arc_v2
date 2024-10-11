@@ -7,12 +7,16 @@ import { View } from "react-native";
 type SingleEncryptProps = {
   plainText: string | null;
   symsk: string | null;
+  transactionID?: string;
   onError?: Function;
   onEncrypted: Function;
+  onEncryptedWatching?: Function;
 };
 function SingleEncrypt(props: SingleEncryptProps) {
   const [isReady, setIsReady] = useState<boolean>(false);
+  const [key, setKey] = useState<number>(0);
   useEffect(() => {
+    setKey(Math.random());
     if (
       props.plainText !== null &&
       props.plainText !== undefined &&
@@ -20,13 +24,20 @@ function SingleEncrypt(props: SingleEncryptProps) {
       props.symsk !== undefined
     ) {
       setIsReady(true);
+    } else {
+      setIsReady(false);
     }
   }, [props.plainText, props.symsk]);
 
   return isReady ? (
     <View style={{ opacity: 0 }}>
       <BackgroundTaskRunner
-        code={encrypt(props.symsk as string, props.plainText)}
+        key={key}
+        code={encrypt(
+          props.symsk as string,
+          props.plainText,
+          props.transactionID || "no transaction id"
+        )}
         tx={Date.now()}
         messageHandler={(e) => {
           const response = JSON.parse(e.nativeEvent.data);
@@ -39,6 +50,12 @@ function SingleEncrypt(props: SingleEncryptProps) {
               stringToCharCodeArray(response.payload)
             );
             props.onEncrypted(encodedEncryptedData);
+            if (props.onEncryptedWatching) {
+              props.onEncryptedWatching({
+                payload: encodedEncryptedData,
+                transactionID: response.transactionID,
+              });
+            }
           }
         }}
       ></BackgroundTaskRunner>

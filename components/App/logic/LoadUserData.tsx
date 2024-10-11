@@ -15,7 +15,9 @@ import * as jsesc from "jsesc";
 import { symmetricDecrypt } from "../decryptors/symmetricDecrypt";
 import { ARC_ChunksType, ArcTaskLogType } from "@/app/config/commonTypes";
 import { symmetricEncrypt } from "../encryptors/symmetricEncrypt";
+import { useHasLoadedUserDataStore } from "../Home/hasLoadedUserData";
 function LoadUserData() {
+  const hasLoadedUserDataAPI = useHasLoadedUserDataStore();
   const getActiveUserID = useLocalUserIDsStore(
     (store) => store.getActiveUserID
   );
@@ -39,7 +41,11 @@ function LoadUserData() {
     setHasArcChunks(arcChunks !== null);
   }, [arcChunks]);
   useEffect(() => {
-    if (arcFeatureConfig !== null && arcChunks !== null) {
+    if (
+      arcFeatureConfig !== null &&
+      arcChunks !== null &&
+      hasLoadedUserDataAPI.hasLoadedUserData === false
+    ) {
       //bug
       updateLoadingMessage({ redirect: "Home" });
     }

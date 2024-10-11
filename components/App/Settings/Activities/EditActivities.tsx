@@ -6,9 +6,12 @@ import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { ActivityIndicator } from "react-native";
 import { useSelectedObjects } from "./selectedObjects";
 import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
+import RButton from "@/components/common/RButton";
+import { useState } from "react";
 
 function EditActivities({ navigation }) {
   const selectedObjectsAPI = useSelectedObjects();
+  const [newName, setNewName] = useState("");
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const arcFeatureConfig = useArcFeatureConfigStore();
   return (
@@ -50,26 +53,13 @@ function EditActivities({ navigation }) {
         ></RLabel>
         <RTextInput
           onInput={(e) => {
-            if (!selectedObjectsAPI.selectedActivity) return;
-            const newArcConfig = { ...arcFeatureConfig.arcFeatureConfig };
-            const selectedActivityIndex = newArcConfig.tasks?.findIndex(
-              (elm) =>
-                elm.taskID === selectedObjectsAPI.selectedActivity?.taskID
-            );
-            if (!newArcConfig.tasks || selectedActivityIndex === -1) return;
-            const newTasks = newArcConfig.tasks.splice(selectedActivityIndex as number, 1);
-            newTasks.push({
-              ...selectedObjectsAPI.selectedActivity,
-              name: e,
-            });
-            console.log(newTasks);
-            newArcConfig['tasks'] = newTasks;
-            console.log(
-              newArcConfig.tasks?.filter(
-                (elm) =>
-                  elm.taskID === selectedObjectsAPI.selectedActivity?.taskID
-              )[0].name
-            );
+            if (
+              !selectedObjectsAPI.selectedActivity ||
+              arcFeatureConfig === null
+            )
+              return;
+            const newName = e;
+            setNewName(newName);
           }}
           defaultValue={selectedObjectsAPI.selectedActivity?.name}
           figmaImport={{
@@ -81,6 +71,36 @@ function EditActivities({ navigation }) {
             },
           }}
         ></RTextInput>
+        <RButton
+          onClick={() => {
+            if (selectedObjectsAPI.selectedActivity === null) return;
+            const index = arcFeatureConfig.arcFeatureConfig?.tasks.findIndex(
+              (task) =>
+                task.taskID === selectedObjectsAPI.selectedActivity?.taskID
+            );
+            if (index === -1) return;
+            const newActivity = {
+              ...selectedObjectsAPI.selectedActivity,
+              name: newName,
+            };
+            const newTasks = [...arcFeatureConfig.arcFeatureConfig.tasks];
+            newTasks[index] = newActivity;
+            console.log("newTasks", newTasks);
+            arcFeatureConfig.setArcFeatureConfig({
+              ...arcFeatureConfig.arcFeatureConfig,
+              tasks: newTasks,
+            });
+            navigation.goBack()
+          }}
+          figmaImport={{
+            mobile: {
+              left: 2,
+              top: 589,
+              width: 356,
+              height: 48,
+            },
+          }}
+        ></RButton>
       </>
     </EmptyView>
   );

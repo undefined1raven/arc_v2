@@ -17,11 +17,13 @@ import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
 import { CryptoMain } from "../CryptoMain";
 import { ActivitiesDeriver } from "../logic/ActivitiesDeriver";
 import { ArcFeatureConfigWatcher } from "../stateWatchers/ArcFeatureConfigWather";
+import { useHasLoadedUserDataStore } from "./hasLoadedUserData";
 
 type HomeProps = { onRequestUserIDs: Function };
 export default function Home({ navigation, onRequestUserIDs }) {
   const currentActivitiesAPI = useArcCurrentActivitiesStore();
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
+  const hasLoadedUserDataAPI = useHasLoadedUserDataStore();
   useEffect(() => {
     console.log(
       currentActivitiesAPI.currentActivities.map((activity) =>
@@ -30,6 +32,10 @@ export default function Home({ navigation, onRequestUserIDs }) {
       "currentActivities"
     );
   }, [currentActivitiesAPI.currentActivities]);
+
+  useEffect(() => {
+    hasLoadedUserDataAPI.setHasLoadedUserData(true);
+  }, []);
 
   return (
     <View
