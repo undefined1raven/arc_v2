@@ -89,7 +89,9 @@ export default function OTSThree({ navigation }) {
           const placeholders = keys.map((_, i) => `?`).join(",");
           const aid = Crypto.randomUUID();
           db.runAsync(
-            `INSERT OR REPLACE INTO users (${keys.join(",")}) VALUES (${placeholders})`,
+            `INSERT OR REPLACE INTO users (${keys.join(
+              ","
+            )}) VALUES (${placeholders})`,
             Object.values(res)
           )
             .then(async (res) => {
@@ -149,31 +151,6 @@ export default function OTSThree({ navigation }) {
   }
 
   useEffect(() => {
-    if (canCompleteSignUp === true) {
-      let keyIntegrity = false;
-      try {
-        const parsedKey = JSON.parse(wrappedKeysStorage);
-        keyIntegrity = parsedKey.pk && parsedKey.symsk;
-      } catch (e) {
-        console.log(e);
-      }
-      if (keyIntegrity) {
-        db.runAsync(
-          `UPDATE users SET PIKBackup=? WHERE id='temp'`,
-          jsesc.default(wrappedKeysStorage, { json: true })
-        )
-          .then((res) => {
-            completeSignUp();
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-      }
-      setCanCompleteSignUp(false);
-    }
-  }, [canCompleteSignUp]);
-
-  useEffect(() => {
     setIsPinValid(
       pin.match(/^(|[0-9]*)$/) && pin.length >= 4 && pin.length <= 6
     );
@@ -182,13 +159,13 @@ export default function OTSThree({ navigation }) {
   function onSkipPin() {
     if (isSkipBoxChecked) {
       setShowSkipLoadingSpinner(true);
-      db.runAsync(`UPDATE users SET PIKBackup=? WHERE id='temp'`, null)
-        .then((res) => {
-          completeSignUp();
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      // db.runAsync(`UPDATE users SET PIKBackup=? WHERE id='temp'`, null)
+      //   .then((res) => {
+      //     completeSignUp();
+      //   })
+      //   .catch((e) => {
+      //     console.log(e);
+      //   });
     }
   }
 
@@ -254,7 +231,7 @@ export default function OTSThree({ navigation }) {
             height: "100%",
           }}
         >
-          <BackgroundTaskRunner
+          {/* <BackgroundTaskRunner
             messageHandler={(e) => {
               handleWrappedKeys(e);
             }}
@@ -264,7 +241,7 @@ export default function OTSThree({ navigation }) {
               SecureStore.getItem("temp-pk"),
               SecureStore.getItem("temp-symsk")
             )}
-          ></BackgroundTaskRunner>
+          ></BackgroundTaskRunner> */}
           <KeyboarDismissWrapper></KeyboarDismissWrapper>
           <RBox
             figmaImport={{
@@ -292,7 +269,7 @@ export default function OTSThree({ navigation }) {
               verticalAlign="center"
               fontSize={15}
               align="left"
-              text="3/3"
+              text="2/3"
             ></RLabel>
           </RBox>
           <RLabel

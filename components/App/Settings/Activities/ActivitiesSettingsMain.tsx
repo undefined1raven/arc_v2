@@ -5,7 +5,6 @@ import { setStatusBarBackgroundColor, StatusBar } from "expo-status-bar";
 import Animated, {
   FadeInDown,
   FadeInRight,
-  FadeInUp,
 } from "react-native-reanimated";
 import { ActivityIndicator, BackHandler, View } from "react-native";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
@@ -27,18 +26,19 @@ import {
 import { Header } from "../../Home/Header";
 import { AddIcon } from "@/components/common/deco/AddIcon";
 import { ArrowDeco } from "@/components/common/deco/ArrowDeco";
-import { transform } from "@babel/core";
 import { emptyRenderItem } from "@/components/common/EmptyListItem";
 import { EditDeco } from "@/components/common/deco/EditDeco";
 import { TrashIcon } from "@/components/common/deco/TrashIcon";
 import { useSelectedObjects } from "./selectedObjects";
+import { randomUUID } from "expo-crypto";
 
 function ActivitiesSettingsMain({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const selectedObjectsAPI = useSelectedObjects();
-  const currentActivities = useArcCurrentActivitiesStore();
+  const currentActivitiesAPI = useArcCurrentActivitiesStore();
   const arcFeatureConfig: FeatureConfigArcType = useArcFeatureConfigStore()
     .arcFeatureConfig as FeatureConfigArcType;
+  const arcFeatureConfigAPI = useArcFeatureConfigStore();
   const menuOverlayStatus = useMenuConfigStore();
   const [hasMounted, setHasMounted] = useState(false);
   type selectedViewType = "activities" | "categories";
@@ -67,6 +67,45 @@ function ActivitiesSettingsMain({ navigation }) {
         )?.name || "Unknown"
       );
     }
+  }
+
+  function newTask() {
+    const newTask: ARCTasksType = {
+      name: `New Task ${Date.now().toString().slice(-4)}`,
+      taskID: "TID-" + randomUUID(),
+      categoryID: null,
+      deleted: false,
+      version: "0.1.0",
+      routineConfig: {
+        enabledDays: [0, 1, 2, 3, 4, 5, 6],
+        timeConfig: null,
+        isActive: false,
+      },
+      isSpecialStatus: false,
+    };
+    selectedObjectsAPI.setSelectedActivity(newTask);
+    arcFeatureConfig.tasks.push(newTask);
+    setTimeout(() => {
+      navigation.navigate("editActivities", {
+        name: "editActivities",
+      });
+    }, 80);
+  }
+
+  function newCategory() {
+    const newCategory: ARCCategoryType = {
+      categoryID: "CID-" + randomUUID(),
+      name: `New Category ${Date.now().toString().slice(-4)}`,
+      deleted: false,
+      version: "0.1.0",
+    };
+    selectedObjectsAPI.setSelectedCategory(newCategory);
+    arcFeatureConfig.taskCategories.push(newCategory);
+    setTimeout(() => {
+      navigation.navigate("editCategories", {
+        name: "editCategories",
+      });
+    }, 80);
   }
 
   function listRenderItem({ item, index }) {
@@ -103,7 +142,6 @@ function ActivitiesSettingsMain({ navigation }) {
                   name: "editCategories",
                 });
               }
-              console.log("edit");
             }}
             borderColor="#00000000"
             left="0%"
@@ -139,6 +177,23 @@ function ActivitiesSettingsMain({ navigation }) {
           <RButton
             borderColor="#00000000"
             onClick={() => {
+              if (selectedView === "activities") {
+                const newTasks = arcFeatureConfig.tasks.filter(
+                  (task) => task.taskID !== item.taskID
+                );
+                arcFeatureConfigAPI.setArcFeatureConfig({
+                  ...arcFeatureConfig,
+                  tasks: newTasks,
+                });
+              } else {
+                const newCats = arcFeatureConfig.taskCategories.filter(
+                  (category) => category.categoryID !== item.categoryID
+                );
+                arcFeatureConfigAPI.setArcFeatureConfig({
+                  ...arcFeatureConfig,
+                  taskCategories: newCats,
+                });
+              }
               console.log("delete");
             }}
             width="15%"
@@ -324,6 +379,13 @@ function ActivitiesSettingsMain({ navigation }) {
               }}
             >
               <RButton
+                onClick={() => {
+                  if (selectedView === "activities") {
+                    newTask();
+                  } else {
+                    newCategory();
+                  }
+                }}
                 figmaImportConfig={{ containerHeight: 48, containerWidth: 356 }}
                 figmaImport={{
                   mobile: { left: 183, width: 174, height: 48, top: "0" },

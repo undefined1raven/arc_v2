@@ -111,7 +111,7 @@ export default function CreateAccountOffline({ navigation }) {
                         { authenticated: true, id: aid, isActive: true },
                       ]);
                       setTimeout(() => {
-                        navigation.navigate("Home", { name: "Home" });
+                        navigation.navigate("OTSOne", { name: "OTSOne" });
                       }, 100);
                     })
                     .catch((e) => {

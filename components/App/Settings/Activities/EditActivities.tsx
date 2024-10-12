@@ -11,7 +11,9 @@ import { useState } from "react";
 
 function EditActivities({ navigation }) {
   const selectedObjectsAPI = useSelectedObjects();
-  const [newName, setNewName] = useState("");
+  const [newName, setNewName] = useState(
+    selectedObjectsAPI.selectedActivity?.name
+  );
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const arcFeatureConfig = useArcFeatureConfigStore();
   return (
@@ -73,7 +75,13 @@ function EditActivities({ navigation }) {
         ></RTextInput>
         <RButton
           onClick={() => {
-            if (selectedObjectsAPI.selectedActivity === null) return;
+            if (
+              selectedObjectsAPI.selectedActivity === null ||
+              selectedObjectsAPI.selectedActivity.name === newName
+            ) {
+              navigation.goBack();
+              return;
+            }
             const index = arcFeatureConfig.arcFeatureConfig?.tasks.findIndex(
               (task) =>
                 task.taskID === selectedObjectsAPI.selectedActivity?.taskID
@@ -85,12 +93,11 @@ function EditActivities({ navigation }) {
             };
             const newTasks = [...arcFeatureConfig.arcFeatureConfig.tasks];
             newTasks[index] = newActivity;
-            console.log("newTasks", newTasks);
             arcFeatureConfig.setArcFeatureConfig({
               ...arcFeatureConfig.arcFeatureConfig,
               tasks: newTasks,
             });
-            navigation.goBack()
+            navigation.goBack();
           }}
           figmaImport={{
             mobile: {
@@ -100,7 +107,14 @@ function EditActivities({ navigation }) {
               height: 48,
             },
           }}
-        ></RButton>
+        >
+          <RLabel
+            text="Save"
+            height="100%"
+            width="100%"
+            verticalAlign="center"
+          ></RLabel>
+        </RButton>
       </>
     </EmptyView>
   );

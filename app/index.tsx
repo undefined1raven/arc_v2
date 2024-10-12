@@ -23,6 +23,7 @@ import { DayView } from "@/components/App/TimeStats/DayView";
 import { ActivitiesSettingsMain } from "@/components/App/Settings/Activities/ActivitiesSettingsMain";
 import { EditActivities } from "@/components/App/Settings/Activities/EditActivities";
 import { EditCategories } from "@/components/App/Settings/Activities/EditCategories";
+import { useNewAccountStore } from "@/stores/newAccountStore";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -39,6 +40,7 @@ type handleAccountInfoEventReturnSig = {
 
 export default function App() {
   LogBox.ignoreAllLogs();
+  const newAccountAPI = useNewAccountStore();
   const updateGlobalStyle = useGlobalStyleStore(
     (store) => store.updateGlobalStyle
   );
@@ -78,8 +80,8 @@ export default function App() {
           component={CreateAccountOnlineEmail}
         ></Stack.Screen>
         <Stack.Screen name="OTSOne" component={OTSOne}></Stack.Screen>
-        <Stack.Screen name="OTSTwo" component={OTSTwo}></Stack.Screen>
-        <Stack.Screen name="OTSThree" component={OTSThree}></Stack.Screen>
+        <Stack.Screen name="OTSTwo" component={OTSThree}></Stack.Screen>
+        <Stack.Screen name="OTSThree" component={OTSTwo}></Stack.Screen>
         <Stack.Screen name="Home" component={Home}></Stack.Screen>
         <Stack.Screen name="timeStats" component={TimeStatsMain}></Stack.Screen>
         <Stack.Screen
@@ -97,10 +99,6 @@ export default function App() {
         <Stack.Screen
           name="activitiesSettingsMain"
           component={ActivitiesSettingsMain}
-        ></Stack.Screen>
-        <Stack.Screen
-          name="keysLoadingScreen"
-          component={KeysLoadingScreen}
         ></Stack.Screen>
         <Stack.Screen
           name="createAccountKeyFile"

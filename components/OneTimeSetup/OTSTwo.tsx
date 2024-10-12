@@ -19,19 +19,15 @@ import globalStyles, {
 import RLabel from "@/components/common/RLabel";
 import RTextInput from "@/components/common/RTextInput";
 import { setStatusBarBackgroundColor, StatusBar } from "expo-status-bar";
-import Animated, { FadeInDown, Easing } from "react-native-reanimated";
-import { ARCLogoMini } from "@/components/common/deco/ARCLogoMini";
+import Animated, {
+  FadeInDown,
+  Easing,
+  FadeInRight,
+} from "react-native-reanimated";
 import { ARCLogo } from "@/components/common/deco/ARCLogo";
-import { CrossedOutNetworkDeco } from "@/components/common/deco/CrossedOutNetworkDeco";
-import { NetworkDeco } from "@/components/common/deco/NetworkDeco";
 import { ArrowDeco } from "@/components/common/deco/ArrowDeco";
 import store from "@/app/store";
 import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
-import {
-  GestureHandlerRootView,
-  ScrollView,
-} from "react-native-gesture-handler";
-import { KeyboarDismissWrapper } from "../common/KeyboardDismissWrapper";
 import * as EmailValidator from "email-validator";
 import { BackgroundTaskRunner } from "../common/BackgroundTaskRunner";
 import { wrapKeysWithPasswordCode } from "@/fn/getPasswordWrappedKeys";
@@ -44,6 +40,7 @@ import * as Crypto from "expo-crypto";
 import * as Clipboard from "expo-clipboard";
 import { download } from "../../fn/download";
 import * as jsesc from "jsesc";
+
 type WrapKeysWithPasswordCodeReturnType = {
   status: "failed" | "success";
   error: null | string | object;
@@ -55,26 +52,31 @@ import * as Sharing from "expo-sharing";
 import { StorageAccessFramework } from "expo-file-system";
 import { DownloadDeco } from "../common/deco/DownloadDeco";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
+import RFlatList from "../common/RFlatList";
 export default function OTSTwo({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   store.subscribe(() => {});
   const [hasMounted, setHasMounted] = useState(false);
-  const [recoveryCodes, setRecoveryCodes] = useState([]);
-  const [recoveryCodeToBeProcessed, setRecoveryCodeToBeProcessed] =
-    useState("");
+  const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
   const [codeTrigger, setCodeTrigger] = useState("");
+  const [ready, setReady] = useState(false);
   const [showCopiedToClipboard, setShowCopiedToClipboard] = useState(false);
   const [wrappedKeysStorage, setWrappedKeysStorage] = useState([]);
   useEffect(() => {
     setHasMounted(true);
     setStatusBarBackgroundColor(globalStyle.statusBarColor, false);
     const recoveryCodesActual = [];
-    for (let ix = 0; ix < 2; ix++) {
+    for (let ix = 0; ix < 6; ix++) {
       recoveryCodesActual.push(genRecoveryCode());
     }
     setRecoveryCodes(recoveryCodesActual);
-    setRecoveryCodeToBeProcessed(recoveryCodes[0]);
   }, []);
+
+  useEffect(() => {
+    if (recoveryCodes.length > 0) {
+      setCodeTrigger(JSON.stringify(Date.now()));
+    }
+  }, [recoveryCodes]);
 
   function genRecoveryCode() {
     return reformatUUID(Crypto.randomUUID().toLocaleUpperCase())
@@ -87,39 +89,90 @@ export default function OTSTwo({ navigation }) {
     return "EX" + split[0] + "-" + split[1] + "-" + split[2] + "-" + split[4];
   }
 
+  function listRenderItem({ item, index }) {
+    return (
+      <Animated.View
+        entering={FadeInRight.duration(75)
+          .damping(30)
+          .delay(25 * index)}
+        style={{
+          position: "relative",
+          paddingBottom: "3%",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          height: 80,
+        }}
+      >
+        <RButton
+          hoverOpacityMin={"00"}
+          hoverOpacityMax={"00"}
+          width="100%"
+          borderColor="transparent"
+          height="100%"
+          top={0}
+          left={0}
+          fontType="mono"
+          alignPadding="0%"
+          verticalAlign="center"
+          onClick={async () => {
+            triggerCopiedToClipboardLabel();
+            await Clipboard.setStringAsync(
+              recoveryCodes.map((code) => `${code}\n`).join("")
+            );
+          }}
+          align="center"
+        >
+          <RLabel
+            width="100%"
+            verticalAlign="center"
+            fontSize={globalStyle.mediumMobileFont}
+            height="100%"
+            text={recoveryCodes[index]}
+          ></RLabel>
+          <RBox
+            width="90%"
+            height={1}
+            top="99%"
+            left="5%"
+            backgroundColor={
+              globalStyle.color +
+              (index !== recoveryCodes.length - 1 ? "FF" : "00")
+            }
+          ></RBox>
+        </RButton>
+      </Animated.View>
+    );
+  }
+
   const titleHeaderContainer = { containerHeight: 36, containerWidth: 325 };
 
   function triggerCopiedToClipboardLabel() {
-    setShowCopiedToClipboard(true);
-    setTimeout(() => {
-      setShowCopiedToClipboard(false);
-    }, 1500);
+    // setShowCopiedToClipboard(true);
+    // setTimeout(() => {
+    //   setShowCopiedToClipboard(false);
+    // }, 1500);
   }
   const db = useSQLiteContext();
 
   useEffect(() => {
-    if (wrappedKeysStorage.length === 1) {
-      setRecoveryCodeToBeProcessed(recoveryCodes[1]);
-    }
-    if (wrappedKeysStorage.length === 2) {
+    if (
+      wrappedKeysStorage.length === recoveryCodes.length &&
+      recoveryCodes.length > 0
+    ) {
       let keyIntegrity = 0;
       wrappedKeysStorage.forEach((wrapedKey) => {
-        try {
-          const parsedKey = JSON.parse(wrapedKey);
-          if (parsedKey.pk && parsedKey.symsk) {
-            keyIntegrity++;
-          }
-        } catch (e) {
-          console.log(e);
+        if (typeof wrapedKey === "object") {
+          keyIntegrity++;
         }
       });
-      if (keyIntegrity === 2) {
+      if (keyIntegrity === recoveryCodes.length) {
         db.runAsync(
           `UPDATE users SET RCKBackup=? WHERE id='temp'`,
           jsesc.default(JSON.stringify(wrappedKeysStorage), { json: true })
         )
           .then((res) => {
-            navigation.navigate("OTSThree", { name: "OTSThree" });
+            setReady(true);
           })
           .catch((e) => {
             console.log(e);
@@ -128,29 +181,19 @@ export default function OTSTwo({ navigation }) {
     }
   }, [wrappedKeysStorage]);
 
-  useEffect(() => {
-    if (
-      recoveryCodeToBeProcessed === recoveryCodes[1] &&
-      wrappedKeysStorage.length === 1
-    ) {
-      setCodeTrigger(Date.now().toString());
-    }
-  }, [recoveryCodeToBeProcessed]);
-
   function handleWrappedKeys(e) {
-    if (codeTrigger !== "" && recoveryCodeToBeProcessed !== "") {
+    if (codeTrigger !== "") {
       const eventResponse: WrapKeysWithPasswordCodeReturnType = JSON.parse(
         e.nativeEvent.data
       );
       if (eventResponse.status === "success" && eventResponse.payload) {
-        setWrappedKeysStorage((prev) => [...prev, eventResponse.payload]);
+        const parsedPayload = JSON.parse(eventResponse.payload);
+        setWrappedKeysStorage(parsedPayload);
+      } else {
+        if (wrappedKeysStorage.length === 0) {
+          setCodeTrigger(JSON.stringify(Date.now()));
+        }
       }
-    }
-  }
-
-  function getWrappedKeysSaved() {
-    if (recoveryCodes.length === 2 && recoveryCodeToBeProcessed !== "") {
-      setCodeTrigger(Date.now().toString());
     }
   }
 
@@ -162,9 +205,7 @@ export default function OTSTwo({ navigation }) {
     }
 
     const recoveryCodesString =
-      recoveryCodes[0] +
-      ", " +
-      recoveryCodes[1] +
+      recoveryCodes.join(" , ") +
       ", 0.1.1, [do not share these with anyone and keep them in a safe place]";
 
     try {
@@ -186,7 +227,8 @@ export default function OTSTwo({ navigation }) {
     }
   }
   return (
-    <View
+    <Animated.View
+      entering={globalEnteringConfig()}
       style={{
         position: "absolute",
         top: 0,
@@ -225,7 +267,7 @@ export default function OTSTwo({ navigation }) {
         }}
         tx={codeTrigger}
         triggeredCode={wrapKeysWithPasswordCode(
-          recoveryCodeToBeProcessed,
+          JSON.stringify(recoveryCodes),
           SecureStore.getItem("temp-pk"),
           SecureStore.getItem("temp-symsk")
         )}
@@ -267,7 +309,7 @@ export default function OTSTwo({ navigation }) {
               verticalAlign="center"
               fontSize={15}
               align="left"
-              text="2/3"
+              text="3/3"
             ></RLabel>
           </RBox>
           <RLabel
@@ -280,40 +322,20 @@ export default function OTSTwo({ navigation }) {
             align="left"
             text="Recovery Codes"
           ></RLabel>
-          <RButton
-            onClick={async () => {
-              triggerCopiedToClipboardLabel();
-              await Clipboard.setStringAsync(recoveryCodes[0]);
-            }}
-            hoverOpacityMin={"10"}
-            hoverOpacityMax={"10"}
+          <RFlatList
+            borderColor={globalStyle.color}
+            borderWidth={1}
+            renderItem={listRenderItem}
+            data={recoveryCodes}
             figmaImport={{
-              mobile: { left: 18, top: 135, width: 324, height: 55 },
+              mobile: {
+                left: 18,
+                top: 135,
+                width: 324,
+                height: 300,
+              },
             }}
-            fontType="mono"
-            alignPadding="0%"
-            verticalAlign="center"
-            mobileFontSize={7}
-            align="center"
-            label={recoveryCodes[0]}
-          ></RButton>
-          <RButton
-            onClick={async () => {
-              triggerCopiedToClipboardLabel();
-              await Clipboard.setStringAsync(recoveryCodes[1]);
-            }}
-            hoverOpacityMin={"10"}
-            hoverOpacityMax={"10"}
-            figmaImport={{
-              mobile: { left: 18, top: 198, width: 325, height: 55 },
-            }}
-            fontType="mono"
-            alignPadding="0%"
-            verticalAlign="center"
-            mobileFontSize={7}
-            align="center"
-            label={recoveryCodes[1]}
-          ></RButton>
+          ></RFlatList>
           <RLabel
             figmaImport={{
               mobile: { left: 18, top: 450, width: "90%", height: 120 },
@@ -365,11 +387,12 @@ export default function OTSTwo({ navigation }) {
           </RButton>
 
           <RButton
-            isEnabled={
-              recoveryCodes.length === 2 && recoveryCodeToBeProcessed !== ""
-            }
+            borderColor={ready ? globalStyle.color : globalStyle.colorInactive}
+            isEnabled={ready}
             onClick={() => {
-              getWrappedKeysSaved();
+              if (ready) {
+                navigation.navigate("OTSThree", { name: "OTSThree" });
+              }
             }}
             figmaImport={{
               mobile: { top: 567, left: 18, width: 324, height: 53 },
@@ -378,16 +401,31 @@ export default function OTSTwo({ navigation }) {
             verticalAlign="center"
             fontSize={14}
           >
+            <RBox left="85%" height="80%" top="10%" width="15%">
+              <ActivityIndicator
+                animating={!ready}
+                color={globalStyle.color}
+                size={"large"}
+              ></ActivityIndicator>
+            </RBox>
             <ArrowDeco
               width="15%"
               style={{ transform: [{ rotateZ: "0deg" }], left: "82%" }}
             ></ArrowDeco>
-            <RLabel text="Continue" fontSize={18} left="3%" top="33%"></RLabel>
+            <RLabel
+              color={
+                ready ? globalStyle.textColor : globalStyle.textColorInactive
+              }
+              text="Continue"
+              fontSize={18}
+              left="3%"
+              top="33%"
+            ></RLabel>
           </RButton>
         </Animated.View>
       ) : (
         <RBox></RBox>
       )}
-    </View>
+    </Animated.View>
   );
 }

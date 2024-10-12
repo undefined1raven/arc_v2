@@ -6,6 +6,7 @@ import { genenerateAccountCode } from "@/fn/generateAccountCode";
 import { setTempCredentials } from "@/fn/setTempCredentials";
 import { useHasCheckedTablesStore } from "@/stores/hasCheckedTables";
 import { useLoadingScreenMessageStore } from "@/stores/loadingScreenMessage";
+import { useNewAccountStore } from "@/stores/newAccountStore";
 import { randomUUID } from "expo-crypto";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
@@ -32,6 +33,7 @@ function AsyncGenNewAccountInfo() {
     completedFeatureConfigEncryption,
     setCompletedFeatureConfigEncryption,
   ] = useState<boolean>(false);
+  const newAccountStoreAPI = useNewAccountStore();
   const [arcEncryptedFeatureConfig, setArcEncryptedFeatureConfig] = useState<
     string | null
   >(null);
@@ -69,10 +71,8 @@ function AsyncGenNewAccountInfo() {
   const db = useSQLiteContext();
   const hasCheckedTables = useHasCheckedTablesStore().hasCheckedTables;
   useEffect(() => {
-    // updateLoadingScreenMessage({
-    //   initialTime: Date.now(),
-    //   message: "Generating Secure Keys",
-    // });
+    newAccountStoreAPI.setAccountGenStartTime(Date.now());
+    newAccountStoreAPI.setIsGeneratingAccountInfo(true);
   }, []);
 
   useEffect(() => {
@@ -91,15 +91,15 @@ function AsyncGenNewAccountInfo() {
           tessFeatureConfig: tessEncryptedFeatureConfig,
           SIDFeatureConfig: sidEncryptedFeatureConfig,
         }).then((res) => {
-          // console.log(res);
-          // console.log(db.getFirstSync(`SELECT * FROM users WHERE id='temp'`));
+          newAccountStoreAPI.setIsGeneratingAccountInfo(false);
+          setCompletedFeatureConfigEncryption(true);
+          console.log("Generated new account info");
         });
       }
-      setCompletedFeatureConfigEncryption(true);
-      updateLoadingScreenMessage({
-        initialTime: Date.now(),
-        message: "Ready",
-      });
+      // updateLoadingScreenMessage({
+      //   initialTime: Date.now(),
+      //   message: "Ready",
+      // });
     }
   }, [
     sidEncryptedFeatureConfig,

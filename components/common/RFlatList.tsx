@@ -120,9 +120,7 @@ export default function RFlatList(props: RFlatListProps) {
       style={{
         position: "absolute",
         alignSelf: "center",
-        borderRadius: getVal(props.borderRadius, 5),
-        borderColor: getVal(props.borderColor, globalStyle.color),
-        borderWidth: getVal(props.borderWidth, 0),
+
         backgroundColor: getVal(
           props.backgroundColor,
           `${globalStyle.color}00`
@@ -155,6 +153,9 @@ export default function RFlatList(props: RFlatListProps) {
           height: "100%",
           left: 0,
           top: 0,
+          borderRadius: getVal(props.borderRadius, 5),
+          borderColor: getVal(props.borderColor, globalStyle.color),
+          borderWidth: getVal(props.borderWidth, 0),
         }}
         renderItem={props.renderItem}
         ListEmptyComponent={props.emptyComponent}

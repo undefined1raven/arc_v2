@@ -41,9 +41,12 @@ import { PasswordHashingReturnType } from "@/app/config/endpointReturnTypes";
 import { RadialGradient } from "react-native-svg";
 import { GradientLine } from "../common/deco/GradientLine";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
+import { useNewAccountStore } from "@/stores/newAccountStore";
+import KeysLoadingScreen from "../CreateAccount/KeysLoadingScreen";
 
 export default function OTSOne({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
+  const newAccountAPI = useNewAccountStore();
   store.subscribe(() => {});
   const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => {
@@ -53,7 +56,7 @@ export default function OTSOne({ navigation }) {
 
   const titleHeaderContainer = { containerHeight: 36, containerWidth: 325 };
 
-  return (
+  return newAccountAPI.isGeneratingAccountInfo === false ? (
     <View
       style={{
         position: "absolute",
@@ -169,5 +172,7 @@ export default function OTSOne({ navigation }) {
         <RBox></RBox>
       )}
     </View>
+  ) : (
+    <KeysLoadingScreen navigation={navigation}></KeysLoadingScreen>
   );
 }

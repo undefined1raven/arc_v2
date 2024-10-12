@@ -17,10 +17,13 @@ import useEncryptionStore from "../encryptors/encryptionStore";
 import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
 import { CryptoMain } from "../CryptoMain";
 import { MultiDecrypt } from "@/components/common/crypto/MultiDecrypt";
+import { useHasLoadedUserDataStore } from "../Home/hasLoadedUserData";
 function InitializeApp() {
   const db = useSQLiteContext();
   const decryptionAPI = useDecryptionStore();
   const encryptionAPI = useEncryptionStore();
+  const hasLoadedUserDataAPI = useHasLoadedUserDataStore();
+  const [hasUsers, setHasUsers] = useState(false);
   const updateHasCheckedTables =
     useHasCheckedTablesStore.getState().updateHasCheckedTables;
   const updateLoadingMessage =
@@ -60,6 +63,7 @@ function InitializeApp() {
                     if (users.length === 0) {
                       updateLoadingMessage({ redirect: "landingScreen" });
                     } else {
+                      setHasUsers(true);
                       if (users.length === 1) {
                         const user = users[0];
                         if (user.authenticated === true) {
@@ -105,27 +109,32 @@ function InitializeApp() {
   ///async gen new account info on load (in case we'd need it)
   return (
     <>
-      {arcEncryptedFeatureConfig !== null && (
-        <SingleDecrypt
-          encryptedObj={arcEncryptedFeatureConfig}
+      {arcEncryptedFeatureConfig !== null &&
+        hasLoadedUserDataAPI.hasLoadedUserData === false && (
+          <SingleDecrypt
+            encryptedObj={arcEncryptedFeatureConfig}
+            onDecrypted={(e) => {
+              setArcFeatureConfig(
+                JSON.parse(format.default(e, { json: true }))
+              );
+            }}
+            symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
+          ></SingleDecrypt>
+        )}
+      {hasLoadedUserDataAPI.hasLoadedUserData === false && (
+        <MultiDecrypt
+          encryptedObj={decryptionAPI.cipherText}
           onDecrypted={(e) => {
-            setArcFeatureConfig(JSON.parse(format.default(e, { json: true })));
+            decryptionAPI.setCipherText(null);
+            decryptionAPI.setDecryptedData(e);
+          }}
+          onError={(e) => {
+            decryptionAPI.setCipherText(null);
+            decryptionAPI.setDecryptedData("error");
           }}
           symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
-        ></SingleDecrypt>
+        ></MultiDecrypt>
       )}
-      <MultiDecrypt
-        encryptedObj={decryptionAPI.cipherText}
-        onDecrypted={(e) => {
-          decryptionAPI.setCipherText(null);
-          decryptionAPI.setDecryptedData(e);
-        }}
-        onError={(e) => {
-          decryptionAPI.setCipherText(null);
-          decryptionAPI.setDecryptedData("error");
-        }}
-        symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
-      ></MultiDecrypt>
       {encryptionAPI.plain !== null && (
         <SingleEncrypt
           plainText={encryptionAPI.plain}
@@ -153,7 +162,7 @@ function InitializeApp() {
           symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
         ></SingleEncrypt>
       )}
-      <AsyncGenNewAccountInfo></AsyncGenNewAccountInfo>
+      {hasUsers === false && <AsyncGenNewAccountInfo></AsyncGenNewAccountInfo>}
       <LoadUserData></LoadUserData>
     </>
   );

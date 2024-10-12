@@ -99,7 +99,7 @@ function DayView({ navigation }) {
           <RBox width="60%" height="100%">
             <RLabel
               align="left"
-              width="70%"
+              width="80%"
               left="2%"
               top="10%"
               height="50%"

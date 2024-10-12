@@ -1,8 +1,10 @@
-
-
-
-function wrapKeysWithPasswordCode(password: string, pk: string, symsk: string) {
+function wrapKeysWithPasswordCode(
+  password: string[],
+  pk: string,
+  symsk: string
+) {
   return `
+  document.title = 'Wrap Keys with backup codes';
  async function exportCryptoKey(key) {
     const exported = await crypto.subtle.exportKey("jwk", key);
     return JSON.stringify(exported);
@@ -98,6 +100,22 @@ function ab2str(buf) {
 }
 
 
+function stringToCharCodeArray(str) {
+  let stringActual = str;
+  if (str === undefined) {
+    throw new Error("stringToCharCodeArray: str is undefined");
+  } else {
+    if (typeof str !== "string") {
+      stringActual = str.toString();
+    }
+  }
+  const charCodeArray = [];
+  for (let i = 0; i < stringActual.length; i++) {
+    charCodeArray.push(stringActual.charCodeAt(i));
+  }
+  return charCodeArray;
+}
+
      function sendMessage(message){
           window.ReactNativeWebView.postMessage(message)
         }
@@ -107,26 +125,51 @@ function ab2str(buf) {
                 const secretSymmetricKeyJWK = JSON.parse('${symsk}');
                 importPrivateKey(privateKeyJWK).then(pkActual => {
                   importSymmetricKey(secretSymmetricKeyJWK).then(symskActual => {
-                    wrapCryptoKey(symskActual, '${password}', 'raw').then(wrapedSymsk => {
-                      wrapCryptoKey(pkActual, '${password}', 'jwk').then(wrapedPk => {
-                      const transportReadyWrappedKey = JSON.stringify({
-									        key: ab2str(wrapedSymsk.wrappedKey),
-									        salt: ab2str(wrapedSymsk.salt),
-									        iv: ab2str(wrapedSymsk.iv)
-								          })
+                    const recoveryCodes = JSON.parse('${password}');
+                    console.log(recoveryCodes);
 
-                          const transportReadyWrappedPrivateKey = JSON.stringify({
-									        key: ab2str(wrapedPk.wrappedKey),
-									        salt: ab2str(wrapedPk.salt),
-									        iv: ab2str(wrapedPk.iv)
-								          })
-                        const payload = JSON.stringify({symsk: transportReadyWrappedKey, pk: transportReadyWrappedPrivateKey});
-                        sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'success', error: null, payload: payload}))
+                    const promiseArrayPk = [];
+                    const promiseArraySYMSK = [];
+
+                    for(let ix = 0; ix < recoveryCodes.length; ix++){
+                      promiseArrayPk.push(wrapCryptoKey(symskActual, recoveryCodes[ix], 'raw'));
+                      promiseArraySYMSK.push(wrapCryptoKey(pkActual, recoveryCodes[ix], 'jwk'));
+                    }
+
+                    Promise.all(promiseArrayPk).then(wrapedPkKeys => {
+                      console.log(wrapedPkKeys);
+                      Promise.all(promiseArraySYMSK).then(wrapedSymKeys => {
+                        console.log(wrapedSymKeys);
+                        if(wrapedPkKeys.length === wrapedSymKeys.length){
+                            const keyExport = [];
+                            for(let ix = 0; ix < wrapedPkKeys.length; ix++){
+                              const wrapedSymsk = wrapedSymKeys[ix];
+                              const wrapedPk = wrapedPkKeys[ix];
+
+                                             const transportReadyWrappedKey = JSON.stringify({
+									                          key: stringToCharCodeArray(ab2str(wrapedSymsk.wrappedKey)),
+									                          salt: stringToCharCodeArray(ab2str(wrapedSymsk.salt)),
+									                          iv: stringToCharCodeArray(ab2str(wrapedSymsk.iv))
+								                            })
+
+                                            const transportReadyWrappedPrivateKey = JSON.stringify({
+									                          key: stringToCharCodeArray(ab2str(wrapedPk.wrappedKey)),
+									                          salt: stringToCharCodeArray(ab2str(wrapedPk.salt)),
+									                          iv: stringToCharCodeArray(ab2str(wrapedPk.iv))
+								                            })
+
+                              keyExport.push({symsk: transportReadyWrappedKey, pk: transportReadyWrappedPrivateKey});
+                            }
+                              const payload = JSON.stringify(keyExport);
+                            sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'success', error: null, payload: payload}))
+                        }else{
+                          sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'failed', error: 'failed to wrap keys | len difference after promise'}))
+                        }
+                      }).catch(e => {
+                        sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'failed', error: 'failed to wrap symsk'}))
+                      });
                     }).catch(e => {
-                      sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'failed', error: 'failed to wrap pk'}))
-                    })
-                    }).catch(e => {
-                      sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'failed', error: 'failed to wrap symsk'}))
+                      sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'failed', error: 'failed to wrap keys'}))
                     })
                   }).catch(e => {
                     sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'failed', error: 'failed to import symsk'}))
@@ -136,13 +179,12 @@ function ab2str(buf) {
                 })
 
             }else{
-              sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'failed', error: 'smth'}))
+              sendMessage(JSON.stringify({taskID: 'keyWrapping', status: 'failed', error: 'dont have subtle crypto fml'}))
             }
-          }catch(e){b
+          }catch(e){
               sendMessage(JSON.stringify({taskID: 'keyWrapping', error: e, status: 'failed'}));
           }
-        `
+        `;
 }
 
-
-export { wrapKeysWithPasswordCode }
+export { wrapKeysWithPasswordCode };

@@ -34,7 +34,9 @@ export default function Home({ navigation, onRequestUserIDs }) {
   }, [currentActivitiesAPI.currentActivities]);
 
   useEffect(() => {
-    hasLoadedUserDataAPI.setHasLoadedUserData(true);
+    setTimeout(() => {
+      hasLoadedUserDataAPI.setHasLoadedUserData(true);
+    }, 2000);
   }, []);
 
   return (

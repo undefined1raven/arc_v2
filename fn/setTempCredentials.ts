@@ -19,7 +19,8 @@ type setTempCredentialsReturnType = {
 async function setTempCredentials(
   args: setTempCredentialsArgsType
 ): Promise<setTempCredentialsReturnType> {
-  SecureStore.setItemAsync("temp-pk", args.pk).catch((e) => {
+  console.log("setting temp credentials");
+   SecureStore.setItemAsync("temp-pk", args.pk).catch((e) => {
     return {
       error: "Failed to set keychain pk",
       errorObj: e,

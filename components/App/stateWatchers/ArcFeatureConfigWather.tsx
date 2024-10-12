@@ -11,22 +11,20 @@ import { encrypt } from "@/fn/crypto/encrypt";
 import { stringToCharCodeArray } from "@/fn/stringToCharCode";
 import { View } from "react-native";
 import { randomUUID } from "expo-crypto";
+import useStatusIndicatorsStore from "@/stores/statusIndicators";
+import { useHasLoadedUserDataStore } from "../Home/hasLoadedUserData";
 function ArcFeatureConfigWatcher() {
   const { arcFeatureConfig } = useArcFeatureConfigStore();
   const activeUserID = useLocalUserIDsStore().getActiveUserID();
-  const [dataToEncrypt, setDataToEncrypt] = useState<string | null>(null);
-  const [ready, setReady] = useState<boolean>(false);
-  const [symsk, setSymsk] = useState<string | null>(null);
-  const [tx, setTx] = useState<number>(0);
   const db = useSQLiteContext();
+  const statusIndicatorsAPI = useStatusIndicatorsStore();
+  const hasLoadedUserDataAPI = useHasLoadedUserDataStore();
   useEffect(() => {
     const debounced = debounce(
       () => {
-        setDataToEncrypt(null);
-        setTimeout(() => {
-          setDataToEncrypt(JSON.stringify(arcFeatureConfig));
-        }, 500);
+        if (hasLoadedUserDataAPI.hasLoadedUserData === false) return;
         const tid = randomUUID();
+        statusIndicatorsAPI.setEncrypting(true);
         symmetricEncrypt(JSON.stringify(arcFeatureConfig), tid)
           .then((e) => {
             console.log("encrypted AFCW");
@@ -35,14 +33,17 @@ function ArcFeatureConfigWatcher() {
               activeUserID,
             ])
               .then((e) => {
+                statusIndicatorsAPI.setEncrypting(false);
                 console.log("updated AFCW");
               })
               .catch((e) => {
+                statusIndicatorsAPI.setEncrypting(false);
                 console.log("error from AFCW");
               });
           })
           .catch((e) => {
             console.log("error from AFCW");
+            statusIndicatorsAPI.setEncrypting(false);
           });
       },
       5000,
@@ -50,30 +51,6 @@ function ArcFeatureConfigWatcher() {
     );
     debounced();
   }, [arcFeatureConfig]);
-
-  useEffect(() => {
-    SecureStore.getItemAsync(`${activeUserID}-symsk`)
-      .then((e) => {
-        if (e !== null) {
-          setSymsk(e);
-        } else {
-          setReady(false);
-        }
-      })
-      .catch((e) => {
-        setReady(false);
-      });
-  }, [activeUserID]);
-
-  useEffect(() => {
-    if (dataToEncrypt !== null && symsk !== null) {
-      setReady(true);
-      setTx(Date.now());
-    } else {
-      setReady(false);
-    }
-  }, [symsk, dataToEncrypt]);
-
   return null;
 }
 

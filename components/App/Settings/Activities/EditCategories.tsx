@@ -5,9 +5,16 @@ import RTextInput from "@/components/common/RTextInput";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { ActivityIndicator } from "react-native";
 import { useSelectedObjects } from "./selectedObjects";
+import RButton from "@/components/common/RButton";
+import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
+import { useState } from "react";
 function EditCategories({ navigation }) {
   const selectedObjectsAPI = useSelectedObjects();
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
+  const arcFeatureConfig = useArcFeatureConfigStore();
+  const [newName, setNewName] = useState(
+    selectedObjectsAPI.selectedCategory?.name
+  );
   return (
     <EmptyView navigation={navigation} showMenu={false}>
       <>
@@ -46,7 +53,9 @@ function EditCategories({ navigation }) {
           text="Name"
         ></RLabel>
         <RTextInput
-          onInput={() => {}}
+          onInput={(e) => {
+            setNewName(e);
+          }}
           defaultValue={selectedObjectsAPI.selectedCategory?.name}
           figmaImport={{
             mobile: {
@@ -57,6 +66,52 @@ function EditCategories({ navigation }) {
             },
           }}
         ></RTextInput>
+        <RButton
+          onClick={() => {
+            if (
+              selectedObjectsAPI.selectedCategory === null ||
+              selectedObjectsAPI.selectedCategory.name === newName
+            ){
+              navigation.goBack();
+              return;
+            }
+            const index =
+              arcFeatureConfig.arcFeatureConfig?.taskCategories.findIndex(
+                (task) =>
+                  task.categoryID ===
+                  selectedObjectsAPI.selectedCategory?.categoryID
+              );
+            if (index === -1) return;
+            const newCategory = {
+              ...selectedObjectsAPI.selectedCategory,
+              name: newName,
+            };
+            const newTaskCategories = [
+              ...arcFeatureConfig.arcFeatureConfig?.taskCategories,
+            ];
+            newTaskCategories[index] = newCategory;
+            arcFeatureConfig.setArcFeatureConfig({
+              ...arcFeatureConfig.arcFeatureConfig,
+              taskCategories: newTaskCategories,
+            });
+            navigation.goBack();
+          }}
+          figmaImport={{
+            mobile: {
+              left: 2,
+              top: 589,
+              width: 356,
+              height: 48,
+            },
+          }}
+        >
+          <RLabel
+            text="Save"
+            height="100%"
+            width="100%"
+            verticalAlign="center"
+          ></RLabel>
+        </RButton>
       </>
     </EmptyView>
   );

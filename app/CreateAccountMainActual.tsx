@@ -47,14 +47,10 @@ export default function CreateAccountMain({ navigation }) {
   }, []);
 
   function onCreateAccount(isOnline: boolean) {
-    if (loadingScreenMessage.message === "Ready") {
-      const name = isOnline ? "createAccountOnline" : "createAccountOffline";
-      navigation.navigate(name, {
-        name: name,
-      });
-    } else {
-      navigation.navigate("keysLoadingScreen", { name: "keysLoadingScreen" });
-    }
+    const name = isOnline ? "createAccountOnline" : "OTSOne";
+    navigation.navigate(name, {
+      name: name,
+    });
   }
 
   return (
