@@ -53,6 +53,7 @@ import { StorageAccessFramework } from "expo-file-system";
 import { DownloadDeco } from "../common/deco/DownloadDeco";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import RFlatList from "../common/RFlatList";
+import { useNewAccountStore } from "@/stores/newAccountStore";
 export default function OTSTwo({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   store.subscribe(() => {});
@@ -60,6 +61,7 @@ export default function OTSTwo({ navigation }) {
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
   const [codeTrigger, setCodeTrigger] = useState("");
   const [ready, setReady] = useState(false);
+  const newAccountAPI = useNewAccountStore();
   const [showCopiedToClipboard, setShowCopiedToClipboard] = useState(false);
   const [wrappedKeysStorage, setWrappedKeysStorage] = useState([]);
   useEffect(() => {
@@ -391,7 +393,15 @@ export default function OTSTwo({ navigation }) {
             isEnabled={ready}
             onClick={() => {
               if (ready) {
-                navigation.navigate("OTSThree", { name: "OTSThree" });
+                if (newAccountAPI.isOffline === true) {
+                  navigation.navigate("createAccountOffline", {
+                    name: "createAccountOffline",
+                  });
+                } else {
+                  navigation.navigate("CreateAccountOnline", {
+                    name: "CreateAccountOnline",
+                  });
+                }
               }
             }}
             figmaImport={{

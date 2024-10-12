@@ -40,6 +40,7 @@ import { defaultFeatureConfig } from "@/app/config/defaultFeatureConfig";
 import { useStore } from "@/stores/arcChunks";
 import { newChunkID } from "@/fn/newChunkID";
 import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
+import { useHasLoadedUserDataStore } from "../App/Home/hasLoadedUserData";
 export default function CreateAccountOffline({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   store.subscribe(() => {});
@@ -48,6 +49,7 @@ export default function CreateAccountOffline({ navigation }) {
   });
 
   const [hasMounted, setHasMounted] = useState(false);
+  const hasLoadedUserDataAPI = useHasLoadedUserDataStore();
   const [showLoading, setShowLoading] = useState(false);
   const setArcFeatureConfig = useArcFeatureConfigStore(
     (store) => store.setArcFeatureConfig
@@ -95,7 +97,6 @@ export default function CreateAccountOffline({ navigation }) {
             ) {
               res = { ...res, id: aid };
               const keys = Object.keys(res);
-              console.log(res.id);
               const placeholders = keys.map((_, i) => `?`).join(",");
               db.runAsync(
                 `INSERT INTO users (${keys.join(
@@ -107,11 +108,22 @@ export default function CreateAccountOffline({ navigation }) {
                   db.runAsync(`DELETE FROM users WHERE id='temp'`)
                     .then(() => {
                       setArcFeatureConfig(defaultFeatureConfig.arc);
+                      const hasTessKey = res.PIKBackup !== null;
+                      if (hasTessKey) {
+                        hasLoadedUserDataAPI.setKeyType("double");
+                      } else {
+                        hasLoadedUserDataAPI.setKeyType("simple");
+                      }
                       useLocalUserIDsStoreAPI.updateLocalUserIDs([
-                        { authenticated: true, id: aid, isActive: true },
+                        {
+                          authenticated: true,
+                          id: aid,
+                          isActive: true,
+                          hasTessKey: hasTessKey,
+                        },
                       ]);
                       setTimeout(() => {
-                        navigation.navigate("OTSOne", { name: "OTSOne" });
+                        navigation.navigate("Home", { name: "Home" });
                       }, 100);
                     })
                     .catch((e) => {

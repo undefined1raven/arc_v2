@@ -44,7 +44,9 @@ import * as Crypto from "expo-crypto";
 import * as Clipboard from "expo-clipboard";
 import { download } from "../../fn/download";
 import * as jsesc from "jsesc";
+import * as LocalAuthentication from "expo-local-authentication";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
+import { getWrapedTessKey } from "@/fn/getWrapedTessKey";
 type WrapKeysWithPasswordCodeReturnType = {
   status: "failed" | "success";
   error: null | string | object;
@@ -142,7 +144,28 @@ export default function OTSThree({ navigation }) {
 
   useEffect(() => {
     if (wrappedKeysStorage !== null) {
-      setCanCompleteSignUp(true);
+      const keys = Object.keys(wrappedKeysStorage);
+      if (keys.length === 3) {
+        db.runAsync(
+          `UPDATE users SET PIKBackup=? WHERE id='temp'`,
+          jsesc.default(JSON.stringify(wrappedKeysStorage), { json: true })
+        )
+          .then(async (res) => {
+            console.log(res);
+            await SecureStore.setItemAsync("tess_symkey_pin", pin, {
+              requireAuthentication: true,
+              authenticationPrompt: "Authenticate to use biometrics to unlock",
+            });
+            await SecureStore.setItemAsync("tess_symkey_pin_no_bio", "false");
+            navigation.navigate("OTSThree", { name: "OTSThree" });
+          })
+          .catch(async (e) => {
+            await SecureStore.setItemAsync("tess_symkey_pin_no_bio", "true");
+            navigation.navigate("OTSThree", { name: "OTSThree" });
+            console.log(e, "XNX-221");
+          });
+      }
+      console.log(wrappedKeysStorage, "wraped symkey");
     }
   }, [wrappedKeysStorage]);
 
@@ -159,13 +182,7 @@ export default function OTSThree({ navigation }) {
   function onSkipPin() {
     if (isSkipBoxChecked) {
       setShowSkipLoadingSpinner(true);
-      // db.runAsync(`UPDATE users SET PIKBackup=? WHERE id='temp'`, null)
-      //   .then((res) => {
-      //     completeSignUp();
-      //   })
-      //   .catch((e) => {
-      //     console.log(e);
-      //   });
+      navigation.navigate("OTSThree", { name: "OTSThree" });
     }
   }
 
@@ -181,7 +198,8 @@ export default function OTSThree({ navigation }) {
         e.nativeEvent.data
       );
       if (eventResponse.status === "success" && eventResponse.payload) {
-        setWrappedKeysStorage(eventResponse.payload);
+        const parsedPayload = JSON.parse(eventResponse.payload);
+        setWrappedKeysStorage(parsedPayload);
       }
     }
   }
@@ -231,17 +249,13 @@ export default function OTSThree({ navigation }) {
             height: "100%",
           }}
         >
-          {/* <BackgroundTaskRunner
+          <BackgroundTaskRunner
             messageHandler={(e) => {
               handleWrappedKeys(e);
             }}
             tx={codeTrigger}
-            triggeredCode={wrapKeysWithPasswordCode(
-              pin,
-              SecureStore.getItem("temp-pk"),
-              SecureStore.getItem("temp-symsk")
-            )}
-          ></BackgroundTaskRunner> */}
+            triggeredCode={getWrapedTessKey(pin)}
+          ></BackgroundTaskRunner>
           <KeyboarDismissWrapper></KeyboarDismissWrapper>
           <RBox
             figmaImport={{

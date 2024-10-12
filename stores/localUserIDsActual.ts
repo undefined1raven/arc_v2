@@ -4,6 +4,7 @@ export interface LocalUserIDsType {
   authenticated: boolean;
   id: string;
   isActive: boolean;
+  hasTessKey: boolean;
 }
 
 interface LocalUserIDsStoreType {

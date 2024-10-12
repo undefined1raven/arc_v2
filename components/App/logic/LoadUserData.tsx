@@ -57,6 +57,7 @@ function LoadUserData() {
         `SELECT * FROM arcChunks WHERE userID=? ORDER BY tx DESC LIMIT 3`,
         [activeUserID]
       ).then((recentChunks) => {
+        console.log(hasLoadedUserDataAPI.keyType, "keyType");
         if (recentChunks.length === 0) {
           currentActivities.setCurrentActivities([]);
           currentActivities.setIni(true);

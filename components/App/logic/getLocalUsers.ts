@@ -6,6 +6,7 @@ import { localUsersType } from "@/hooks/localUserIDs";
 import { LocalUserIDsType } from "@/stores/localUserIDsActual";
 import * as SQLite from "expo-sqlite";
 import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
+import { useHasLoadedUserDataStore } from "../Home/hasLoadedUserData";
 type GetLocalUsersSig = {
   status: "failed" | "success";
   error: null | string;
@@ -14,14 +15,17 @@ type GetLocalUsersSig = {
 
 async function getLocalUsers(): Promise<GetLocalUsersSig> {
   const updateLocalUsers = useLocalUserIDsStore.getState().updateLocalUserIDs;
+  const loadedUserDataAPI = useHasLoadedUserDataStore.getState();
   const db = await SQLite.openDatabaseAsync("localCache");
   return db
-    .getAllAsync(`SELECT id FROM users`)
+    .getAllAsync(`SELECT id, PIKBackup FROM users`)
     .then((result) => {
       const users: LocalUserIDsType[] = [];
       const activeUserID = getActiveUserID();
       for (let ix = 0; ix < result.length; ix++) {
         const userID = result[ix].id;
+        const hasTessKey = result[ix].PIKBackup !== null;
+        console.log(result[ix].PIKBackup !== null, " PINIXIN");
         if (userID === "temp") {
           continue;
         }
@@ -31,9 +35,19 @@ async function getLocalUsers(): Promise<GetLocalUsersSig> {
           const symsk = getUserSymsk(userID);
           const pk = getUserPK(userID);
           if (pk !== null && symsk !== null) {
-            users.push({ authenticated: true, id: userID, isActive: false });
+            users.push({
+              authenticated: true,
+              id: userID,
+              isActive: false,
+              hasTessKey: hasTessKey,
+            });
           } else {
-            users.push({ authenticated: false, id: userID, isActive: false });
+            users.push({
+              authenticated: false,
+              id: userID,
+              isActive: false,
+              hasTessKey: hasTessKey,
+            });
           }
         } else {
           ///online accounts
@@ -42,16 +56,36 @@ async function getLocalUsers(): Promise<GetLocalUsersSig> {
           if (authToken !== null) {
             auth = true;
           }
-          users.push({ authenticated: auth, id: userID, isActive: false });
+          users.push({
+            authenticated: auth,
+            id: userID,
+            isActive: false,
+            hasTessKey: hasTessKey,
+          });
         }
       }
-      if (activeUserID !== null) {
+      if (activeUserID !== null && activeUserID !== undefined) {
         ////set active user or leave them all as false for the ui to show the account picker if multiple accounts are present
         for (let ix = 0; ix < users.length; ix++) {
-          if (users[ix].id === activeUserID) {
+          if (
+            users[ix].id === activeUserID &&
+            users[ix].authenticated === true
+          ) {
+            loadedUserDataAPI.setKeyType(
+              users[ix].hasTessKey ? "double" : "simple"
+            );
             users[ix].isActive = true;
           }
         }
+      } else {
+        const firstAuthenticatedUser = users.filter(
+          (user) => user.authenticated === true
+        )[0];
+        const index = users.indexOf(firstAuthenticatedUser);
+        users[index].isActive = true;
+        loadedUserDataAPI.setKeyType(
+          firstAuthenticatedUser.hasTessKey ? "double" : "simple"
+        );
       }
       updateLocalUsers(users);
       return { status: "success", error: null, users: users };

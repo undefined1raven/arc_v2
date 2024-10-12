@@ -36,6 +36,7 @@ import useEncryptionStore from "../../encryptors/encryptionStore";
 import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
 import useStatusIndicatorsStore from "@/stores/statusIndicators";
 import { EditDeco } from "@/components/common/deco/EditDeco";
+import { useHasLoadedUserDataStore } from "../hasLoadedUserData";
 
 export default function TimeTracker({ navigation }) {
   store.subscribe(() => {});
@@ -68,7 +69,7 @@ export default function TimeTracker({ navigation }) {
     containerWidth: 354,
   };
   const db = useSQLiteContext();
-
+  const hasLoadedUserDataAPI = useHasLoadedUserDataStore();
   useEffect(() => {
     if (currentActivities.length > 0) {
       setCurrentDisplayedActivity(currentActivities[0]);
@@ -169,6 +170,7 @@ export default function TimeTracker({ navigation }) {
   }, [encryptedData, currentArcActivitiesAPI.lastChunk, dataToEncrypt]);
 
   async function updateLocalCache(newActivity: ArcTaskLogType) {
+    if (hasLoadedUserDataAPI.hasLoadedUserData === false) return;
     statusIndicatorsAPI.setEncrypting(true);
     try {
       if (currentArcActivitiesAPI.lastChunk !== null) {
@@ -379,7 +381,9 @@ export default function TimeTracker({ navigation }) {
         )}
         <RButton
           onClick={() => {
-            navigation.navigate("activitiesSettingsMain", { name: "activitiesSettingsMain" });
+            navigation.navigate("activitiesSettingsMain", {
+              name: "activitiesSettingsMain",
+            });
           }}
           figmaImportConfig={timeTrackingContainerConfig}
           figmaImport={{

@@ -27,6 +27,7 @@ import { NetworkDeco } from "@/components/common/deco/NetworkDeco";
 import { ArrowDeco } from "@/components/common/deco/ArrowDeco";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { useLoadingScreenMessageStore } from "@/stores/loadingScreenMessage";
+import { useNewAccountStore } from "@/stores/newAccountStore";
 
 export default function CreateAccountMain({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
@@ -36,6 +37,7 @@ export default function CreateAccountMain({ navigation }) {
   }, []);
 
   const [hasMounted, setHasMounted] = useState(false);
+  const createAccountAPI = useNewAccountStore();
   const buttonContainerSize = { containerWidth: 260, containerHeight: 155 };
   const loadingScreenMessage = useLoadingScreenMessageStore(
     (store) => store.loadingScreenMessage
@@ -48,6 +50,7 @@ export default function CreateAccountMain({ navigation }) {
 
   function onCreateAccount(isOnline: boolean) {
     const name = isOnline ? "createAccountOnline" : "OTSOne";
+    createAccountAPI.setIsOffline(!isOnline);
     navigation.navigate(name, {
       name: name,
     });
