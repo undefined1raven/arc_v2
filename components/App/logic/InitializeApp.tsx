@@ -121,20 +121,21 @@ function InitializeApp() {
             symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
           ></SingleDecrypt>
         )}
-      {hasLoadedUserDataAPI.hasLoadedUserData === false && (
-        <MultiDecrypt
-          encryptedObj={decryptionAPI.cipherText}
-          onDecrypted={(e) => {
-            decryptionAPI.setCipherText(null);
-            decryptionAPI.setDecryptedData(e);
-          }}
-          onError={(e) => {
-            decryptionAPI.setCipherText(null);
-            decryptionAPI.setDecryptedData("error");
-          }}
-          symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
-        ></MultiDecrypt>
-      )}
+      {hasLoadedUserDataAPI.hasLoadedUserData === false &&
+        hasLoadedUserDataAPI.keyType === "simple" && (
+          <MultiDecrypt
+            encryptedObj={decryptionAPI.cipherText}
+            onDecrypted={(e) => {
+              decryptionAPI.setCipherText(null);
+              decryptionAPI.setDecryptedData(e);
+            }}
+            onError={(e) => {
+              decryptionAPI.setCipherText(null);
+              decryptionAPI.setDecryptedData("error");
+            }}
+            symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
+          ></MultiDecrypt>
+        )}
       {encryptionAPI.plain !== null && (
         <SingleEncrypt
           plainText={encryptionAPI.plain}

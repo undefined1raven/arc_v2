@@ -25,6 +25,8 @@ import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { useLoadingScreenMessageStore } from "@/stores/loadingScreenMessage";
 import { useNavigatorStore } from "@/hooks/navigator";
 import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
+import { useHasLoadedUserDataStore } from "../App/Home/hasLoadedUserData";
+import { DecryptionScreen } from "../App/Home/DecryptScreen";
 
 export default function LoadingScreen({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
@@ -32,6 +34,7 @@ export default function LoadingScreen({ navigation }) {
     (store) => store.loadingScreenMessage
   );
   store.subscribe(() => {});
+  const hasLoadedUserDataAPI = useHasLoadedUserDataStore();
   const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => {
     setHasMounted(true);
@@ -49,7 +52,7 @@ export default function LoadingScreen({ navigation }) {
     setNavigator(navigation);
   }, []);
 
-  return (
+  return hasLoadedUserDataAPI.hasStartedDecryption === false ? (
     <View
       style={{
         position: "absolute",
@@ -108,5 +111,7 @@ export default function LoadingScreen({ navigation }) {
         <RBox></RBox>
       )}
     </View>
+  ) : (
+    <DecryptionScreen></DecryptionScreen>
   );
 }

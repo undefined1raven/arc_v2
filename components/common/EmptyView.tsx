@@ -36,7 +36,7 @@ import { TrashIcon } from "@/components/common/deco/TrashIcon";
 import { fullStyle } from "@/fn/fullStyle";
 import { Header } from "../App/Home/Header";
 
-function EmptyView({ navigation, showMenu, navBack, children }) {
+function EmptyView({ navigation, showMenu, navBack, children, showHeader }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -75,7 +75,7 @@ function EmptyView({ navigation, showMenu, navBack, children }) {
           height: "100%",
         }}
       />
-      <Header show={true}></Header>
+      <Header show={getVal(showHeader, true)}></Header>
       {hasMounted && (
         <Animated.View
           entering={globalEnteringConfig(150, 20)}

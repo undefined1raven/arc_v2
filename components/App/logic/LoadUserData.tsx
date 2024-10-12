@@ -43,7 +43,7 @@ function LoadUserData() {
   useEffect(() => {
     if (
       arcFeatureConfig !== null &&
-      arcChunks !== null &&
+      currentActivities.ini === true &&
       hasLoadedUserDataAPI.hasLoadedUserData === false
     ) {
       //bug
@@ -53,50 +53,56 @@ function LoadUserData() {
 
   useEffect(() => {
     if (activeUserID !== null) {
+      hasLoadedUserDataAPI.setHasStartedDecryption(true);
       db.getAllAsync(
         `SELECT * FROM arcChunks WHERE userID=? ORDER BY tx DESC LIMIT 3`,
         [activeUserID]
       ).then((recentChunks) => {
         console.log(hasLoadedUserDataAPI.keyType, "keyType");
-        if (recentChunks.length === 0) {
-          currentActivities.setCurrentActivities([]);
-          currentActivities.setIni(true);
-        } else {
-          const encryptedContents = recentChunks.map((chunk) => {
-            return chunk.encryptedContent;
-          });
-          symmetricDecrypt(JSON.stringify(encryptedContents))
-            .then((res) => {
-              const decryptedChunks: ARC_ChunksType[] = [];
-              const results = JSON.parse(jsesc.default(res, { json: true }));
-              console.log(results.length, "results len");
-              for (let ix = 0; ix < results.length; ix++) {
-                const tasks = JSON.parse(results[ix]);
-                decryptedChunks.push({
-                  ...recentChunks[ix],
-                  encryptedContent: tasks,
-                });
-              }
-              try {
-                let activities = [];
-                for (let ix = 0; ix < decryptedChunks.length; ix++) {
-                  const na = decryptedChunks[ix].encryptedContent.tasks;
-                  activities = [...activities, ...na];
-                }
-                const lastDecryptedChunk = {
-                  ...recentChunks[0],
-                  encryptedContent: results[0],
-                };
-                currentActivities.setCurrentActivities(activities);
-                currentActivities.setLastChunk(lastDecryptedChunk);
-                currentActivities.setIni(true);
-              } catch (e) {
-                console.log(e, "initial chunks parsing failed");
-              }
-            })
-            .catch((e) => {
-              console.log(e, "decryption failed");
+        if (
+          hasLoadedUserDataAPI.keyType === "simple" ||
+          (hasLoadedUserDataAPI.keyType === "double" && false)
+        ) {
+          if (recentChunks.length === 0) {
+            currentActivities.setCurrentActivities([]);
+            currentActivities.setIni(true);
+          } else {
+            const encryptedContents = recentChunks.map((chunk) => {
+              return chunk.encryptedContent;
             });
+            symmetricDecrypt(JSON.stringify(encryptedContents))
+              .then((res) => {
+                const decryptedChunks: ARC_ChunksType[] = [];
+                const results = JSON.parse(jsesc.default(res, { json: true }));
+                console.log(results.length, "results len");
+                for (let ix = 0; ix < results.length; ix++) {
+                  const tasks = JSON.parse(results[ix]);
+                  decryptedChunks.push({
+                    ...recentChunks[ix],
+                    encryptedContent: tasks,
+                  });
+                }
+                try {
+                  let activities = [];
+                  for (let ix = 0; ix < decryptedChunks.length; ix++) {
+                    const na = decryptedChunks[ix].encryptedContent.tasks;
+                    activities = [...activities, ...na];
+                  }
+                  const lastDecryptedChunk = {
+                    ...recentChunks[0],
+                    encryptedContent: results[0],
+                  };
+                  currentActivities.setCurrentActivities(activities);
+                  currentActivities.setLastChunk(lastDecryptedChunk);
+                  currentActivities.setIni(true);
+                } catch (e) {
+                  console.log(e, "initial chunks parsing failed");
+                }
+              })
+              .catch((e) => {
+                console.log(e, "decryption failed");
+              });
+          }
         }
       });
     }
