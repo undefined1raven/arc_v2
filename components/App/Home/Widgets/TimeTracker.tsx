@@ -228,7 +228,11 @@ export default function TimeTracker({ navigation }) {
           onError={(e) => {
             console.log(e);
           }}
-          symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
+          symsk={SecureStore.getItem(
+            hasLoadedUserDataAPI.keyType === "simple"
+              ? `${activeUserID}-symsk`
+              : `${activeUserID}-tess-symkey`
+          )}
         ></SingleEncrypt>
       )}
       <RBox

@@ -41,6 +41,7 @@ function LoadUserData() {
     setHasArcChunks(arcChunks !== null);
   }, [arcChunks]);
   useEffect(() => {
+    console.log(currentActivities.ini, "currentActivities.ini");
     if (
       arcFeatureConfig !== null &&
       currentActivities.ini === true &&
@@ -49,7 +50,11 @@ function LoadUserData() {
       //bug
       updateLoadingMessage({ redirect: "Home" });
     }
-  }, [arcFeatureConfig, hasArcChunks]);
+  }, [
+    arcFeatureConfig,
+    hasLoadedUserDataAPI.hasLoadedUserData,
+    currentActivities.ini,
+  ]);
 
   useEffect(() => {
     if (activeUserID !== null) {
@@ -61,8 +66,10 @@ function LoadUserData() {
         console.log(hasLoadedUserDataAPI.keyType, "keyType");
         if (
           hasLoadedUserDataAPI.keyType === "simple" ||
-          (hasLoadedUserDataAPI.keyType === "double" && false)
+          (hasLoadedUserDataAPI.keyType === "double" &&
+            hasLoadedUserDataAPI.hasTessKey)
         ) {
+          console.log(recentChunks, "recentChunks");
           if (recentChunks.length === 0) {
             currentActivities.setCurrentActivities([]);
             currentActivities.setIni(true);
@@ -71,7 +78,7 @@ function LoadUserData() {
               return chunk.encryptedContent;
             });
             symmetricDecrypt(JSON.stringify(encryptedContents))
-              .then((res) => {
+            .then((res) => {
                 const decryptedChunks: ARC_ChunksType[] = [];
                 const results = JSON.parse(jsesc.default(res, { json: true }));
                 console.log(results.length, "results len");
@@ -106,7 +113,11 @@ function LoadUserData() {
         }
       });
     }
-  }, [activeUserID]);
+  }, [
+    activeUserID,
+    hasLoadedUserDataAPI.keyType,
+    hasLoadedUserDataAPI.hasTessKey,
+  ]);
 
   return <></>;
 }

@@ -79,6 +79,7 @@ type RButtonProps = {
   mouseEnter?: Function;
   mouseLeave?: Function;
   transitions?: string | object;
+  autoFocus?: boolean;
   isSelected?: boolean;
   onLongPress?: Function;
 };
@@ -222,6 +223,7 @@ export default function RTextInput(props: RButtonProps) {
             onChangeText={(e) => {
               getVal(props.onInput(e), () => {});
             }}
+            autoFocus={getVal(props.autoFocus, false)}
             defaultValue={getVal(props.defaultValue, "")}
             placeholder={getVal(props.placeholder, "")}
             keyboardType={getVal(props.keyboardType, "default")}

@@ -24,6 +24,7 @@ import { ActivitiesSettingsMain } from "@/components/App/Settings/Activities/Act
 import { EditActivities } from "@/components/App/Settings/Activities/EditActivities";
 import { EditCategories } from "@/components/App/Settings/Activities/EditCategories";
 import { useNewAccountStore } from "@/stores/newAccountStore";
+import { DecryptionScreen } from "@/components/App/Home/DecryptScreen";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {

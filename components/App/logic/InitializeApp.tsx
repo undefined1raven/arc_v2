@@ -18,7 +18,7 @@ import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
 import { CryptoMain } from "../CryptoMain";
 import { MultiDecrypt } from "@/components/common/crypto/MultiDecrypt";
 import { useHasLoadedUserDataStore } from "../Home/hasLoadedUserData";
-function InitializeApp() {
+function InitializeApp({ navigation }) {
   const db = useSQLiteContext();
   const decryptionAPI = useDecryptionStore();
   const encryptionAPI = useEncryptionStore();
@@ -54,6 +54,7 @@ function InitializeApp() {
             } else {
               getLocalUsers()
                 .then((res) => {
+                  console.log(res, "checkTables");
                   if (
                     res.status === "success" &&
                     res.error === null &&
@@ -61,6 +62,7 @@ function InitializeApp() {
                   ) {
                     const users = res.users;
                     if (users.length === 0) {
+                      console.log("no users");
                       updateLoadingMessage({ redirect: "landingScreen" });
                     } else {
                       setHasUsers(true);
@@ -122,20 +124,28 @@ function InitializeApp() {
           ></SingleDecrypt>
         )}
       {hasLoadedUserDataAPI.hasLoadedUserData === false &&
-        hasLoadedUserDataAPI.keyType === "simple" && (
-          <MultiDecrypt
-            encryptedObj={decryptionAPI.cipherText}
-            onDecrypted={(e) => {
-              decryptionAPI.setCipherText(null);
-              decryptionAPI.setDecryptedData(e);
-            }}
-            onError={(e) => {
-              decryptionAPI.setCipherText(null);
-              decryptionAPI.setDecryptedData("error");
-            }}
-            symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
-          ></MultiDecrypt>
-        )}
+      ((hasLoadedUserDataAPI.hasTessKey === true &&
+        hasLoadedUserDataAPI.keyType === "double") ||
+        hasLoadedUserDataAPI.keyType === "simple") ? (
+        <MultiDecrypt
+          encryptedObj={decryptionAPI.cipherText}
+          onDecrypted={(e) => {
+            decryptionAPI.setCipherText(null);
+            decryptionAPI.setDecryptedData(e);
+          }}
+          onError={(e) => {
+            decryptionAPI.setCipherText(null);
+            decryptionAPI.setDecryptedData("error");
+          }}
+          symsk={SecureStore.getItem(
+            hasLoadedUserDataAPI.keyType === "simple"
+              ? `${activeUserID}-symsk`
+              : `${activeUserID}-tess-symkey`
+          )}
+        ></MultiDecrypt>
+      ) : (
+        <></>
+      )}
       {encryptionAPI.plain !== null && (
         <SingleEncrypt
           plainText={encryptionAPI.plain}

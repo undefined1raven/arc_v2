@@ -81,16 +81,17 @@ async function getLocalUsers(): Promise<GetLocalUsersSig> {
         const firstAuthenticatedUser = users.filter(
           (user) => user.authenticated === true
         )[0];
-        const index = users.indexOf(firstAuthenticatedUser);
-        users[index].isActive = true;
-        loadedUserDataAPI.setKeyType(
-          firstAuthenticatedUser.hasTessKey ? "double" : "simple"
-        );
+        if (firstAuthenticatedUser !== undefined) {
+          loadedUserDataAPI.setKeyType(
+            firstAuthenticatedUser.hasTessKey ? "double" : "simple"
+          );
+        }
       }
       updateLocalUsers(users);
       return { status: "success", error: null, users: users };
     })
     .catch((error) => {
+      console.log(error);
       return { status: "failed", error: "GLU-32" };
     });
 }

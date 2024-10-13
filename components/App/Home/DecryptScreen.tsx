@@ -18,12 +18,15 @@ import { ActivityIndicator } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import RTextInput from "@/components/common/RTextInput";
 import { useEffect, useState } from "react";
+import { UnwrapTessSymkey } from "./UnwrapTessSymkey";
 function DecryptionScreen() {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const hasLoadedUserDataAPI = useHasLoadedUserDataStore();
   const tessKeyBioFlag = SecureStore.getItem("tess_symkey_pin_no_bio");
+  const [isPinValid, setIsPinValid] = useState(false);
   const [usePinInsteadMode, setUsePinInsteadMode] = useState(false);
-  const [pinFromKeyChain, setPinFromKeyChain] = useState<string | null>(null);
+  const [pinFromInput, setPinFromInput] = useState<string>("");
+  const [finalTessPin, setFinalTessPin] = useState<string | null>(null);
   function ChunksDecryptingLoadingDeco(props: { top: number }) {
     const progress = useSharedValue(0);
 
@@ -81,6 +84,17 @@ function DecryptionScreen() {
       </RBox>
     );
   }
+  useEffect(() => {
+    setIsPinValid(
+      !!(
+        pinFromInput.match(/^(|[0-9]*)$/) &&
+        pinFromInput.length >= 4 &&
+        pinFromInput.length <= 6
+      )
+    );
+  }, [pinFromInput]);
+
+  useEffect(() => {}, [finalTessPin]);
 
   function requestPinFromStorage() {
     try {
@@ -88,16 +102,20 @@ function DecryptionScreen() {
         requireAuthentication: true,
         authenticationPrompt: "Authenticate to decrypt your data",
       });
-      console.log(tessPin);
+      setFinalTessPin(tessPin);
     } catch (e) {
       console.log(e);
     }
   }
-
   useEffect(() => {
-    setTimeout(() => {
-      requestPinFromStorage();
-    }, 300);
+    if (
+      hasLoadedUserDataAPI.keyType === "double" &&
+      tessKeyBioFlag === "false"
+    ) {
+      setTimeout(() => {
+        requestPinFromStorage();
+      }, 300);
+    }
   }, []);
 
   return (
@@ -109,17 +127,29 @@ function DecryptionScreen() {
     >
       {/* <ChunksDecryptingLoadingDeco
         top={hasLoadedUserDataAPI.keyType === "simple" ? 293 : 445}
-      ></ChunksDecryptingLoadingDeco> */}
+        ></ChunksDecryptingLoadingDeco> */}
       {hasLoadedUserDataAPI.keyType === "double" ? (
         <>
+          {hasLoadedUserDataAPI.hasLoadedUserData === false && (
+            <UnwrapTessSymkey
+              onSuccess={() => {
+                hasLoadedUserDataAPI.setHasTessKey(true);
+                console.log("success");
+              }}
+              onError={(e) => {
+                console.log(e);
+              }}
+              pin={finalTessPin}
+            ></UnwrapTessSymkey>
+          )}
           {tessKeyBioFlag === "false" && usePinInsteadMode === false ? (
             <>
               <RLabel
                 text="Use biometrics to decrypt your data"
                 figmaImport={{
                   mobile: {
-                    left: 51,
-                    width: 257,
+                    left: "0",
+                    width: "100%",
                     height: 19,
                     top: 300,
                   },
@@ -167,7 +197,24 @@ function DecryptionScreen() {
               ></RLabel>
               <RTextInput
                 secureTextEntry={true}
-                onInput={() => {}}
+                onInput={(e) => {
+                  setPinFromInput(e);
+                }}
+                autoFocus={true}
+                borderColor={
+                  pinFromInput.length === 0
+                    ? globalStyle.color
+                    : isPinValid
+                    ? globalStyle.successColor
+                    : globalStyle.errorColor
+                }
+                backgroundColor={
+                  pinFromInput.length === 0
+                    ? globalStyle.color
+                    : isPinValid
+                    ? globalStyle.successColor
+                    : globalStyle.errorColor
+                }
                 fontSize={globalStyle.largeMobileFont}
                 placeholderTextColor={globalStyle.textColorInactive}
                 placeholder="Enter your PIN"
@@ -197,6 +244,11 @@ function DecryptionScreen() {
                 }}
               ></RLabel>
               <RButton
+                onClick={() => {
+                  if (isPinValid) {
+                    setFinalTessPin(pinFromInput);
+                  }
+                }}
                 label="Enter"
                 figmaImport={{
                   mobile: {
