@@ -66,7 +66,7 @@ function DayView({ navigation }) {
     )?.categoryID;
     return (
       arcFeatureConfig.taskCategories.find((cat) => cat.categoryID === catID)
-        ?.name || "Unknown"
+        ?.name || "No category"
     );
   };
 

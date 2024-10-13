@@ -4,7 +4,9 @@ import { useEffect } from "react";
 
 function ActivitiesDeriver() {
   const arcActivitiesAPI = useArcCurrentActivitiesStore();
-  const activities = arcActivitiesAPI.currentActivities;
+  const activities = arcActivitiesAPI.currentActivities.sort(
+    (a, b) => a.start - b.start
+  );
 
   useEffect(() => {
     ///for days
@@ -16,7 +18,7 @@ function ActivitiesDeriver() {
         days[day] = [activity];
       } else {
         const newDay = [...days[day], activity];
-        days[day] = newDay;
+        days[day] = newDay.sort((a, b) => a.start - b.start);
       }
     }
     arcActivitiesAPI.setByDayDerivedActivities({ byDay: days });

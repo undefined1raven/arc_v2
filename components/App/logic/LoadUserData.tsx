@@ -60,7 +60,7 @@ function LoadUserData() {
     if (activeUserID !== null) {
       hasLoadedUserDataAPI.setHasStartedDecryption(true);
       db.getAllAsync(
-        `SELECT * FROM arcChunks WHERE userID=? ORDER BY tx DESC LIMIT 3`,
+        `SELECT * FROM arcChunks WHERE userID=? ORDER BY tx DESC LIMIT 6`,
         [activeUserID]
       ).then((recentChunks) => {
         console.log(hasLoadedUserDataAPI.keyType, "keyType");
@@ -69,7 +69,6 @@ function LoadUserData() {
           (hasLoadedUserDataAPI.keyType === "double" &&
             hasLoadedUserDataAPI.hasTessKey)
         ) {
-          console.log(recentChunks, "recentChunks");
           if (recentChunks.length === 0) {
             currentActivities.setCurrentActivities([]);
             currentActivities.setIni(true);

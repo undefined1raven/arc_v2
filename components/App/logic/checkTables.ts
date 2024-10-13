@@ -32,17 +32,23 @@ async function checkTables(): Promise<CheckTablesReturnSig> {
     "CREATE TABLE IF NOT EXISTS sidChunks (id TEXT NOT NULL PRIMARY KEY, userID TEXT NOT NULL, encryptedContent TEXT NOT NULL, tx NUMBER NOT NULL, version TEXT NOT NULL);"
   );
   promiseArray.push(SIDChunksTablePromise);
-  return db.getFirstAsync("SELECT id FROM users;").then((firstUser) => {
-    const isEmpty = firstUser === null;
-    return Promise.all(promiseArray)
-      .then((res) => {
-        return { status: "success", error: null, isEmpty: isEmpty };
-      })
-      .catch((e) => {
-        console.log(e);
-        return { status: "failed", error: "e" };
-      });
-  });
+  return db
+    .getFirstAsync("SELECT id FROM users;")
+    .then((firstUser) => {
+      const isEmpty = firstUser === null;
+      return Promise.all(promiseArray)
+        .then((res) => {
+          return { status: "success", error: null, isEmpty: isEmpty };
+        })
+        .catch((e) => {
+          console.log(e, "fmx");
+          return { status: "failed", error: e };
+        });
+    })
+    .catch((e) => {
+      console.log(e, "fmx");
+      return { status: "failed", error: e };
+    });
 }
 
 export { checkTables };

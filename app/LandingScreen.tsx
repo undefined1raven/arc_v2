@@ -83,7 +83,7 @@ export default function LandingScreen({ navigation }) {
           onClick={() => {
             db.runAsync(`DROP TABLE users`);
           }}
-          mobileFontSize={22}
+          mobileFontSize={globalStyle.largeMobileFont}
           figmaImport={{
             mobile: { top: 366, left: 50, width: 260, height: 44 },
           }}
@@ -99,7 +99,7 @@ export default function LandingScreen({ navigation }) {
           onClick={() => {
             onCreateAccount();
           }}
-          mobileFontSize={22}
+          mobileFontSize={globalStyle.largeMobileFont}
           transitionDuration={0}
           figmaImport={{
             mobile: { top: 463, left: 50, width: 260, height: 44 },

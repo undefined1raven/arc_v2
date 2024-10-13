@@ -273,8 +273,8 @@ export default function RButton(props: RButtonProps) {
           height="100%"
           left={0}
           top={0}
+          fontSize={getVal(props.mobileFontSize, globalStyle.regularMobileFont)}
           style={{
-            fontSize: getVal(props.mobileFontSize, 18),
             fontFamily: currentFontFamiliy,
           }}
         ></RLabel>

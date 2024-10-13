@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import FigmaImporter from "../../fn/figmaImporter";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
+import { fontController } from "../../fn/fontController";
 import FigmaImportConfig from "../../fn/FigmaImportConfig";
 import Animated, {
   Easing,
@@ -239,7 +240,9 @@ export default function RTextInput(props: RButtonProps) {
               margin: 0,
               color: getVal(props.color, globalStyle.textColor),
               display: "flex",
-              fontSize: getVal(props.fontSize, globalStyle.regularMobileFont),
+              fontSize: fontController(
+                getVal(props.fontSize, globalStyle.regularMobileFont)
+              ),
               justifyContent: getVal(props.align, "left"),
               textAlign: getVal(props.align, "left"),
               alignItems: getVal(props.align, "left"),
