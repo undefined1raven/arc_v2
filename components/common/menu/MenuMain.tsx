@@ -6,6 +6,7 @@ import globalStyles, {
   GlobalStyleType,
   updateGlobalStyle,
 } from "@/hooks/globalStyles";
+import * as FileSystem from "expo-file-system";
 import RLabel from "@/components/common/RLabel";
 import { setStatusBarBackgroundColor, StatusBar } from "expo-status-bar";
 import Animated, {
@@ -29,6 +30,8 @@ import * as SecureStore from "expo-secure-store";
 import { useMenuConfigStore } from "../../../stores/mainMenu";
 import { useNavigation } from "@react-navigation/native";
 import { useNavigatorStore } from "@/hooks/navigator";
+import { StorageAccessFramework } from "expo-file-system";
+import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 
 export default function MenuMain() {
   const navigation = useNavigation();
@@ -48,6 +51,66 @@ export default function MenuMain() {
   const { height: screenHeight } = Dimensions.get("window");
   const menuApi = useMenuConfigStore();
   const db = useSQLiteContext();
+  const activeUserID = useLocalUserIDsStore().getActiveUserID();
+
+  async function saveFile() {
+    const permissions =
+      await StorageAccessFramework.requestDirectoryPermissionsAsync();
+    if (!permissions.granted) {
+      console.log("Permission denied");
+      return;
+    }
+    console.log("here 2");
+
+    const userData = await db.getFirstAsync(
+      `SELECT * FROM users WHERE id = '${activeUserID}'`
+    );
+    const arcData = await db.getAllAsync(
+      `SELECT * FROM arcChunks WHERE userID = '${activeUserID}'`
+    );
+    const SIDData = await db.getAllAsync(
+      `SELECT * FROM sidChunks WHERE userID = '${activeUserID}'`
+    );
+    const tessData = await db.getAllAsync(
+      `SELECT * FROM tessChunks WHERE userID = '${activeUserID}'`
+    );
+    const pk = await SecureStore.getItemAsync(`${activeUserID}-pk`);
+    const symkey = await SecureStore.getItemAsync(`${activeUserID}-symsk`);
+    console.log("here");
+    let accountBackup = { userData, arcData, SIDData, tessData, pk, symkey };
+
+    function getUTC() {
+      const date = new Date();
+      return date.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      });
+    }
+
+    try {
+      await StorageAccessFramework.createFileAsync(
+        permissions.directoryUri,
+        `ARC_AccountBackup-${getUTC()}-${activeUserID}.arc.backup.txt`,
+        "text/plain"
+      )
+        .then(async (uri) => {
+          await FileSystem.writeAsStringAsync(
+            uri,
+            JSON.stringify(accountBackup),
+            {
+              encoding: FileSystem.EncodingType.UTF8,
+            }
+          );
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
   return menuConfig.visible ? (
     <RBox
       figmaImport={{
@@ -65,13 +128,16 @@ export default function MenuMain() {
       >
         <RButton
           onLongPress={() => {
-            console.log("xx");
-            db.runAsync("DROP TABLE users");
-            db.runAsync("DROP TABLE userData");
-            db.runAsync("DROP TABLE arcChunks");
-            if (navigator !== null) {
-              // navigator.navigate("SettingsMain", { name: "SettingsMain" });
-            }
+            // console.log("xx");
+            // db.runAsync("DROP TABLE users");
+            // db.runAsync("DROP TABLE userData");
+            // db.runAsync("DROP TABLE arcChunks");
+            // if (navigator !== null) {
+            //   // navigator.navigate("SettingsMain", { name: "SettingsMain" });
+            // }
+          }}
+          onClick={async () => {
+            await saveFile();
           }}
           figmaImportConfig={containerConfig}
           figmaImport={{
