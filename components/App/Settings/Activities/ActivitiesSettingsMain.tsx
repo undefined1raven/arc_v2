@@ -2,10 +2,7 @@ import MenuList from "@/components/common/menu/MenuList";
 import MenuMain from "@/components/common/menu/MenuMain";
 import RBox from "@/components/common/RBox";
 import { setStatusBarBackgroundColor, StatusBar } from "expo-status-bar";
-import Animated, {
-  FadeInDown,
-  FadeInRight,
-} from "react-native-reanimated";
+import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { ActivityIndicator, BackHandler, View } from "react-native";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { useEffect, useState } from "react";
@@ -177,21 +174,47 @@ function ActivitiesSettingsMain({ navigation }) {
           <RButton
             borderColor="#00000000"
             onClick={() => {
+              if (selectedObjectsAPI.selectedActivity === null) return;
               if (selectedView === "activities") {
-                const newTasks = arcFeatureConfig.tasks.filter(
-                  (task) => task.taskID !== item.taskID
+                const newTasks = arcFeatureConfig.tasks;
+                const newTask = {
+                  ...selectedObjectsAPI.selectedActivity,
+                  deleted: true,
+                };
+                const index = newTasks.findIndex(
+                  (task) => task.taskID === newTask.taskID
                 );
+                if (index === -1) return;
+                newTasks[index] = newTask;
                 arcFeatureConfigAPI.setArcFeatureConfig({
                   ...arcFeatureConfig,
                   tasks: newTasks,
                 });
               } else {
-                const newCats = arcFeatureConfig.taskCategories.filter(
-                  (category) => category.categoryID !== item.categoryID
+                const newCats = arcFeatureConfig.taskCategories;
+                const newCat = {
+                  ...item,
+                  deleted: true,
+                };
+                const index = newCats.findIndex(
+                  (category) => category.categoryID === newCat.categoryID
                 );
+                if (index === -1) return;
+                newCats[index] = newCat;
+                const newTasks = arcFeatureConfig.tasks.map((task) => {
+                  if (task.categoryID === newCat.categoryID) {
+                    return {
+                      ...task,
+                      categoryID: null,
+                    };
+                  } else {
+                    return task;
+                  }
+                });
                 arcFeatureConfigAPI.setArcFeatureConfig({
                   ...arcFeatureConfig,
                   taskCategories: newCats,
+                  tasks: newTasks,
                 });
               }
               console.log("delete");
@@ -352,8 +375,10 @@ function ActivitiesSettingsMain({ navigation }) {
               inverted={false}
               data={
                 selectedView === "activities"
-                  ? arcFeatureConfig.tasks
-                  : arcFeatureConfig.taskCategories
+                  ? arcFeatureConfig.tasks.filter((task) => !task.deleted)
+                  : arcFeatureConfig.taskCategories.filter(
+                      (cat) => !cat.deleted
+                    )
               }
               keyExtractor={(item, index) => {
                 return selectedView === "activities"

@@ -202,6 +202,7 @@ export default function TimeTrackingActivityMenu(
             renderItem={renderItem}
             keyExtractor={(item) => item.taskID}
             data={arcFeatureConfig?.tasks.filter((task) => {
+              if (task.deleted === true) return false;
               if (searchInput === "") return true;
               const searchInputLowerCase = searchInput.toLocaleLowerCase();
               const filteredTaskCategories =

@@ -185,7 +185,9 @@ function EditActivities({ navigation }) {
             <RFlatList
               renderItem={listRenderItem}
               data={getVal(
-                arcFeatureConfig.arcFeatureConfig?.taskCategories,
+                arcFeatureConfig.arcFeatureConfig?.taskCategories.filter(
+                  (cat) => cat.deleted === false
+                ),
                 []
               )}
               emptyComponent={emptyRenderItem(globalStyle, "No Categories")}
