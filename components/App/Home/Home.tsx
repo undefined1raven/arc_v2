@@ -81,8 +81,8 @@ export default function Home({ navigation, onRequestUserIDs }) {
             mobile: { top: 22, left: "0", width: "100%", height: 618 },
           }}
         >
-          <DayBreakdown navigation={navigation}></DayBreakdown>
           <TimeTracker navigation={navigation}></TimeTracker>
+          <DayBreakdown navigation={navigation}></DayBreakdown>
         </RBox>
         <MenuMain></MenuMain>
         <QuickNavMain

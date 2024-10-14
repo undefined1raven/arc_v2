@@ -54,6 +54,7 @@ import { DownloadDeco } from "../common/deco/DownloadDeco";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import RFlatList from "../common/RFlatList";
 import { useNewAccountStore } from "@/stores/newAccountStore";
+import { indexAnimationDelay } from "@/constants/indexAnimationDelay";
 export default function OTSTwo({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   store.subscribe(() => {});
@@ -96,7 +97,7 @@ export default function OTSTwo({ navigation }) {
       <Animated.View
         entering={FadeInRight.duration(75)
           .damping(30)
-          .delay(25 * index)}
+          .delay(indexAnimationDelay * index)}
         style={{
           position: "relative",
           paddingBottom: "3%",

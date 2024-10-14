@@ -193,7 +193,7 @@ function DayView({ navigation }) {
         >
           <RFlatList
             figmaImport={{
-              mobile: { top: 97, left: 3, width: 354, height: 449 },
+              mobile: { top: 97, left: 3, width: 354, height: 485 },
             }}
             emptyComponent={emptyRenderItem(globalStyle, "No activities")}
             inverted={false}

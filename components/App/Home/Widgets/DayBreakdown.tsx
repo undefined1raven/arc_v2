@@ -3,7 +3,13 @@ import { useContext, useEffect, useState } from "react";
 import RBox from "@/components/common/RBox";
 import RLabel from "@/components/common/RLabel";
 import { setStatusBarBackgroundColor, StatusBar } from "expo-status-bar";
-import Animated, { FadeInDown, Easing, FadeIn } from "react-native-reanimated";
+import Animated, {
+  FadeInDown,
+  Easing,
+  FadeIn,
+  FadeInLeft,
+  FadeInUp,
+} from "react-native-reanimated";
 import store from "@/app/store";
 import {
   getVal,
@@ -27,6 +33,7 @@ import { AddIcon } from "@/components/common/deco/AddIcon";
 import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 import { randomUUID } from "expo-crypto";
+import { useRequestFullSpace } from "./requestFullSpace";
 import { useArcCurrentActivitiesStore } from "@/stores/arcCurrentActivities";
 import { MaxActivitiesInArcChunk } from "@/app/config/chunking";
 import { symmetricEncrypt } from "../../encryptors/symmetricEncrypt";
@@ -38,6 +45,8 @@ import useStatusIndicatorsStore from "@/stores/statusIndicators";
 import { EditDeco } from "@/components/common/deco/EditDeco";
 import { useHasLoadedUserDataStore } from "../hasLoadedUserData";
 import RFlatList from "@/components/common/RFlatList";
+import { indexAnimationDelay } from "@/constants/indexAnimationDelay";
+import { transform } from "@babel/core";
 
 export default function DayBreakdown({ navigation }) {
   store.subscribe(() => {});
@@ -46,6 +55,7 @@ export default function DayBreakdown({ navigation }) {
   const currentArcActivitiesAPI = useArcCurrentActivitiesStore();
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const activeUserID = useLocalUserIDsStore().getActiveUserID();
+  const requestFullSpaceAPI = useRequestFullSpace();
   const arcFeatureConfig: FeatureConfigArcType = useArcFeatureConfigStore(
     (store) => store.arcFeatureConfig
   );
@@ -60,7 +70,7 @@ export default function DayBreakdown({ navigation }) {
         key={item.label}
         entering={FadeInDown.duration(75)
           .damping(30)
-          .delay(25 * index)}
+          .delay(indexAnimationDelay * index)}
         style={{
           position: "relative",
           alignItems: "center",
@@ -94,13 +104,23 @@ export default function DayBreakdown({ navigation }) {
             backgroundColor={globalStyle.colorInactive}
             left="65.5%"
           >
-            <RBox
-              width={`${item.percentage}%`}
-              left="0%"
-              height="100%"
-              top={0}
-              backgroundColor={globalStyle.color}
-            ></RBox>
+            <Animated.View
+              entering={FadeInLeft.withInitialValues({
+                scaleX: 0,
+                left: -10,
+              })
+                .duration(150)
+                .delay(index * 50)}
+              style={{ width: "100%", height: "100%", top: 0, left: 0 }}
+            >
+              <RBox
+                width={`${item.percentage}%`}
+                left="0%"
+                height="100%"
+                top={0}
+                backgroundColor={globalStyle.color}
+              ></RBox>
+            </Animated.View>
           </RBox>
           <RBox
             height={1}
@@ -117,9 +137,9 @@ export default function DayBreakdown({ navigation }) {
   const [data, setData] = useState<{ label: string; percentage: number }[]>([]);
   useEffect(() => {
     const now = new Date();
-    now.setHours(0, 0, 0, 0);
+    now.setHours(0, 0, 0, 1);
     const milliesInADay = 86400000;
-    const dayMidnightUnix = now.getTime() - milliesInADay;
+    const dayMidnightUnix = now.getTime();
     const categoriesDurationMap: { [key: string]: number } = {};
     const relevantActivities = currentArcActivitiesAPI.currentActivities.filter(
       (activity) => {
@@ -157,38 +177,41 @@ export default function DayBreakdown({ navigation }) {
       percentage: 100 - data.reduce((acc, val) => acc + val.percentage, 0),
     });
 
-    setData(data);
+    setData(data.sort((a, b) => b.percentage - a.percentage));
+    console.log(data.length);
   }, [currentArcActivitiesAPI.currentActivities, arcFeatureConfig]);
 
   return (
-    <RBox
-      backgroundColor={globalStyle.color + "10"}
-      figmaImport={{
-        mobile: {
-          top: 245,
-          left: 3,
-          width: 354,
-          height: 163,
-        },
-      }}
-    >
-      <RLabel
-        color={globalStyle.textColorAccent}
-        width="100%"
-        fontSize={globalStyle.smallMobileFont}
-        align="left"
-        alignPadding="2%"
-        text="Day Breakdown"
-      ></RLabel>
-      <RFlatList
-        renderItem={renderItem}
-        data={data}
-        width={"98%"}
-        height={"91%"}
-        top={"7%"}
-        left={"1%"}
-      ></RFlatList>
-    </RBox>
+    requestFullSpaceAPI.requestFullSpace === false && (
+      <RBox
+        backgroundColor={globalStyle.color + "10"}
+        figmaImport={{
+          mobile: {
+            top: 245,
+            left: 3,
+            width: 354,
+            height: 163,
+          },
+        }}
+      >
+        <RLabel
+          color={globalStyle.textColorAccent}
+          width="100%"
+          fontSize={globalStyle.smallMobileFont}
+          align="left"
+          alignPadding="2%"
+          text="Day Breakdown"
+        ></RLabel>
+        <RFlatList
+          renderItem={renderItem}
+          data={data}
+          width={"98%"}
+          height={"91%"}
+          top={"7%"}
+          left={"1%"}
+        ></RFlatList>
+      </RBox>
+    )
   );
 }
 const styles = StyleSheet.create({

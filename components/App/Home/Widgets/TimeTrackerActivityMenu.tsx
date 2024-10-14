@@ -46,6 +46,7 @@ import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { useMenuConfigStore } from "@/stores/mainMenu";
 import { useArcFeatureConfigStore } from "@/stores/arcFeatureConfig";
 import { randomUUID } from "expo-crypto";
+import { indexAnimationDelay } from "@/constants/indexAnimationDelay";
 
 type TimeTrackingActivityMenuProps = {
   onBackButton: Function;
@@ -83,7 +84,7 @@ export default function TimeTrackingActivityMenu(
       <Animated.View
         entering={FadeInDown.duration(75)
           .damping(30)
-          .delay(25 * index)}
+          .delay(indexAnimationDelay * index)}
         style={{
           position: "relative",
           paddingBottom: "3%",
@@ -193,7 +194,7 @@ export default function TimeTrackingActivityMenu(
         </RBox>
         <RBox
           figmaImport={{
-            mobile: { left: 5, width: 350, height: 508, top: 52 },
+            mobile: { left: 5, width: 350, height: 528, top: 52 },
           }}
         >
           <FlatList

@@ -34,6 +34,7 @@ import RFlatList from "../RFlatList";
 import RButton from "../RButton";
 import { TimeStatsIcon } from "../deco/TimeStatsIcon";
 import { useNavigatorStore } from "@/hooks/navigator";
+import { indexAnimationDelay } from "@/constants/indexAnimationDelay";
 export default function MenuList({}) {
   const menuApi = useMenuConfigStore();
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
@@ -52,7 +53,7 @@ export default function MenuList({}) {
       <Animated.View
         entering={FadeInDown.duration(25)
           .damping(30)
-          .delay(15 * index)}
+          .delay(indexAnimationDelay * index)}
         style={{
           position: "relative",
           paddingBottom: "3%",

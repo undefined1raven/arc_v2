@@ -12,6 +12,7 @@ import RFlatList from "@/components/common/RFlatList";
 import { getVal } from "@/app/config/defaultTransitionConfig";
 import { emptyRenderItem } from "@/components/common/EmptyListItem";
 import Animated, { FadeInRight } from "react-native-reanimated";
+import { indexAnimationDelay } from "@/constants/indexAnimationDelay";
 
 function EditActivities({ navigation }) {
   const selectedObjectsAPI = useSelectedObjects();
@@ -27,7 +28,7 @@ function EditActivities({ navigation }) {
       <Animated.View
         entering={FadeInRight.duration(75)
           .damping(30)
-          .delay(25 * index)}
+          .delay(indexAnimationDelay * index)}
         style={{
           position: "relative",
           paddingBottom: "3%",

@@ -32,6 +32,7 @@ import { randomUUID } from "expo-crypto";
 import { ColorValueHex } from "../CommonTypes";
 import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 import { quickNavMenuType, useQuickNavStore } from "@/stores/quickNavStore";
+import { indexAnimationDelay } from "@/constants/indexAnimationDelay";
 
 type QuickNavMainProps = {
   figmaImport?: object;
@@ -156,7 +157,7 @@ export default function QuickNavMain(props: QuickNavMainProps) {
         }}
         entering={FadeInDown.duration(75)
           .damping(30)
-          .delay(25 * index)}
+          .delay(indexAnimationDelay * index)}
         style={{
           position: "relative",
           paddingBottom: "2%",

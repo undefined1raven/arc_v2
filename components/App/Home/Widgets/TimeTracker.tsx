@@ -37,6 +37,12 @@ import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
 import useStatusIndicatorsStore from "@/stores/statusIndicators";
 import { EditDeco } from "@/components/common/deco/EditDeco";
 import { useHasLoadedUserDataStore } from "../hasLoadedUserData";
+import { useRequestFullSpace } from "./requestFullSpace";
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
 
 export default function TimeTracker({ navigation }) {
   store.subscribe(() => {});
@@ -45,6 +51,7 @@ export default function TimeTracker({ navigation }) {
   const currentArcActivitiesAPI = useArcCurrentActivitiesStore();
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const activeUserID = useLocalUserIDsStore().getActiveUserID();
+  const requestFullSpaceAPI = useRequestFullSpace();
   const arcFeatureConfig: FeatureConfigArcType = useArcFeatureConfigStore(
     (store) => store.arcFeatureConfig
   );
@@ -78,6 +85,10 @@ export default function TimeTracker({ navigation }) {
     }
     mutateCurrentActivities(currentActivities);
   }, [currentActivities]);
+
+  useEffect(() => {
+    requestFullSpaceAPI.setrequestFullSpace(showMenu);
+  }, [showMenu]);
 
   useEffect(() => {
     if (currentDisplayedActivity !== null) {
@@ -218,222 +229,260 @@ export default function TimeTracker({ navigation }) {
   }
 
   return (
-    <RBox width="100%" height="100%" top={0} left={0}>
-      {dataToEncrypt !== null && (
-        <SingleEncrypt
-          plainText={dataToEncrypt}
-          onEncrypted={(e) => {
-            setEncryptedData(e);
-          }}
-          onError={(e) => {
-            console.log(e);
-          }}
-          symsk={SecureStore.getItem(
-            hasLoadedUserDataAPI.keyType === "simple"
-              ? `${activeUserID}-symsk`
-              : `${activeUserID}-tess-symkey`
-          )}
-        ></SingleEncrypt>
-      )}
-      <RBox
-        backgroundColor={globalStyle.color + "10"}
-        figmaImportConfig={widgetContainerConfig}
-        figmaImport={{
-          mobile: {
-            width: timeTrackingContainerConfig.containerWidth,
-            height: timeTrackingContainerConfig.containerHeight,
-            top: 398,
-            left: 3,
-          },
-        }}
-      >
-        <RLabel
-          align="left"
-          text="Current Activity"
-          figmaImportConfig={timeTrackingContainerConfig}
-          figmaImport={{
-            mobile: { top: 10, left: 5, width: "40%", height: 16 },
-          }}
-          fontSize={12}
-          color={globalStyle.textColorAccent}
-        ></RLabel>
-        {currentActivities.length === 0 || currentDisplayedActivity === null ? (
-          <Animated.View
-            style={styles.defaultStyle}
-            entering={FadeInDown.duration(50).damping(15)}
-          >
-            <RButton
-              figmaImportConfig={timeTrackingContainerConfig}
-              figmaImport={{
-                mobile: { top: 60, left: 5, width: 344, height: 48 },
-              }}
-              onClick={() => {
-                setShowMenu(true);
-              }}
-              mobileFontSize={20}
-              label="Pick an activity"
-            ></RButton>
-
-            <RLabel
-              width="100%"
-              top="69%"
-              fontSize={15}
-              text="Pick an activity to keep track of time"
-              horizontalCenter={true}
-            ></RLabel>
-          </Animated.View>
-        ) : (
-          <Animated.View
-            entering={FadeIn.duration(35).damping(10)}
-            style={styles.defaultStyle}
-          >
-            <RButton
-              figmaImportConfig={timeTrackingContainerConfig}
-              figmaImport={{
-                mobile: { top: 109, left: 5, width: 344, height: 48 },
-              }}
-              onClick={async () => {
-                const newActivity = {
-                  taskID: currentDisplayedActivity?.taskID as string,
-                  start: currentDisplayedActivity.start,
-                  end: Date.now(),
-                };
-                setCurrentActivities((prev) => {
-                  if (currentDisplayedActivity === null) return prev;
-                  return prev.filter(
-                    (elm) => elm.taskID !== currentDisplayedActivity?.taskID
-                  );
-                });
-                currentArcActivitiesAPI.appendCurrentActivities(newActivity);
-                updateLocalCache(newActivity);
-              }}
-              mobileFontSize={20}
-              label="Done"
-            ></RButton>
-            <RLabel
-              figmaImport={{
-                mobile: { top: 50, left: 191, width: 72, height: 35 },
-              }}
-              align="right"
-              fontSize={globalStyle.mediumMobileFont}
-              text="Duration"
-              figmaImportConfig={timeTrackingContainerConfig}
-            ></RLabel>
-            <RBox
-              figmaImport={{
-                mobile: { top: 70, left: 191, width: 72, height: 35 },
-              }}
-              figmaImportConfig={timeTrackingContainerConfig}
-            >
-              {displayDurationLabel !== "" ||
-              hasCurrentActivitiesFromUserData === false ? (
-                <RLabel
-                  width="100%"
-                  height="100%"
-                  align="right"
-                  fontSize={globalStyle.regularMobileFont}
-                  text={displayDurationLabel}
-                ></RLabel>
-              ) : (
-                <RBox left="90%" width="10%" top="3%" height="10%">
-                  <ActivityIndicator
-                    size={"small"}
-                    color={globalStyle.color}
-                  ></ActivityIndicator>
-                </RBox>
-              )}
-            </RBox>
-            <RBox
-              figmaImport={{
-                mobile: { left: 272, top: 48, height: 39, width: 1 },
-              }}
-              backgroundColor={globalStyle.color}
-              figmaImportConfig={timeTrackingContainerConfig}
-            ></RBox>
-            <RLabel
-              figmaImport={{
-                mobile: { top: 50, left: 281, width: 72, height: 35 },
-              }}
-              align="left"
-              fontSize={globalStyle.mediumMobileFont}
-              text="Started at"
-              figmaImportConfig={timeTrackingContainerConfig}
-            ></RLabel>
-            <RLabel
-              figmaImport={{
-                mobile: { top: 70, left: 281, width: 72, height: 35 },
-              }}
-              align="left"
-              fontSize={globalStyle.regularMobileFont}
-              text={displayStartedAtLabel}
-              figmaImportConfig={timeTrackingContainerConfig}
-            ></RLabel>
-            <RLabel
-              figmaImport={{
-                mobile: { top: 54, left: 5, width: 197, height: 35 },
-              }}
-              align="left"
-              fontSize={21}
-              text={
-                arcFeatureConfig?.tasks?.find(
-                  (elm) => currentDisplayedActivity?.taskID === elm.taskID
-                )?.name
-              }
-              figmaImportConfig={timeTrackingContainerConfig}
-            ></RLabel>
-          </Animated.View>
+    <GestureHandlerRootView style={{ width: "100%", height: "100%" }}>
+      <RBox width="100%" height="100%" top={0} left={0}>
+        {dataToEncrypt !== null && (
+          <SingleEncrypt
+            plainText={dataToEncrypt}
+            onEncrypted={(e) => {
+              setEncryptedData(e);
+            }}
+            onError={(e) => {
+              console.log(e);
+            }}
+            symsk={SecureStore.getItem(
+              hasLoadedUserDataAPI.keyType === "simple"
+                ? `${activeUserID}-symsk`
+                : `${activeUserID}-tess-symkey`
+            )}
+          ></SingleEncrypt>
         )}
-        <RButton
-          onClick={() => {
-            navigation.navigate("activitiesSettingsMain", {
-              name: "activitiesSettingsMain",
-            });
-          }}
-          figmaImportConfig={timeTrackingContainerConfig}
+        <RBox
+          backgroundColor={globalStyle.color + "10"}
+          figmaImportConfig={widgetContainerConfig}
           figmaImport={{
-            mobile: { top: 5, left: 227, width: 59, height: 26 },
+            mobile: {
+              width: timeTrackingContainerConfig.containerWidth,
+              height: timeTrackingContainerConfig.containerHeight,
+              top: 398,
+              left: 3,
+            },
           }}
         >
-          <EditDeco
-            color={globalStyle.color}
-            width="100%"
-            height="70%"
-          ></EditDeco>
-        </RButton>
-        <RButton
-          onClick={() => {
-            setShowMenu(true);
-          }}
-          figmaImportConfig={timeTrackingContainerConfig}
-          figmaImport={{
-            mobile: { top: 5, left: 290, width: 59, height: 26 },
-          }}
-        >
-          <AddIcon width="60%" height="50%"></AddIcon>
-        </RButton>
-      </RBox>
-      {showMenu ? (
-        <RBox style={styles.defaultStyle}>
-          <TimeTrackingActivityMenu
-            onTaskSelected={(taskID: string) => {
-              setCurrentActivities((prev) => {
-                return [
-                  ...prev,
-                  {
-                    taskID: taskID,
-                    start: Date.now(),
-                    end: null,
-                  },
-                ];
+          <RLabel
+            align="left"
+            text="Current Activity"
+            figmaImportConfig={timeTrackingContainerConfig}
+            figmaImport={{
+              mobile: { top: 10, left: 5, width: "40%", height: 16 },
+            }}
+            fontSize={12}
+            color={globalStyle.textColorAccent}
+          ></RLabel>
+          {currentActivities.length === 0 ||
+          currentDisplayedActivity === null ? (
+            <Animated.View
+              style={styles.defaultStyle}
+              entering={FadeInDown.duration(50).damping(15)}
+            >
+              <RButton
+                figmaImportConfig={timeTrackingContainerConfig}
+                figmaImport={{
+                  mobile: { top: 60, left: 5, width: 344, height: 48 },
+                }}
+                onClick={() => {
+                  setShowMenu(true);
+                }}
+                mobileFontSize={20}
+                label="Pick an activity"
+              ></RButton>
+
+              <RLabel
+                width="100%"
+                top="69%"
+                fontSize={15}
+                text="Pick an activity to keep track of time"
+                horizontalCenter={true}
+              ></RLabel>
+            </Animated.View>
+          ) : (
+            <GestureDetector
+              gesture={Gesture.Pan()
+                .minDistance(10)
+                .activeOffsetX(60)
+                .failOffsetY(35)
+                .onEnd((e) => {
+                  // if (currentDisplayedActivity === null) return;
+                  // console.log(e.translationX);
+                  // const translationX = e.translationX;
+                  // const threshold = 100;
+                  // const index = currentActivities.findIndex(
+                  //   (r) => r.taskID === currentDisplayedActivity?.taskID
+                  // );
+                  // if (translationX > threshold) {
+                  //   const nextIndex = index - 1;
+                  //   if (currentActivities[nextIndex] !== undefined) {
+                  //     setCurrentDisplayedActivity(currentActivities[nextIndex]);
+                  //   } else {
+                  //     setCurrentDisplayedActivity(
+                  //       currentActivities[currentActivities.length - 1]
+                  //     );
+                  //   }
+                  // } else {
+                  //   const nextIndex = index + 1;
+                  //   if (currentActivities[nextIndex] !== undefined) {
+                  //     setCurrentDisplayedActivity(currentActivities[nextIndex]);
+                  //   } else {
+                  //     setCurrentDisplayedActivity(currentActivities[0]);
+                  //   }
+                  // }
+                })}
+            >
+              <Animated.View
+                entering={FadeIn.duration(35).damping(10)}
+                style={styles.defaultStyle}
+              >
+                <RButton
+                  figmaImportConfig={timeTrackingContainerConfig}
+                  figmaImport={{
+                    mobile: { top: 109, left: 5, width: 344, height: 48 },
+                  }}
+                  onClick={async () => {
+                    const newActivity = {
+                      taskID: currentDisplayedActivity?.taskID as string,
+                      start: currentDisplayedActivity.start,
+                      end: Date.now(),
+                    };
+                    setCurrentActivities((prev) => {
+                      if (currentDisplayedActivity === null) return prev;
+                      return prev.filter(
+                        (elm) => elm.taskID !== currentDisplayedActivity?.taskID
+                      );
+                    });
+                    currentArcActivitiesAPI.appendCurrentActivities(
+                      newActivity
+                    );
+                    updateLocalCache(newActivity);
+                  }}
+                  mobileFontSize={20}
+                  label="Done"
+                ></RButton>
+                <RLabel
+                  figmaImport={{
+                    mobile: { top: 50, left: 191, width: 72, height: 35 },
+                  }}
+                  align="right"
+                  fontSize={globalStyle.mediumMobileFont}
+                  text="Duration"
+                  figmaImportConfig={timeTrackingContainerConfig}
+                ></RLabel>
+                <RBox
+                  figmaImport={{
+                    mobile: { top: 70, left: 191, width: 72, height: 35 },
+                  }}
+                  figmaImportConfig={timeTrackingContainerConfig}
+                >
+                  {displayDurationLabel !== "" ||
+                  hasCurrentActivitiesFromUserData === false ? (
+                    <RLabel
+                      width="100%"
+                      height="100%"
+                      align="right"
+                      fontSize={globalStyle.regularMobileFont}
+                      text={displayDurationLabel}
+                    ></RLabel>
+                  ) : (
+                    <RBox left="90%" width="10%" top="3%" height="10%">
+                      <ActivityIndicator
+                        size={"small"}
+                        color={globalStyle.color}
+                      ></ActivityIndicator>
+                    </RBox>
+                  )}
+                </RBox>
+                <RBox
+                  figmaImport={{
+                    mobile: { left: 272, top: 48, height: 39, width: 1 },
+                  }}
+                  backgroundColor={globalStyle.color}
+                  figmaImportConfig={timeTrackingContainerConfig}
+                ></RBox>
+                <RLabel
+                  figmaImport={{
+                    mobile: { top: 50, left: 281, width: 72, height: 35 },
+                  }}
+                  align="left"
+                  fontSize={globalStyle.mediumMobileFont}
+                  text="Started at"
+                  figmaImportConfig={timeTrackingContainerConfig}
+                ></RLabel>
+                <RLabel
+                  figmaImport={{
+                    mobile: { top: 70, left: 281, width: 72, height: 35 },
+                  }}
+                  align="left"
+                  fontSize={globalStyle.regularMobileFont}
+                  text={displayStartedAtLabel}
+                  figmaImportConfig={timeTrackingContainerConfig}
+                ></RLabel>
+                <RLabel
+                  figmaImport={{
+                    mobile: { top: 54, left: 5, width: 197, height: 35 },
+                  }}
+                  align="left"
+                  fontSize={21}
+                  text={
+                    arcFeatureConfig?.tasks?.find(
+                      (elm) => currentDisplayedActivity?.taskID === elm.taskID
+                    )?.name
+                  }
+                  figmaImportConfig={timeTrackingContainerConfig}
+                ></RLabel>
+              </Animated.View>
+            </GestureDetector>
+          )}
+          <RButton
+            onClick={() => {
+              navigation.navigate("activitiesSettingsMain", {
+                name: "activitiesSettingsMain",
               });
             }}
-            onBackButton={() => setShowMenu(false)}
-          ></TimeTrackingActivityMenu>
+            figmaImportConfig={timeTrackingContainerConfig}
+            figmaImport={{
+              mobile: { top: 5, left: 227, width: 59, height: 26 },
+            }}
+          >
+            <EditDeco
+              color={globalStyle.color}
+              width="100%"
+              height="70%"
+            ></EditDeco>
+          </RButton>
+          <RButton
+            onClick={() => {
+              setShowMenu(true);
+            }}
+            figmaImportConfig={timeTrackingContainerConfig}
+            figmaImport={{
+              mobile: { top: 5, left: 290, width: 59, height: 26 },
+            }}
+          >
+            <AddIcon width="60%" height="50%"></AddIcon>
+          </RButton>
         </RBox>
-      ) : (
-        <RBox></RBox>
-      )}
-    </RBox>
+        {showMenu ? (
+          <RBox style={styles.defaultStyle}>
+            <TimeTrackingActivityMenu
+              onTaskSelected={(taskID: string) => {
+                setCurrentActivities((prev) => {
+                  return [
+                    ...prev,
+                    {
+                      taskID: taskID,
+                      start: Date.now(),
+                      end: null,
+                    },
+                  ];
+                });
+              }}
+              onBackButton={() => setShowMenu(false)}
+            ></TimeTrackingActivityMenu>
+          </RBox>
+        ) : (
+          <RBox></RBox>
+        )}
+      </RBox>
+    </GestureHandlerRootView>
   );
 }
 const styles = StyleSheet.create({

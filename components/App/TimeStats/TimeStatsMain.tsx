@@ -54,6 +54,7 @@ import { DayView } from "./DayView";
 import { useTimeStatsStore } from "./selectedTimeRange";
 import { itemTextToLabel } from "./fn/DayToLabel";
 import { emptyRenderItem } from "@/components/common/EmptyListItem";
+import { indexAnimationDelay } from "@/constants/indexAnimationDelay";
 export default function TimeStatsMain({ navigation }) {
   const menuApi = useMenuConfigStore();
   const timeStatsAPI = useTimeStatsStore();
@@ -121,7 +122,7 @@ export default function TimeStatsMain({ navigation }) {
       <Animated.View
         entering={FadeInRight.duration(75)
           .damping(30)
-          .delay(25 * index)}
+          .delay(indexAnimationDelay * index)}
         style={{
           position: "relative",
           paddingBottom: "3%",
