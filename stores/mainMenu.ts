@@ -53,7 +53,7 @@ const useMenuConfigStore = create<MenuConfigStore>((set) => ({
         id: "dayPlanner",
         label: "Day Planner",
         icon: DayPlannerIcon,
-        screenName: "home",
+        screenName: "dayPlanner",
       },
       {
         id: "diary",

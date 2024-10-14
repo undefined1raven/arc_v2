@@ -25,6 +25,7 @@ import { EditActivities } from "@/components/App/Settings/Activities/EditActivit
 import { EditCategories } from "@/components/App/Settings/Activities/EditCategories";
 import { useNewAccountStore } from "@/stores/newAccountStore";
 import { DecryptionScreen } from "@/components/App/Home/DecryptScreen";
+import { DayPlannerMain } from "@/components/App/DayPlanner/DayPlannerMain";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -109,7 +110,10 @@ export default function App() {
           name="createAccountOffline"
           component={CreateAccountOffline}
         ></Stack.Screen>
-
+        <Stack.Screen
+          name="dayPlanner"
+          component={DayPlannerMain}
+        ></Stack.Screen>
         {/* <Stack.Screen
           name="SettingsMain"
           component={SettingsMainMenu}

@@ -244,6 +244,19 @@ const tessDefaultConfig: FeatureConfigTessType = {
         return score * 0 + 1;
       },
     },
+    {
+      labelID: "LID-000000-0000-0000-000003",
+      name: "Normaal",
+      lightColor: "#757120",
+      textLightColor: "#757120",
+      darkColor: "#A19B16",
+      textDarkColor: "#A19B16",
+      version: "0.1.0",
+      deleted: false,
+      completionMultiplier: (score: number) => {
+        return score * 0 + 1;
+      },
+    },
   ],
   pinProtected: false,
 };

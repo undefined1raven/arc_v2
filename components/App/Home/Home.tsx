@@ -18,6 +18,7 @@ import { CryptoMain } from "../CryptoMain";
 import { ActivitiesDeriver } from "../logic/ActivitiesDeriver";
 import { ArcFeatureConfigWatcher } from "../stateWatchers/ArcFeatureConfigWather";
 import { useHasLoadedUserDataStore } from "./hasLoadedUserData";
+import DayBreakdown from "./Widgets/DayBreakdown";
 
 type HomeProps = { onRequestUserIDs: Function };
 export default function Home({ navigation, onRequestUserIDs }) {
@@ -80,6 +81,7 @@ export default function Home({ navigation, onRequestUserIDs }) {
             mobile: { top: 22, left: "0", width: "100%", height: 618 },
           }}
         >
+          <DayBreakdown navigation={navigation}></DayBreakdown>
           <TimeTracker navigation={navigation}></TimeTracker>
         </RBox>
         <MenuMain></MenuMain>
