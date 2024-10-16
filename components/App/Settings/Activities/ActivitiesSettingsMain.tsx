@@ -28,6 +28,7 @@ import { EditDeco } from "@/components/common/deco/EditDeco";
 import { TrashIcon } from "@/components/common/deco/TrashIcon";
 import { useSelectedObjects } from "./selectedObjects";
 import { randomUUID } from "expo-crypto";
+import { indexAnimationDelay } from "@/constants/indexAnimationDelay";
 
 function ActivitiesSettingsMain({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
@@ -110,7 +111,7 @@ function ActivitiesSettingsMain({ navigation }) {
       <Animated.View
         entering={FadeInRight.duration(75)
           .damping(30)
-          .delay(25 * index)}
+          .delay(indexAnimationDelay * index)}
         style={{
           position: "relative",
           paddingBottom: "3%",

@@ -96,9 +96,9 @@ export default function Home({ navigation, onRequestUserIDs }) {
             },
             {
               buttonID: "hide2",
-              label: "Hide2",
+              label: "Day Planner",
               onClick: () => {
-                console.log("hide2");
+                navigation.navigate("dayPlanner", { name: "dayPlanner" });
               },
             },
             {
@@ -106,7 +106,6 @@ export default function Home({ navigation, onRequestUserIDs }) {
               label: "Time Stats",
               onClick: () => {
                 navigation.navigate("timeStats", { name: "timeStats" });
-                console.log("remove");
               },
             },
           ]}
