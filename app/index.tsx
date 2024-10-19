@@ -28,6 +28,7 @@ import { DecryptionScreen } from "@/components/App/Home/DecryptScreen";
 import { DayPlannerMain } from "@/components/App/DayPlanner/DayPlannerMain";
 import { DayPlannerSettings } from "@/components/App/DayPlanner/DayPlannerSettings";
 import { DayPlannerActiveDayView } from "@/components/App/DayPlanner/DayPlannerActiveDayView";
+import { DayPlannerTaskEditor } from "@/components/App/DayPlanner/DayPlannerTaskEditor";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -119,6 +120,10 @@ export default function App() {
         <Stack.Screen
           name="dayPlannerSettings"
           component={DayPlannerSettings}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="dayPlannerTaskEditor"
+          component={DayPlannerTaskEditor}
         ></Stack.Screen>
         <Stack.Screen
           name="dayPlannerActiveDayView"

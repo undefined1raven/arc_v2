@@ -46,7 +46,7 @@ type Themes = {
 
 const themeColors: Themes = {
   ravensPurp: {
-    androidRippleColor: "#000000",
+    androidRippleColor: "#ffffff",
     statusBarColor: "#391665",
     colorAlt: "#AD79EF",
     pageBackgroundColors: ["#391665", "#230746"],
@@ -176,7 +176,7 @@ const themeColors: Themes = {
   },
 
   light: {
-    androidRippleColor: "#BEB4FF",
+    androidRippleColor: "#000050",
     statusBarColor: "#BEB4FF",
     pageBackgroundColors: ["#BEB4FF", "#ACA0FD"],
     color: "#0b004f",

@@ -169,6 +169,7 @@ export type {
   FeatureConfigTessType,
   FeatureConfigSIDType,
   UserDataKeys,
+  TessTaskType,
   ArcTaskLogType,
   UserDataValues,
 };

@@ -203,7 +203,7 @@ const tessDefaultConfig: FeatureConfigTessType = {
       colors: {
         light: {
           color: "#DBE03F",
-          textColor: "#DBE03F",
+          textColor: "#846732",
         },
         dark: {
           color: "#3C3E09",

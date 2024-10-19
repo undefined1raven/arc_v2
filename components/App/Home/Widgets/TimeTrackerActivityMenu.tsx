@@ -222,7 +222,6 @@ export default function TimeTrackingActivityMenu(
           ></FlatList>
         </RBox>
         <RButton
-          style={{ zIndex: 5, elevation: 5 }}
           onClick={() => {
             onBackTrigger();
           }}
