@@ -20,6 +20,7 @@ import { randomUUID } from "expo-crypto";
 import { useSQLiteContext } from "expo-sqlite";
 import { ArrowDeco } from "@/components/common/deco/ArrowDeco";
 import { useActiveDayStore } from "./activeDayStore";
+import { DayPlannerLoadingScreen } from "./DayPlannerLoadingScreen";
 
 function DayPlannerMain({ navigation }) {
   const tessFeatureConfig = useTessFeatureConfigStore(
@@ -42,7 +43,9 @@ function DayPlannerMain({ navigation }) {
 
   function handleDayView() {
     if (hasOngoingDay) {
-      ////
+      navigation.navigate("dayPlannerActiveDayView", {
+        name: "dayPlannerActiveDayView",
+      });
     } else {
       const newDay: TessDayLogType = {
         day: new Date().toDateString(),
@@ -71,6 +74,9 @@ function DayPlannerMain({ navigation }) {
           )
             .then((rx) => {
               console.log(rx, "rx");
+              navigation.navigate("dayPlannerActiveDayView", {
+                name: "dayPlannerActiveDayView",
+              });
             })
             .catch((e) => {
               console.log(e, "e");
@@ -148,70 +154,9 @@ function DayPlannerMain({ navigation }) {
           )}
         </RBox>
       </RButton>
-      {/* <QuickNavMain
-        navMenuItems={[
-          {
-            buttonID: "cancel",
-            label: "x",
-            onClick: () => {
-              console.log("cancel");
-            },
-          },
-          {
-            buttonID: "hide2",
-            label: "Home",
-            onClick: () => {
-              navigation.navigate("Home", { name: "Home" });
-            },
-          },
-          {
-            buttonID: "timeStats",
-            label: "Time Stats",
-            onClick: () => {
-              navigation.navigate("timeStats", { name: "timeStats" });
-            },
-          },
-        ]}
-      ></QuickNavMain> */}
     </EmptyView>
   ) : (
-    <EmptyView navigation={navigation}>
-      <RLabel
-        text="Decrypting Data"
-        figmaImport={{
-          mobile: {
-            left: "0",
-            width: "100%",
-            height: 20,
-            top: 246,
-          },
-        }}
-      ></RLabel>
-      <RBox
-        figmaImport={{
-          mobile: {
-            left: "0",
-            width: "100%",
-            height: 20,
-            top: 270,
-          },
-        }}
-      >
-        <ActivityIndicator color={globalStyle.color}></ActivityIndicator>
-      </RBox>
-      <RLabel
-        fontSize={globalStyle.smallMobileFont}
-        text="This can take a few moments. You can go back and come back later"
-        figmaImport={{
-          mobile: {
-            left: "2.5%",
-            width: "95%",
-            height: 40,
-            top: 320,
-          },
-        }}
-      ></RLabel>
-    </EmptyView>
+    <DayPlannerLoadingScreen navigation={navigation}></DayPlannerLoadingScreen>
   );
 }
 
