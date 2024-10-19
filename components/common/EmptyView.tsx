@@ -42,7 +42,7 @@ function EmptyView({ navigation, showMenu, navBack, children, showHeader }) {
 
   useEffect(() => {
     BackHandler.addEventListener("hardwareBackPress", () => {
-      if (navBack && navigation) {
+      if (navBack && navigation !== undefined) {
         navigation.navigate(navBack, { name: navBack });
       } else {
         navigation.goBack();

@@ -4,7 +4,16 @@ import { ColorValueHex } from "@/components/common/CommonTypes";
 
 type PageBackgroundColorArrayType = ColorValueHex[];
 
-type GlobalStyleType = {
+type GlobalStyleKeys = keyof ThemeColorsType;
+
+type BasicColorsType = {
+  color: ColorValueHex;
+  colorAccent?: ColorValueHex;
+  textColor: ColorValueHex;
+  textColorAccent?: ColorValueHex;
+};
+
+interface GlobalStyleType {
   borderRadius: number;
   borderRadius20: number;
   borderRadius10: number;
@@ -25,9 +34,9 @@ type GlobalStyleType = {
   theme: Themes;
   color: ColorValueHex;
   colorAccent: ColorValueHex;
-  colorAlt: ColorValueHex;
   textColor: ColorValueHex;
   textColorAccent: ColorValueHex;
+  colorAlt: ColorValueHex;
   textColorInactive: ColorValueHex;
   colorInactive: ColorValueHex;
   successColor: ColorValueHex;
@@ -37,7 +46,7 @@ type GlobalStyleType = {
   pageBackgroundColors: PageBackgroundColorArrayType;
   statusBarColor: ColorValueHex;
   androidRippleColor: ColorValueHex;
-};
+}
 
 const globalStyle = createSlice({
   name: "globalStyle",
@@ -69,6 +78,6 @@ const globalStyle = createSlice({
   },
 });
 
-export type { GlobalStyleType, PageBackgroundColorArrayType };
+export type { GlobalStyleType, PageBackgroundColorArrayType, BasicColorsType };
 export const { updateGlobalStyle } = globalStyle.actions;
 export default globalStyle.reducer;

@@ -18,6 +18,8 @@ import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
 import { CryptoMain } from "../CryptoMain";
 import { MultiDecrypt } from "@/components/common/crypto/MultiDecrypt";
 import { useHasLoadedUserDataStore } from "../Home/hasLoadedUserData";
+import { useTessFeatureConfigStore } from "../DayPlanner/tessFeatureConfigStore";
+import { LoadTessData } from "./LoadTessData";
 function InitializeApp({ navigation }) {
   const db = useSQLiteContext();
   const decryptionAPI = useDecryptionStore();
@@ -36,6 +38,11 @@ function InitializeApp({ navigation }) {
   const [arcEncryptedFeatureConfig, setArcEncryptedFeatureConfig] = useState<
     null | string
   >(null);
+  const [tessEncryptedFeatureConfig, setTessEncryptedFeatureConfig] = useState<
+    string | null
+  >(null);
+  const setTessFeatureConfig =
+    useTessFeatureConfigStore.getState().setTessFeatureConfig;
   const setArcFeatureConfig = useArcFeatureConfigStore(
     (store) => store.setArcFeatureConfig
   );
@@ -83,6 +90,9 @@ function InitializeApp({ navigation }) {
                               setArcEncryptedFeatureConfig(
                                 res.data?.arcFeatureConfig
                               );
+                              setTessEncryptedFeatureConfig(
+                                res.data?.tessFeatureConfig
+                              );
                             } else {
                               //failed
                             }
@@ -123,10 +133,19 @@ function InitializeApp({ navigation }) {
             symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
           ></SingleDecrypt>
         )}
-      {hasLoadedUserDataAPI.hasLoadedUserData === false &&
-      ((hasLoadedUserDataAPI.hasTessKey === true &&
+      {tessEncryptedFeatureConfig !== null && (
+        <SingleDecrypt
+          encryptedObj={tessEncryptedFeatureConfig}
+          onDecrypted={(e) => {
+            setTessEncryptedFeatureConfig(null);
+            setTessFeatureConfig(JSON.parse(format.default(e, { json: true })));
+          }}
+          symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
+        ></SingleDecrypt>
+      )}
+      {(hasLoadedUserDataAPI.hasTessKey === true &&
         hasLoadedUserDataAPI.keyType === "double") ||
-        hasLoadedUserDataAPI.keyType === "simple") ? (
+      hasLoadedUserDataAPI.keyType === "simple" ? (
         <MultiDecrypt
           encryptedObj={decryptionAPI.cipherText}
           onDecrypted={(e) => {
@@ -175,6 +194,7 @@ function InitializeApp({ navigation }) {
       )}
       {hasUsers === false && <AsyncGenNewAccountInfo></AsyncGenNewAccountInfo>}
       <LoadUserData></LoadUserData>
+      <LoadTessData></LoadTessData>
     </>
   );
 }

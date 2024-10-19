@@ -162,69 +162,105 @@ const tessDefaultConfig: FeatureConfigTessType = {
     {
       statusID: "SID-000000-0000-0000-000001",
       name: "To Do",
-      lightColor: themeColors.light.color,
-      textLightColor: themeColors.light.textColor,
-      darkColor: themeColors.dark.color,
-      textDarkColor: themeColors.dark.textColor,
       completionEffect: 0,
       version: "0.1.0",
       deleted: false,
+      colors: {
+        light: {
+          color: themeColors.light.color,
+          textColor: themeColors.light.textColor,
+        },
+        dark: {
+          color: themeColors.dark.color,
+          textColor: themeColors.dark.textColor,
+        },
+      },
     },
     {
       statusID: "SID-000000-0000-0000-000002",
       name: "Completed",
-      lightColor: themeColors.light.successColor,
-      textLightColor: themeColors.light.successTextColor,
-      darkColor: themeColors.dark.successColor,
-      textDarkColor: themeColors.dark.successTextColor,
       completionEffect: 1,
       version: "0.1.0",
       deleted: false,
+      colors: {
+        light: {
+          color: themeColors.light.successColor,
+          textColor: themeColors.light.successTextColor,
+        },
+        dark: {
+          color: themeColors.dark.successColor,
+          textColor: themeColors.dark.successTextColor,
+        },
+      },
     },
 
     {
       statusID: "SID-000000-0000-0000-000003",
       name: "Incomplete",
-      lightColor: "#757120",
-      textLightColor: "#757120",
-      darkColor: "#A19B16",
-      textDarkColor: "#A19B16",
       completionEffect: 0.5,
       version: "0.1.0",
       deleted: false,
+      colors: {
+        light: {
+          color: "#DBE03F",
+          textColor: "#DBE03F",
+        },
+        dark: {
+          color: "#3C3E09",
+          textColor: "#3C3E09",
+        },
+      },
     },
 
     {
       statusID: "SID-000000-0000-0000-000004",
       name: "Failed",
-      lightColor: themeColors.light.errorColor,
-      textLightColor: themeColors.light.errorTextColor,
-      darkColor: themeColors.dark.errorColor,
-      textDarkColor: themeColors.dark.errorTextColor,
       completionEffect: 0,
       version: "0.1.0",
       deleted: false,
+      colors: {
+        light: {
+          color: themeColors.light.errorColor,
+          textColor: themeColors.light.errorTextColor,
+        },
+        dark: {
+          color: themeColors.dark.errorColor,
+          textColor: themeColors.dark.errorTextColor,
+        },
+      },
     },
     {
       statusID: "SID-000000-0000-0000-000005",
       name: "In Progress",
-      lightColor: "#2146A7",
-      textLightColor: "#2146A7",
-      darkColor: "#537FF2",
-      textDarkColor: "#537FF2",
       completionEffect: 0.1,
       version: "0.1.0",
       deleted: false,
+      colors: {
+        light: {
+          color: "#3D0861",
+          textColor: "#3D0861",
+        },
+        dark: {
+          color: "#BE79EC",
+          textColor: "#BE79EC",
+        },
+      },
     },
   ],
   labelArray: [
     {
       labelID: "LID-000000-0000-0000-000001",
       name: "High Priority",
-      lightColor: "#580055",
-      textLightColor: "#580055",
-      darkColor: "#C300BC",
-      textDarkColor: "#C300BC",
+      colors: {
+        light: {
+          textColor: "#580055",
+          color: "#580055",
+        },
+        dark: {
+          textColor: "#C300BC",
+          color: "#C300BC",
+        },
+      },
       version: "0.1.0",
       deleted: false,
       completionMultiplier: (score: number) => {
@@ -240,6 +276,16 @@ const tessDefaultConfig: FeatureConfigTessType = {
       textDarkColor: "#A19B16",
       version: "0.1.0",
       deleted: false,
+      colors: {
+        light: {
+          textColor: "#757120",
+          color: "#757120",
+        },
+        dark: {
+          textColor: "#A19B16",
+          color: "#A19B16",
+        },
+      },
       completionMultiplier: (score: number) => {
         return score * 0 + 1;
       },
@@ -247,14 +293,67 @@ const tessDefaultConfig: FeatureConfigTessType = {
     {
       labelID: "LID-000000-0000-0000-000003",
       name: "Normaal",
-      lightColor: "#757120",
-      textLightColor: "#757120",
-      darkColor: "#A19B16",
-      textDarkColor: "#A19B16",
+      colors: {
+        light: {
+          color: themeColors.light.color,
+          textColor: themeColors.light.textColor,
+        },
+        dark: {
+          color: themeColors.dark.color,
+          textColor: themeColors.dark.textColor,
+        },
+      },
       version: "0.1.0",
       deleted: false,
       completionMultiplier: (score: number) => {
         return score * 0 + 1;
+      },
+    },
+  ],
+  dayClassifier: [
+    {
+      dayClassID: "DCID-000000-0000-0000-000001",
+      label: "Completed",
+      threshold: 0.75,
+      colors: {
+        light: {
+          color: themeColors.light.successColor,
+          textColor: themeColors.light.successTextColor,
+        },
+        dark: {
+          color: themeColors.dark.successColor,
+          textColor: themeColors.dark.successTextColor,
+        },
+      },
+    },
+    {
+      dayClassID: "DCID-000000-0000-0000-000002",
+      label: "Incomplete",
+      threshold: 0.25,
+      colors: {
+        light: {
+          color: "#757120",
+          textColor: "#757120",
+        },
+        dark: {
+          color: "#A19B16",
+          textColor: "#A19B16",
+        },
+      },
+    },
+    {
+      dayClassID: "DCID-000000-0000-0000-000003",
+      label: "Failed",
+      threshold: 0.75,
+      colors: {
+        light: {
+          color: themeColors.light.errorColor,
+          textColor: themeColors.light.errorTextColor,
+        },
+        dark: {
+          color: themeColors.dark.errorColor,
+          textColor: themeColors.dark.errorTextColor,
+        },
       },
     },
   ],

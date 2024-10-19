@@ -1,4 +1,6 @@
 import { ColorValueHex } from "@/components/common/CommonTypes";
+import { AvailableThemes, Themes } from "./colors";
+import { BasicColorsType, GlobalStyleType } from "@/hooks/globalStyles";
 
 type UserDataKeys = "currentActivities" | "currentMood";
 type UserDataValues = {
@@ -10,6 +12,25 @@ type ArcTaskLogType = {
   start: number;
   end: number | null;
 };
+
+type TessTaskType = {
+  TTID: string;
+  statusID: TessStatusType["statusID"];
+  labels: TessLabelType["labelID"][];
+  description: string;
+  name: string;
+  doRemind: boolean;
+  start: number;
+  end: number;
+  deleted: boolean;
+  version: "0.1.0";
+};
+
+type TessDayLogType = {
+  day: string;
+  tasks: TessTaskType[];
+};
+
 type ARCTasksType = {
   taskID: string;
   name: string;
@@ -39,26 +60,33 @@ type TessStatusType = {
   name: string;
   deleted: boolean;
   version: "0.1.0";
-  lightColor: ColorValueHex;
-  textLightColor: ColorValueHex;
-  darkColor: ColorValueHex;
-  textDarkColor: ColorValueHex;
+  colors: {
+    [key in AvailableThemes]: { [key in keyof BasicColorsType]: ColorValueHex };
+  };
   completionEffect: number;
 };
 type TessLabelType = {
   labelID: string;
   name: string;
+  colors: {
+    [key in AvailableThemes]: { [key in keyof BasicColorsType]: ColorValueHex };
+  };
   deleted: boolean;
   version: "0.1.0";
-  lightColor: ColorValueHex;
-  textLightColor: ColorValueHex;
-  darkColor: ColorValueHex;
-  textDarkColor: ColorValueHex;
   completionMultiplier: Function;
+};
+type DayClassifierType = {
+  dayClassID: string;
+  threshold: number;
+  colors: {
+    [key in AvailableThemes]: { [key in keyof BasicColorsType]: ColorValueHex };
+  };
+  label: string;
 };
 type FeatureConfigTessType = {
   statusArray: TessStatusType[];
   labelArray: TessLabelType[];
+  dayClassifier: DayClassifierType[];
   pinProtected: boolean;
 };
 
@@ -116,7 +144,6 @@ type Tess_ChunksType = {
   encryptedContent: string;
   tx: number;
   version: "0.1.1";
-  isComplete: boolean;
 };
 
 type SID_ChunksType = {
@@ -132,7 +159,9 @@ export type {
   ARCCategoryType,
   TessStatusType,
   TessLabelType,
+  TessDayLogType,
   SIDMoodType,
+  Tess_ChunksType,
   ARC_ChunksType,
   FeatureConfigType,
   UserData,

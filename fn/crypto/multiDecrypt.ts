@@ -84,7 +84,9 @@ function encode(str) {
   return JSON.stringify(enc);
 }
 console.log("[Decryption] string payload present: ", \`${payload?.length}\`);
-
+console.log(window.crypto.subtle, " | subtle");
+console.log(crypto.subtle, " | subtle 2");
+console.log(window.isSecureContext, " | is secure");
 try {
   if (crypto.subtle !== undefined) {
     const jwk = JSON.parse(\`${symsk}\`);

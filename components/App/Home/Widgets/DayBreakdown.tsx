@@ -167,9 +167,9 @@ export default function DayBreakdown({ navigation }) {
       const catName =
         arcFeatureConfig.taskCategories.find((cat) => cat.categoryID === key)
           ?.name || "Uncategorized";
-      const percantageOfDay = parseFloat(
-        ((categoriesDurationMap[key] / milliesInADay) * 100).toFixed(1)
-      );
+      const percantageOfDay =
+        parseFloat((categoriesDurationMap[key] / milliesInADay).toFixed(1)) *
+        100;
       data.push({ label: catName, percentage: percantageOfDay });
     }
     data.push({

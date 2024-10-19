@@ -1,1 +1,1 @@
-export const indexAnimationDelay = 10;
+export const indexAnimationDelay = 1;

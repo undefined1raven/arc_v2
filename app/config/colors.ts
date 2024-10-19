@@ -17,11 +17,25 @@ type ThemeColorsType = {
   androidRippleColor: ColorValueHex;
 };
 
+type AvailableThemes =
+  | "sneaky"
+  | "dark"
+  | "light"
+  | "limeLight"
+  | "turcois"
+  | "brown"
+  | "cutuSmaraldUpdate"
+  | "cutuSmarald"
+  | "cerulRatonas"
+  | "ravenPurp"
+  | "ravensPurp";
+
 type Themes = {
   dark: ThemeColorsType;
   light: ThemeColorsType;
   limeLight: ThemeColorsType;
   turcois: ThemeColorsType;
+  sneaky: ThemeColorsType;
   brown: ThemeColorsType;
   cutuSmaraldUpdate: ThemeColorsType;
   cutuSmarald: ThemeColorsType;
@@ -31,7 +45,7 @@ type Themes = {
 };
 
 const themeColors: Themes = {
-  light: {
+  ravensPurp: {
     androidRippleColor: "#000000",
     statusBarColor: "#391665",
     colorAlt: "#AD79EF",
@@ -47,7 +61,7 @@ const themeColors: Themes = {
     errorColor: "#ff0000",
     errorTextColor: "#ae0000",
   },
-  ravensPurp: {
+  sneaky: {
     androidRippleColor: "#000000",
     statusBarColor: "#BEB4FF",
     pageBackgroundColors: ["#471F5B", "#885C9D"],
@@ -161,7 +175,7 @@ const themeColors: Themes = {
     errorTextColor: "#ae0000",
   },
 
-  ravenPurp: {
+  light: {
     androidRippleColor: "#BEB4FF",
     statusBarColor: "#BEB4FF",
     pageBackgroundColors: ["#BEB4FF", "#ACA0FD"],
@@ -195,22 +209,24 @@ const themeColors: Themes = {
     errorTextColor: "#FF004D",
   },
 };
-const y =   {dark: {
-  androidRippleColor: "#2400ff",
-  statusBarColor: "#04030E",
-  pageBackgroundColors: ["#04030E", "#0B0727"],
-  color: "#2400FF",
-  colorAccent: "#150098",
-  textColor: "#9E8EFF",
-  textColorAccent: "#584D99",
+const y = {
+  dark: {
+    androidRippleColor: "#2400ff",
+    statusBarColor: "#04030E",
+    pageBackgroundColors: ["#04030E", "#0B0727"],
+    color: "#2400FF",
+    colorAccent: "#150098",
+    textColor: "#9E8EFF",
+    textColorAccent: "#584D99",
     colorAlt: "#AD79EF",
     textColorInactive: "#343244",
-  colorInactive: "#373252",
-  successColor: "#4FFF96",
-  successTextColor: "#4FFF96",
-  errorColor: "#D7000D",
-  errorTextColor: "#FF004D",
-}}
-const x = ['#362a34', '#de98b0', '#ad61b4', '#8279d2']
-export type { ThemeColorsType, Themes };
+    colorInactive: "#373252",
+    successColor: "#4FFF96",
+    successTextColor: "#4FFF96",
+    errorColor: "#D7000D",
+    errorTextColor: "#FF004D",
+  },
+};
+const x = ["#362a34", "#de98b0", "#ad61b4", "#8279d2"];
+export type { ThemeColorsType, Themes, AvailableThemes };
 export default themeColors;
