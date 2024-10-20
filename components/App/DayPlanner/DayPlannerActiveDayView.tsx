@@ -31,7 +31,6 @@ import { ColorValueHex } from "@/components/common/CommonTypes";
 import { indexAnimationDelay } from "@/constants/indexAnimationDelay";
 import { LinearGradient } from "expo-linear-gradient";
 
-
 function DayPlannerActiveDayView({ navigation }) {
   const tessFeatureConfig = useTessFeatureConfigStore(
     (store) => store.tessFeatureConfig
@@ -41,10 +40,6 @@ function DayPlannerActiveDayView({ navigation }) {
   const activeUserID = useLocalUserIDsStore((store) => store.getActiveUserID());
   const dayPlannerAPI = useDayPlannerStore();
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
-
-  useEffect(() => {
-    console.log(activeDayAPI.activeDay, "AXSO");
-  }, [dayPlannerAPI.lastChunk, activeDayAPI.activeDay]);
 
   const renderItem = ({ item, index }: { item: TessTaskType }) => {
     const currentStatus = tessFeatureConfig?.statusArray.find(
@@ -179,6 +174,9 @@ function DayPlannerActiveDayView({ navigation }) {
           }}
         >
           <RButton
+          onClick={() => {
+            navigation.navigate("dayPlanner");
+          }}
             figmaImportConfig={{ containerHeight: 48, containerWidth: 356 }}
             figmaImport={{
               mobile: { left: 183, width: 174, height: 48, top: "0" },
@@ -200,7 +198,7 @@ function DayPlannerActiveDayView({ navigation }) {
             onClick={() => {
               const newTask: TessTaskType = {
                 TTID: randomUUID(),
-                statusID: "SID-000000-0000-0000-000004",
+                statusID: "SID-000000-0000-0000-000001",
                 labels: [],
                 description: "",
                 name: "New Task " + Date.now().toString().slice(-4),

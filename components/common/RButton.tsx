@@ -222,7 +222,7 @@ export default function RButton(props: RButtonProps) {
       <Pressable
         android_disableSound={true}
         android_ripple={{
-          radius: 200,
+          radius: 500,
           color: getVal(props.androidRippleEnabled, true)
             ? getVal(props.isEnabled, true)
               ? getVal(

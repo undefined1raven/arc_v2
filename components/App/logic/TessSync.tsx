@@ -1,0 +1,99 @@
+import { useSQLiteContext } from "expo-sqlite";
+import { useActiveDayStore } from "../DayPlanner/activeDayStore";
+import { useEffect } from "react";
+import { act } from "react-test-renderer";
+import { useDayPlannerStore } from "../DayPlanner/daysStore";
+import { randomUUID } from "expo-crypto";
+import { symmetricDecrypt } from "../decryptors/symmetricDecrypt";
+import { symmetricEncrypt } from "../encryptors/symmetricEncrypt";
+import { Tess_ChunksType } from "@/app/config/commonTypes";
+import useStatusIndicatorsStore from "@/stores/statusIndicators";
+
+function TessSync() {
+  const db = useSQLiteContext();
+  const activeDayAPI = useActiveDayStore();
+  const statusIndicatorsAPI = useStatusIndicatorsStore();
+  const dayPlannerAPI = useDayPlannerStore();
+  function updateTessChunk(
+    tessChunk: Tess_ChunksType,
+    onSuccess: Function,
+    onError: Function
+  ) {
+    db.runAsync(
+      `INSERT OR REPLACE INTO tessChunks (id, userID, encryptedContent, tx, version) VALUES (?, ?, ?, ?, ?)`,
+      [
+        tessChunk.id,
+        tessChunk.userID,
+        tessChunk.encryptedContent,
+        tessChunk.tx,
+        tessChunk.version,
+      ]
+    )
+      .then((rx) => {
+        if (onSuccess) {
+          onSuccess(rx);
+        }
+      })
+      .catch((e) => {
+        console.log(e, "e");
+        if (onError) {
+          onError(e);
+        }
+      });
+  }
+
+  useEffect(() => {
+    console.log("tess update triggered")
+    if (
+      activeDayAPI.activeDay === null ||
+      dayPlannerAPI.hasLoadedData === false
+    ) {
+      return;
+    }
+
+    try {
+      const lastData = JSON.parse(dayPlannerAPI.lastChunk?.encryptedContent);
+      const lastDayIndex = lastData.findIndex(
+        (day) => day.day === activeDayAPI.activeDay.day
+      );
+      if (lastDayIndex !== -1) {
+        lastData[lastDayIndex] = activeDayAPI.activeDay;
+        const transactionID = randomUUID();
+        statusIndicatorsAPI.setEncrypting(true);
+        symmetricEncrypt(JSON.stringify(lastData), transactionID)
+          .then((updatedEncryptedData) => {
+            const updatedChunk: Tess_ChunksType = {
+              ...dayPlannerAPI.lastChunk,
+              encryptedContent: updatedEncryptedData,
+            };
+            updateTessChunk(
+              updatedChunk,
+              () => {
+                statusIndicatorsAPI.setEncrypting(false);
+                console.log("Updated chunk successfully");
+              },
+              (e) => {
+                statusIndicatorsAPI.setEncrypting(false);
+                console.log("Error updating chunk", e);
+              }
+            );
+          })
+          .catch((e) => {
+            statusIndicatorsAPI.setEncrypting(false);
+            console.log("Error encrypting updated data", e);
+          });
+      }
+    } catch (e) {
+      statusIndicatorsAPI.setEncrypting(false);
+      console.log("Error parsing last chunk", e);
+    }
+  }, [
+    activeDayAPI.activeDay,
+    dayPlannerAPI.hasLoadedData,
+    dayPlannerAPI.lastChunk,
+  ]);
+
+  return null;
+}
+
+export { TessSync };

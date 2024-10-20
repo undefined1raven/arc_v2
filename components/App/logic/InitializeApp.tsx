@@ -20,6 +20,9 @@ import { MultiDecrypt } from "@/components/common/crypto/MultiDecrypt";
 import { useHasLoadedUserDataStore } from "../Home/hasLoadedUserData";
 import { useTessFeatureConfigStore } from "../DayPlanner/tessFeatureConfigStore";
 import { LoadTessData } from "./LoadTessData";
+import { useActiveDayStore } from "../DayPlanner/activeDayStore";
+import { useDayPlannerStore } from "../DayPlanner/daysStore";
+import { TessSync } from "./TessSync";
 function InitializeApp({ navigation }) {
   const db = useSQLiteContext();
   const decryptionAPI = useDecryptionStore();
@@ -49,6 +52,12 @@ function InitializeApp({ navigation }) {
   const arcFeatureConfig = useArcFeatureConfigStore(
     (store) => store.arcFeatureConfig
   );
+  const activeDayAPI = useActiveDayStore();
+  const dayPlannerAPI = useDayPlannerStore();
+  useEffect(() => {
+    console.log("activeDayAPI", activeDayAPI.activeDay);
+    console.log("last chunk", dayPlannerAPI.lastChunk);
+  }, [activeDayAPI]);
 
   useEffect(() => {
     checkTables()
@@ -121,6 +130,7 @@ function InitializeApp({ navigation }) {
   ///async gen new account info on load (in case we'd need it)
   return (
     <>
+      <TessSync></TessSync>
       {arcEncryptedFeatureConfig !== null &&
         hasLoadedUserDataAPI.hasLoadedUserData === false && (
           <SingleDecrypt

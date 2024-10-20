@@ -95,7 +95,7 @@ function LoadTessData() {
             let allDays: TessDayLogType[] = [];
             for (let ix = 0; ix < decryptedChunks.length; ix++) {
               const na = decryptedChunks[ix].encryptedContent;
-              allDays = [...allDays, na];
+              allDays = [...allDays, ...na];
             }
             const lastDecryptedChunk = {
               ...recentChunks[0],

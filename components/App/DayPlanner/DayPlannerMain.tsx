@@ -21,6 +21,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import { ArrowDeco } from "@/components/common/deco/ArrowDeco";
 import { useActiveDayStore } from "./activeDayStore";
 import { DayPlannerLoadingScreen } from "./DayPlannerLoadingScreen";
+import { MaxDaysInTessChunk } from "@/app/config/chunking";
 
 function DayPlannerMain({ navigation }) {
   const tessFeatureConfig = useTessFeatureConfigStore(
@@ -33,6 +34,7 @@ function DayPlannerMain({ navigation }) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const [hasOngoingDay, setHasOngoingDay] = useState<boolean>(false);
   useEffect(() => {
+    if (dayPlannerAPI.days === null) return;
     const currentDayIndex = dayPlannerAPI.days?.findIndex((day) => {
       return day.day === new Date().toDateString();
     });
@@ -40,6 +42,34 @@ function DayPlannerMain({ navigation }) {
     setHasOngoingDay(newHasOngoingDays);
     activeDayAPI.setActiveDay(dayPlannerAPI.days[currentDayIndex]);
   }, [tessFeatureConfig, dayPlannerAPI.days]);
+
+  function updateTessChunk(
+    tessChunk: Tess_ChunksType,
+    onSuccess: Function,
+    onError: Function
+  ) {
+    db.runAsync(
+      `INSERT OR REPLACE INTO tessChunks (id, userID, encryptedContent, tx, version) VALUES (?, ?, ?, ?, ?)`,
+      [
+        tessChunk.id,
+        tessChunk.userID,
+        tessChunk.encryptedContent,
+        tessChunk.tx,
+        tessChunk.version,
+      ]
+    )
+      .then((rx) => {
+        if (onSuccess) {
+          onSuccess(rx);
+        }
+      })
+      .catch((e) => {
+        console.log(e, "e");
+        if (onError) {
+          onError(e);
+        }
+      });
+  }
 
   function handleDayView() {
     if (hasOngoingDay) {
@@ -51,39 +81,81 @@ function DayPlannerMain({ navigation }) {
         day: new Date().toDateString(),
         tasks: [],
       };
-      activeDayAPI.setActiveDay(newDay);
-      const transactionID = randomUUID();
-      symmetricEncrypt(JSON.stringify(newDay), transactionID)
-        .then((res) => {
-          const newTessChunk: Tess_ChunksType = {
-            id: newChunkID("TESS"),
-            userID: activeUserID as string,
-            tx: Date.now(),
-            version: "0.1.1",
-            encryptedContent: res,
-          };
-          db.runAsync(
-            `INSERT OR REPLACE INTO tessChunks (id, userID, encryptedContent, tx, version) VALUES (?, ?, ?, ?, ?)`,
-            [
-              newTessChunk.id,
-              newTessChunk.userID,
-              newTessChunk.encryptedContent,
-              newTessChunk.tx,
-              newTessChunk.version,
-            ]
-          )
-            .then((rx) => {
-              console.log(rx, "rx");
-              navigation.navigate("dayPlannerActiveDayView", {
-                name: "dayPlannerActiveDayView",
-              });
+      try {
+        const lastChunkData = JSON.parse(
+          dayPlannerAPI.lastChunk?.encryptedContent
+        );
+        activeDayAPI.setActiveDay(newDay);
+        const transactionID = randomUUID();
+        const newDay: TessDayLogType = {
+          day: new Date().toDateString(),
+          tasks: [],
+        };
+        const currentDayFromLastChunk = lastChunkData.indexOf(
+          (day) => day.day === newDay.day
+        );
+        if (currentDayFromLastChunk !== -1) {
+          return;
+        }
+        if (lastChunkData.length > MaxDaysInTessChunk) {
+          symmetricEncrypt(JSON.stringify([newDay]), transactionID).then(
+            (encryptedContent) => {
+              const newTessChunk: Tess_ChunksType = {
+                id: newChunkID("TESS"),
+                userID: activeUserID,
+                encryptedContent: encryptedContent,
+                tx: Date.now(),
+                version: "0.1.1",
+              };
+              updateTessChunk(
+                newTessChunk,
+                (rx) => {
+                  dayPlannerAPI.setLastChunk({
+                    ...newTessChunk,
+                    encryptedContent: JSON.stringify([newDay]),
+                  });
+                  setHasOngoingDay(true);
+                  navigation.navigate("dayPlannerActiveDayView", {
+                    name: "dayPlannerActiveDayView",
+                  });
+                },
+                (e) => {
+                  console.log(e, "e");
+                }
+              );
+            }
+          );
+        } else {
+          const newDays = [...lastChunkData, newDay];
+          symmetricEncrypt(JSON.stringify(newDays), transactionID)
+            .then((encryptedContent) => {
+              const updatedTessChunk: Tess_ChunksType = {
+                ...dayPlannerAPI.lastChunk,
+                encryptedContent: encryptedContent,
+              };
+              updateTessChunk(
+                updatedTessChunk,
+                (rx) => {
+                  dayPlannerAPI.setLastChunk({
+                    ...updatedTessChunk,
+                    encryptedContent: JSON.stringify(newDays),
+                  });
+                  navigation.navigate("dayPlannerActiveDayView", {
+                    name: "dayPlannerActiveDayView",
+                  });
+                },
+                (e) => {
+                  console.log(e, "e");
+                }
+              );
             })
             .catch((e) => {
-              console.log(e, "e");
+              console.log(e);
             });
-          console.log(res, "res");
-        })
-        .catch();
+        }
+      } catch (e) {
+        console.log(e);
+      }
     }
   }
 
