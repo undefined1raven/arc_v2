@@ -81,7 +81,7 @@ export default function LandingScreen({ navigation }) {
         <RButton
           transitionDuration={0}
           onClick={() => {
-            db.runAsync(`DROP TABLE users`);
+            navigation.navigate("loginMain", { name: "loginMain" });
           }}
           mobileFontSize={globalStyle.largeMobileFont}
           figmaImport={{

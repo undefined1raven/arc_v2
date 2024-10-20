@@ -6,10 +6,12 @@ import { useEffect, useState } from "react";
 import * as jsesc from "jsesc";
 import Animated from "react-native-reanimated";
 import * as SecureStore from "expo-secure-store";
+import { getVal } from "@/app/config/defaultTransitionConfig";
 function UnwrapTessSymkey(props: {
   pin: string | null;
   onSuccess: Function;
   onError: Function;
+  userID?: string;
 }) {
   const [codeTrigger, setCodeTrigger] = useState("");
   const [encryptedKey, setEncryptedKey] = useState("");
@@ -30,12 +32,15 @@ function UnwrapTessSymkey(props: {
 
   useEffect(() => {
     if (props.pin !== null) {
-      db.getFirstAsync("SELECT PIKBackup FROM users WHERE id=?", [activeUserID])
+      db.getFirstAsync("SELECT PIKBackup FROM users WHERE id=?", [
+        getVal(props.userID, activeUserID),
+      ])
         .then((res) => {
           const parsed = JSON.parse(
             jsesc.default(res?.PIKBackup, { json: true })
           ) as object;
           const encryptedKey = JSON.stringify(JSON.parse(JSON.parse(parsed)));
+          console.log(encryptedKey);
           setEncryptedKey(encryptedKey);
         })
         .catch((e) => {
@@ -48,13 +53,21 @@ function UnwrapTessSymkey(props: {
     if (codeTrigger !== "" && props.pin !== null) {
       const eventResponse: UnwrapKeysType = JSON.parse(e.nativeEvent.data);
       if (eventResponse.status === "success" && eventResponse.payload) {
-        SecureStore.setItemAsync(`${activeUserID}-tess-symkey`, eventResponse.payload).then(() => {
+        SecureStore.setItemAsync(
+          `${getVal(props.userID, activeUserID)}-tess-symkey`,
+          eventResponse.payload
+        )
+          .then(() => {
             props.onSuccess();
-        }).catch(e => {
-            props.onError({status: 'failed', error: "Failed to save key to keychain"});
-        });
+          })
+          .catch((e) => {
+            props.onError({
+              status: "failed",
+              error: "Failed to save key to keychain",
+            });
+          });
       } else {
-        props.onError({status: 'failed', error: "Cannot unwrap key"});
+        props.onError({ status: "failed", error: "Cannot unwrap key" });
       }
     }
   }

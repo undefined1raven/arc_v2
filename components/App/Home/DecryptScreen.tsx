@@ -94,8 +94,6 @@ function DecryptionScreen() {
     );
   }, [pinFromInput]);
 
-  useEffect(() => {}, [finalTessPin]);
-
   function requestPinFromStorage() {
     try {
       const tessPin = SecureStore.getItem("tess_symkey_pin", {
@@ -132,9 +130,32 @@ function DecryptionScreen() {
         <>
           {hasLoadedUserDataAPI.hasLoadedUserData === false && (
             <UnwrapTessSymkey
-              onSuccess={() => {
+              onSuccess={async () => {
+                if (finalTessPin === null) return;
+                if (tessKeyBioFlag === null || tessKeyBioFlag === undefined || tessKeyBioFlag === "true") {
+                  await SecureStore.setItemAsync(
+                    "tess_symkey_pin",
+                    finalTessPin,
+                    {
+                      requireAuthentication: true,
+                      authenticationPrompt:
+                        "Authenticate to use biometrics to unlock",
+                    }
+                  )
+                    .catch(async (e) => {
+                      await SecureStore.setItemAsync(
+                        "tess_symkey_pin_no_bio",
+                        "true"
+                      );
+                    })
+                    .then(async () => {
+                      await SecureStore.setItemAsync(
+                        "tess_symkey_pin_no_bio",
+                        "false"
+                      );
+                    });
+                }
                 hasLoadedUserDataAPI.setHasTessKey(true);
-                console.log("success");
               }}
               onError={(e) => {
                 console.log(e);
