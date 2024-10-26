@@ -1,3 +1,5 @@
+import { defaultFeatureConfig } from "@/app/config/defaultFeatureConfig";
+
 function getWrapedTessKey(createConfirmPIN: string) {
   return `
   document.title = 'Tess Symkey gen';
@@ -102,6 +104,38 @@ function getWrapedTessKey(createConfirmPIN: string) {
         }).catch(e => console.log(e));
 }
 
+
+ async function symmetricEncrypt(plaintext, key) {
+     let encoded = new TextEncoder().encode(plaintext);
+     let iv = crypto.getRandomValues(new Uint8Array(12));
+     return await crypto.subtle.encrypt({
+         name: 'AES-GCM',
+         iv: iv
+     }, key, encoded).then((encrypted) => {
+         return {
+             cipher: ab2str(encrypted),
+             iv: ab2str(iv)
+         };
+     });
+ }
+
+
+function stringToCharCodeArray(str) {
+  let stringActual = str;
+  if (str === undefined) {
+    throw new Error("stringToCharCodeArray: str is undefined");
+  } else {
+    if (typeof str !== "string") {
+      stringActual = str.toString();
+    }
+  }
+  const charCodeArray = [];
+  for (let i = 0; i < stringActual.length; i++) {
+    charCodeArray.push(stringActual.charCodeAt(i));
+  }
+  return charCodeArray;
+}
+
 async function wrapCryptoKey(keyToWrap, password) {
     // get the key encryption key
     const keyMaterial = await getKeyMaterial(password);
@@ -151,7 +185,29 @@ async function wrapCryptoKey(keyToWrap, password) {
 									salt: stringToCharCodeArray(ab2str(res.salt)),
 									iv: stringToCharCodeArray(ab2str(res.iv))
 								}
-                                sendMessage(JSON.stringify({taskID: 'tessSymkeyWrappingSuccess', payload: JSON.stringify(payload), status: 'success'}));
+
+
+                    const configPromises = [];
+
+                                                    configPromises.push(symmetricEncrypt('${JSON.stringify(
+                                                      defaultFeatureConfig.arc
+                                                    )}', tess_simkey));
+                    configPromises.push(symmetricEncrypt('${JSON.stringify(
+                      defaultFeatureConfig.sid
+                    )}', tess_simkey));
+                    configPromises.push(symmetricEncrypt('${JSON.stringify(
+                      defaultFeatureConfig.tess
+                    )}', tess_simkey));
+
+                    Promise.all(configPromises).then((encryptedConfigs) => {
+                        const arcFeatureConfig = JSON.stringify(stringToCharCodeArray(JSON.stringify(encryptedConfigs[0])));
+                        const SIDFeatureConfig = JSON.stringify(stringToCharCodeArray(JSON.stringify(encryptedConfigs[1])));
+                        const tessFeatureConfig = JSON.stringify(stringToCharCodeArray(JSON.stringify(encryptedConfigs[2])));
+                        sendMessage(JSON.stringify({taskID: 'tessSymkeyWrappingSuccess', payload: JSON.stringify(payload), status: 'success', arcFeatureConfig: arcFeatureConfig, SIDFeatureConfig: SIDFeatureConfig, tessFeatureConfig: tessFeatureConfig}));
+                    }).catch(e => {
+                       sendMessage(JSON.stringify({taskID: 'accountGen', status: 'failed', error: 'failed to encrypt default feature config'}))
+                    });
+
                             })
                             .catch((e) => {
                                     sendMessage(JSON.stringify({taskID: 'failed to wrap new symmetric key', error: e, status: 'failed'}));

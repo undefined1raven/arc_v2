@@ -16,7 +16,7 @@ import { symmetricDecrypt } from "../decryptors/symmetricDecrypt";
 import { ARC_ChunksType, ArcTaskLogType } from "@/app/config/commonTypes";
 import { symmetricEncrypt } from "../encryptors/symmetricEncrypt";
 import { useHasLoadedUserDataStore } from "../Home/hasLoadedUserData";
-function LoadUserData() {
+function LoadUserData({ navigation }) {
   const hasLoadedUserDataAPI = useHasLoadedUserDataStore();
   const getActiveUserID = useLocalUserIDsStore(
     (store) => store.getActiveUserID
@@ -59,6 +59,7 @@ function LoadUserData() {
   useEffect(() => {
     if (activeUserID !== null) {
       hasLoadedUserDataAPI.setHasStartedDecryption(true);
+      console.log(getActiveUserID(), "activeUserID here");
       db.getAllAsync(
         `SELECT * FROM arcChunks WHERE userID=? ORDER BY tx DESC LIMIT 6`,
         [activeUserID]
@@ -77,7 +78,7 @@ function LoadUserData() {
               return chunk.encryptedContent;
             });
             symmetricDecrypt(JSON.stringify(encryptedContents))
-            .then((res) => {
+              .then((res) => {
                 const decryptedChunks: ARC_ChunksType[] = [];
                 const results = JSON.parse(jsesc.default(res, { json: true }));
                 console.log(results.length, "results len");
@@ -101,6 +102,7 @@ function LoadUserData() {
                   currentActivities.setCurrentActivities(activities);
                   currentActivities.setLastChunk(lastDecryptedChunk);
                   currentActivities.setIni(true);
+                  navigation.navigate("Home", { name: "Home" });
                 } catch (e) {
                   console.log(e, "initial chunks parsing failed");
                 }

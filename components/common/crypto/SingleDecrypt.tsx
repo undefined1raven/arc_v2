@@ -10,6 +10,7 @@ type SingleDecryptProps = {
   onDecrypted: Function;
 };
 function SingleDecrypt(props: SingleDecryptProps) {
+  console.log(props.encryptedObj, "encryptedObj");
   const [isReady, setIsReady] = useState<boolean>(false);
   useEffect(() => {
     if (

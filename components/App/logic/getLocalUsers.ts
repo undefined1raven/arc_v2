@@ -38,9 +38,14 @@ async function getLocalUsers(): Promise<GetLocalUsersSig> {
             users.push({
               authenticated: true,
               id: userID,
-              isActive: false,
+              isActive: true,
               hasTessKey: hasTessKey,
             });
+            if (hasTessKey) {
+              useHasLoadedUserDataStore.getState().setKeyType("double");
+            } else {
+              useHasLoadedUserDataStore.getState().setKeyType("simple");
+            }
           } else {
             users.push({
               authenticated: false,

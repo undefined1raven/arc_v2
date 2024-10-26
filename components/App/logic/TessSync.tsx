@@ -6,10 +6,16 @@ import { useDayPlannerStore } from "../DayPlanner/daysStore";
 import { randomUUID } from "expo-crypto";
 import { symmetricDecrypt } from "../decryptors/symmetricDecrypt";
 import { symmetricEncrypt } from "../encryptors/symmetricEncrypt";
-import { Tess_ChunksType } from "@/app/config/commonTypes";
+import { Tess_ChunksType, TessDayLogType } from "@/app/config/commonTypes";
 import useStatusIndicatorsStore from "@/stores/statusIndicators";
+import { useTessFeatureConfigStore } from "../DayPlanner/tessFeatureConfigStore";
+import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
+import { getInsertStringFromObject } from "@/fn/dbUtils";
+import { newChunkID } from "@/fn/newChunkID";
 
 function TessSync() {
+  const localUsersAPI = useLocalUserIDsStore();
+  const tessFeatureConfigAPI = useTessFeatureConfigStore();
   const db = useSQLiteContext();
   const activeDayAPI = useActiveDayStore();
   const statusIndicatorsAPI = useStatusIndicatorsStore();
@@ -41,12 +47,28 @@ function TessSync() {
         }
       });
   }
+  // useEffect(() => {
+  //   console.log(
+  //     activeDayAPI.activeDay,
+  //     dayPlannerAPI.hasLoadedData,
+  //     dayPlannerAPI.lastChunk,
+  //     tessFC,
+  //     dayPlannerAPI.days
+  //   );
+  // }, [
+  //   activeDayAPI.activeDay,
+  //   dayPlannerAPI.hasLoadedData,
+  //   dayPlannerAPI.lastChunk,
+  //   tessFC,
+  //   dayPlannerAPI.days,
+  // ]);
 
   useEffect(() => {
-    console.log("tess update triggered")
+    console.log("tess update triggered");
     if (
       activeDayAPI.activeDay === null ||
-      dayPlannerAPI.hasLoadedData === false
+      dayPlannerAPI.hasLoadedData === false ||
+      dayPlannerAPI.lastChunk === null
     ) {
       return;
     }
@@ -87,11 +109,49 @@ function TessSync() {
       statusIndicatorsAPI.setEncrypting(false);
       console.log("Error parsing last chunk", e);
     }
-  }, [
-    activeDayAPI,
-    dayPlannerAPI.hasLoadedData,
-    dayPlannerAPI.lastChunk,
-  ]);
+  }, [activeDayAPI, dayPlannerAPI.hasLoadedData, dayPlannerAPI.lastChunk]);
+
+  useEffect(() => {
+    if (tessFeatureConfigAPI.tessFeatureConfig === null) {
+      return;
+    }
+    statusIndicatorsAPI.setEncrypting(true);
+    const tid = randomUUID();
+    symmetricEncrypt(
+      JSON.stringify(tessFeatureConfigAPI.tessFeatureConfig),
+      tid
+    )
+      .then((encryptedData) => {
+        db.getFirstAsync(`SELECT * FROM users WHERE id = ?`, [
+          localUsersAPI.getActiveUserID(),
+        ])
+          .then((rx) => {
+            const userData = rx;
+            if (userData === null) {
+              return;
+            }
+            userData["tessFeatureConfig"] = encryptedData;
+            const insertString = getInsertStringFromObject(userData);
+            db.runAsync(
+              `INSERT OR REPLACE INTO users ${insertString.queryString}`,
+              insertString.values
+            )
+              .then((rr) => {
+                console.log(rr, "from tess update");
+                statusIndicatorsAPI.setEncrypting(false);
+              })
+              .catch((e) => {
+                statusIndicatorsAPI.setEncrypting(false);
+              });
+          })
+          .catch((e) => {
+            statusIndicatorsAPI.setEncrypting(false);
+          });
+      })
+      .catch((e) => {
+        statusIndicatorsAPI.setEncrypting(false);
+      });
+  }, [tessFeatureConfigAPI.tessFeatureConfig]);
 
   return null;
 }

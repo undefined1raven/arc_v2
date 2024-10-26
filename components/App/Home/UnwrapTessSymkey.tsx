@@ -50,9 +50,13 @@ function UnwrapTessSymkey(props: {
   }, [props.pin]);
 
   function handleWrappedKeys(e) {
+    console.log(e.nativeEvent.data);
     if (codeTrigger !== "" && props.pin !== null) {
       const eventResponse: UnwrapKeysType = JSON.parse(e.nativeEvent.data);
-      if (eventResponse.status === "success" && eventResponse.payload) {
+      if (
+        eventResponse.status === "success" &&
+        typeof eventResponse.payload === "string"
+      ) {
         SecureStore.setItemAsync(
           `${getVal(props.userID, activeUserID)}-tess-symkey`,
           eventResponse.payload

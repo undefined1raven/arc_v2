@@ -47,11 +47,15 @@ import * as jsesc from "jsesc";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { getWrapedTessKey } from "@/fn/getWrapedTessKey";
+import { defaultFeatureConfig } from "@/app/config/defaultFeatureConfig";
 type WrapKeysWithPasswordCodeReturnType = {
   status: "failed" | "success";
   error: null | string | object;
   taskID: "passwordKeyWrap";
   payload?: string;
+  tessFeatureConfig?: string;
+  arcFeatureConfig?: string;
+  SIDFeatureConfig?: string;
 };
 
 export default function OTSThree({ navigation }) {
@@ -197,9 +201,27 @@ export default function OTSThree({ navigation }) {
       const eventResponse: WrapKeysWithPasswordCodeReturnType = JSON.parse(
         e.nativeEvent.data
       );
-      if (eventResponse.status === "success" && eventResponse.payload) {
-        const parsedPayload = JSON.parse(eventResponse.payload);
-        setWrappedKeysStorage(parsedPayload);
+      console.log(eventResponse, "from wrapped keys");
+      if (
+        eventResponse.status === "success" &&
+        eventResponse.payload !== undefined &&
+        eventResponse.tessFeatureConfig &&
+        eventResponse.arcFeatureConfig &&
+        eventResponse.SIDFeatureConfig
+      ) {
+        db.runAsync(
+          `UPDATE users SET tessFeatureConfig=?, arcFeatureConfig=?, sidFeatureConfig=? WHERE id='temp'`,
+          eventResponse.tessFeatureConfig,
+          eventResponse.arcFeatureConfig,
+          eventResponse.SIDFeatureConfig
+        )
+          .then((r) => {
+            const parsedPayload = JSON.parse(eventResponse.payload as string);
+            setWrappedKeysStorage(parsedPayload);
+          })
+          .catch((e) => {
+            console.log(e, "from FC reencryption");
+          });
       }
     }
   }

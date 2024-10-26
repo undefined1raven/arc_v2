@@ -138,11 +138,19 @@ function InitializeApp({ navigation }) {
           <SingleDecrypt
             encryptedObj={arcEncryptedFeatureConfig}
             onDecrypted={(e) => {
+              console.log("decrypted", e);
               setArcFeatureConfig(
                 JSON.parse(format.default(e, { json: true }))
               );
             }}
-            symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
+            onError={() => {
+              console.log("failed to decrypt arc feature config");
+            }}
+            symsk={SecureStore.getItem(
+              hasLoadedUserDataAPI.keyType === "simple"
+                ? `${activeUserID}-symsk`
+                : `${activeUserID}-tess-symkey`
+            )}
           ></SingleDecrypt>
         )}
       {tessEncryptedFeatureConfig !== null && (
@@ -157,11 +165,16 @@ function InitializeApp({ navigation }) {
             const latestTessFeatureConfig =
               migrateTessFeatureConfigFromv010Tov011(cachedTessFeatureConfig);
 
-            console.log("got v 0.1.1!!!", latestTessFeatureConfig);
-
             setTessFeatureConfig(latestTessFeatureConfig);
           }}
-          symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
+          onError={() => {
+            console.log("failed to decrypt tess feature config");
+          }}
+          symsk={SecureStore.getItem(
+            hasLoadedUserDataAPI.keyType === "simple"
+              ? `${activeUserID}-symsk`
+              : `${activeUserID}-tess-symkey`
+          )}
         ></SingleDecrypt>
       )}
       {(hasLoadedUserDataAPI.hasTessKey === true &&
@@ -210,11 +223,15 @@ function InitializeApp({ navigation }) {
             console.log("encrypted watching", e);
           }}
           transactionID={encryptionAPI.transactionID}
-          symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
+          symsk={SecureStore.getItem(
+            hasLoadedUserDataAPI.keyType === "simple"
+              ? `${activeUserID}-symsk`
+              : `${activeUserID}-tess-symkey`
+          )}
         ></SingleEncrypt>
       )}
       {hasUsers === false && <AsyncGenNewAccountInfo></AsyncGenNewAccountInfo>}
-      <LoadUserData></LoadUserData>
+      <LoadUserData navigation={navigation}></LoadUserData>
       <LoadTessData></LoadTessData>
     </>
   );
