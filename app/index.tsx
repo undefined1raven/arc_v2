@@ -31,6 +31,7 @@ import { DayPlannerActiveDayView } from "@/components/App/DayPlanner/DayPlannerA
 import { DayPlannerTaskEditor } from "@/components/App/DayPlanner/DayPlannerTaskEditor";
 import LoginMain from "@/components/Login/LoginMain";
 import LoginOffline from "@/components/Login/LoginOffline";
+import { DayPlannerStatusSettings } from "@/components/App/Settings/DayPlanner/DayPlannerStatusSettings";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -134,6 +135,10 @@ export default function App() {
         <Stack.Screen
           name="loginOffline"
           component={LoginOffline}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="dayPlannerStatusSettings"
+          component={DayPlannerStatusSettings}
         ></Stack.Screen>
         <Stack.Screen name="loginMain" component={LoginMain}></Stack.Screen>
 

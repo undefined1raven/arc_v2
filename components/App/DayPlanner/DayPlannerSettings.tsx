@@ -11,6 +11,7 @@ import Animated, { FadeInRight } from "react-native-reanimated";
 import { useTessFeatureConfigStore } from "./tessFeatureConfigStore";
 import { TessTagsDeco } from "@/components/common/deco/TessTagsDeco";
 import { TessDayClassifierDeco } from "@/components/common/deco/TessDayClassifierDeco";
+import RButton from "@/components/common/RButton";
 
 function DayPlannerSettings({ navigation }) {
   const tessFeatureConfig = useTessFeatureConfigStore(
@@ -24,18 +25,21 @@ function DayPlannerSettings({ navigation }) {
       label: "Status Picker",
       description: "Add or remove statuses from the status picker",
       deco: TessStatusDeco,
+      navRedirect: "dayPlannerStatusSettings",
     },
     {
       key: "tags",
       label: "Tags",
       description: "Edit tags for tasks",
       deco: TessTagsDeco,
+      navRedirect: "Home",
     },
     {
       key: "dayClassifer",
       label: "Day Classifier",
       description: "Edit the day classifier",
       deco: TessDayClassifierDeco,
+      navRedirect: "Home",
     },
   ];
 
@@ -91,7 +95,10 @@ function DayPlannerSettings({ navigation }) {
           height: 120,
         }}
       >
-        <RBox
+        <RButton
+          onClick={() => {
+            navigation.navigate(item.navRedirect);
+          }}
           width="100%"
           height="100%"
           borderWidth={1}
@@ -121,7 +128,7 @@ function DayPlannerSettings({ navigation }) {
             left="20%"
             text={item.description}
           ></RLabel>
-        </RBox>
+        </RButton>
       </Animated.View>
     );
   }

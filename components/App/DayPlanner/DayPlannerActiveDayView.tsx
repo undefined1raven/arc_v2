@@ -174,9 +174,9 @@ function DayPlannerActiveDayView({ navigation }) {
           }}
         >
           <RButton
-          onClick={() => {
-            navigation.navigate("dayPlanner");
-          }}
+            onClick={() => {
+              navigation.navigate("dayPlanner");
+            }}
             figmaImportConfig={{ containerHeight: 48, containerWidth: 356 }}
             figmaImport={{
               mobile: { left: 183, width: 174, height: 48, top: "0" },

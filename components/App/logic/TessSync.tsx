@@ -88,7 +88,7 @@ function TessSync() {
       console.log("Error parsing last chunk", e);
     }
   }, [
-    activeDayAPI.activeDay,
+    activeDayAPI,
     dayPlannerAPI.hasLoadedData,
     dayPlannerAPI.lastChunk,
   ]);

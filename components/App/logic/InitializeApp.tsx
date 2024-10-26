@@ -23,6 +23,8 @@ import { LoadTessData } from "./LoadTessData";
 import { useActiveDayStore } from "../DayPlanner/activeDayStore";
 import { useDayPlannerStore } from "../DayPlanner/daysStore";
 import { TessSync } from "./TessSync";
+import { migrateTessFeatureConfigFromv010Tov011 } from "./featureConfigVersionMigrations";
+import { symmetricEncrypt } from "../encryptors/symmetricEncrypt";
 function InitializeApp({ navigation }) {
   const db = useSQLiteContext();
   const decryptionAPI = useDecryptionStore();
@@ -148,7 +150,16 @@ function InitializeApp({ navigation }) {
           encryptedObj={tessEncryptedFeatureConfig}
           onDecrypted={(e) => {
             setTessEncryptedFeatureConfig(null);
-            setTessFeatureConfig(JSON.parse(format.default(e, { json: true })));
+            const cachedTessFeatureConfig = JSON.parse(
+              format.default(e, { json: true })
+            );
+
+            const latestTessFeatureConfig =
+              migrateTessFeatureConfigFromv010Tov011(cachedTessFeatureConfig);
+
+            console.log("got v 0.1.1!!!", latestTessFeatureConfig);
+
+            setTessFeatureConfig(latestTessFeatureConfig);
           }}
           symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
         ></SingleDecrypt>

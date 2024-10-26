@@ -196,7 +196,7 @@ const themeColors: Themes = {
     androidRippleColor: "#2400ff",
     statusBarColor: "#04030E",
     pageBackgroundColors: ["#04030E", "#0B0727"],
-    color: "#2400FF",
+    color: "#4627FF",
     colorAccent: "#150098",
     textColor: "#9E8EFF",
     textColorAccent: "#584D99",

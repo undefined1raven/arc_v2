@@ -163,7 +163,7 @@ const tessDefaultConfig: FeatureConfigTessType = {
       statusID: "SID-000000-0000-0000-000001",
       name: "To Do",
       completionEffect: 0,
-      version: "0.1.0",
+      version: "0.1.1",
       deleted: false,
       colors: {
         light: {
@@ -180,7 +180,7 @@ const tessDefaultConfig: FeatureConfigTessType = {
       statusID: "SID-000000-0000-0000-000002",
       name: "Completed",
       completionEffect: 1,
-      version: "0.1.0",
+      version: "0.1.1",
       deleted: false,
       colors: {
         light: {
@@ -198,7 +198,7 @@ const tessDefaultConfig: FeatureConfigTessType = {
       statusID: "SID-000000-0000-0000-000003",
       name: "Incomplete",
       completionEffect: 0.5,
-      version: "0.1.0",
+      version: "0.1.1",
       deleted: false,
       colors: {
         light: {
@@ -216,7 +216,7 @@ const tessDefaultConfig: FeatureConfigTessType = {
       statusID: "SID-000000-0000-0000-000004",
       name: "Failed",
       completionEffect: 0,
-      version: "0.1.0",
+      version: "0.1.1",
       deleted: false,
       colors: {
         light: {
@@ -233,7 +233,7 @@ const tessDefaultConfig: FeatureConfigTessType = {
       statusID: "SID-000000-0000-0000-000005",
       name: "In Progress",
       completionEffect: 0.1,
-      version: "0.1.0",
+      version: "0.1.1",
       deleted: false,
       colors: {
         light: {
@@ -261,7 +261,7 @@ const tessDefaultConfig: FeatureConfigTessType = {
           color: "#C300BC",
         },
       },
-      version: "0.1.0",
+      version: "0.1.1",
       deleted: false,
       completionMultiplier: (score: number) => {
         return score * 1.2;
@@ -274,7 +274,7 @@ const tessDefaultConfig: FeatureConfigTessType = {
       textLightColor: "#757120",
       darkColor: "#A19B16",
       textDarkColor: "#A19B16",
-      version: "0.1.0",
+      version: "0.1.1",
       deleted: false,
       colors: {
         light: {
@@ -303,7 +303,7 @@ const tessDefaultConfig: FeatureConfigTessType = {
           textColor: themeColors.dark.textColor,
         },
       },
-      version: "0.1.0",
+      version: "0.1.1",
       deleted: false,
       completionMultiplier: (score: number) => {
         return score * 0 + 1;
@@ -312,6 +312,7 @@ const tessDefaultConfig: FeatureConfigTessType = {
   ],
   dayClassifier: [
     {
+      version: '0.1.1',
       dayClassID: "DCID-000000-0000-0000-000001",
       label: "Completed",
       threshold: 0.75,
@@ -327,6 +328,7 @@ const tessDefaultConfig: FeatureConfigTessType = {
       },
     },
     {
+      version: '0.1.1',
       dayClassID: "DCID-000000-0000-0000-000002",
       label: "Incomplete",
       threshold: 0.25,
@@ -342,6 +344,7 @@ const tessDefaultConfig: FeatureConfigTessType = {
       },
     },
     {
+      version: '0.1.1',
       dayClassID: "DCID-000000-0000-0000-000003",
       label: "Failed",
       threshold: 0.75,

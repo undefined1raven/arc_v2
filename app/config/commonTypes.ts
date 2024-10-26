@@ -59,12 +59,13 @@ type TessStatusType = {
   statusID: string;
   name: string;
   deleted: boolean;
-  version: "0.1.0";
+  version: "0.1.1";
   colors: {
     [key in AvailableThemes]: { [key in keyof BasicColorsType]: ColorValueHex };
   };
   completionEffect: number;
 };
+
 type TessLabelType = {
   labelID: string;
   name: string;
@@ -72,7 +73,7 @@ type TessLabelType = {
     [key in AvailableThemes]: { [key in keyof BasicColorsType]: ColorValueHex };
   };
   deleted: boolean;
-  version: "0.1.0";
+  version: "0.1.1";
   completionMultiplier: Function;
 };
 type DayClassifierType = {
@@ -82,7 +83,10 @@ type DayClassifierType = {
     [key in AvailableThemes]: { [key in keyof BasicColorsType]: ColorValueHex };
   };
   label: string;
+  version: "0.1.1";
 };
+
+
 type FeatureConfigTessType = {
   statusArray: TessStatusType[];
   labelArray: TessLabelType[];

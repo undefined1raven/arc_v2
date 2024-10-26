@@ -141,11 +141,45 @@ export default function DayBreakdown({ navigation }) {
     const milliesInADay = 86400000;
     const dayMidnightUnix = now.getTime();
     const categoriesDurationMap: { [key: string]: number } = {};
-    const relevantActivities = currentArcActivitiesAPI.currentActivities.filter(
+    let relevantActivities = currentArcActivitiesAPI.currentActivities.filter(
       (activity) => {
-        return activity.start > dayMidnightUnix;
+        return (
+          activity.start > dayMidnightUnix ||
+          ((activity.end as number) > dayMidnightUnix &&
+            activity.start < dayMidnightUnix)
+        );
       }
     );
+
+    relevantActivities.sort((a, b) => a.start - b.start);
+
+    const activitiesGoingThroughMidnight = relevantActivities.filter(
+      (activity) => {
+        return (
+          activity.start < dayMidnightUnix &&
+          (activity.end as number) > dayMidnightUnix
+        );
+      }
+    );
+
+    for (let ix = 0; ix < activitiesGoingThroughMidnight.length; ix++) {
+      const activity = activitiesGoingThroughMidnight[ix];
+      const activityID = activity.taskID;
+      const timeAfterMidnight = (activity.end as number) - dayMidnightUnix;
+      const categoryID =
+        arcFeatureConfig.tasks.find((task) => task.taskID === activityID)
+          ?.categoryID || "Uncategorized";
+
+      if (!categoriesDurationMap[categoryID]) {
+        categoriesDurationMap[categoryID] = 0;
+      }
+
+      categoriesDurationMap[categoryID] += timeAfterMidnight;
+    }
+
+    relevantActivities = relevantActivities.filter((activities) => {
+      return !activitiesGoingThroughMidnight.includes(activities);
+    });
 
     for (let ix = 0; ix < relevantActivities.length; ix++) {
       const activity = relevantActivities[ix];
@@ -167,9 +201,9 @@ export default function DayBreakdown({ navigation }) {
       const catName =
         arcFeatureConfig.taskCategories.find((cat) => cat.categoryID === key)
           ?.name || "Uncategorized";
-      const percantageOfDay =
-        parseFloat((categoriesDurationMap[key] / milliesInADay).toFixed(1)) *
-        100;
+      const percantageOfDay = parseFloat(
+        ((categoriesDurationMap[key] / milliesInADay) * 100).toFixed(2)
+      );
       data.push({ label: catName, percentage: percantageOfDay });
     }
     data.push({

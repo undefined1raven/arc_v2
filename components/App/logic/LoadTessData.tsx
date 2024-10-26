@@ -34,7 +34,6 @@ function LoadTessData() {
   const db = useSQLiteContext();
 
   useEffect(() => {
-    console.log(encryptedContents, recentChunks);
     if (activeUserID !== null) {
       dayPlannerAPI.setHasLoadedData(false);
       db.getAllAsync(
@@ -83,7 +82,6 @@ function LoadTessData() {
         onDecrypted={(res) => {
           const decryptedChunks: Tess_ChunksType[] = [];
           const results = JSON.parse(jsesc.default(res, { json: true }));
-          console.log(results, "from tess multi");
           for (let ix = 0; ix < results.length; ix++) {
             const days = JSON.parse(results[ix]);
             decryptedChunks.push({
@@ -101,7 +99,6 @@ function LoadTessData() {
               ...recentChunks[0],
               encryptedContent: results[0],
             };
-            console.log(allDays, "allDays");
             dayPlannerAPI.setDays(allDays);
             dayPlannerAPI.setLastChunk(lastDecryptedChunk);
             dayPlannerAPI.setHasLoadedData(true);
