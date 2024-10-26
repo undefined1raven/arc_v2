@@ -88,11 +88,6 @@ function DayPlannerMain({ navigation }) {
     );
     symmetricEncrypt(JSON.stringify([newDay]), transactionID).then(
       (encryptedContent) => {
-        console.log(
-          "CNCK:------------------------------------------",
-          transactionID,
-          " ::::2"
-        );
         const newTessChunk: Tess_ChunksType = {
           id: newChunkID("TESS"),
           userID: activeUserID,
@@ -100,20 +95,10 @@ function DayPlannerMain({ navigation }) {
           tx: Date.now(),
           version: "0.1.1",
         };
-        console.log(
-          "CNCK:------------------------------------------",
-          transactionID,
-          " ::::3"
-        );
         activeDayAPI.setActiveDay(newDay);
         updateTessChunk(
           newTessChunk,
           (rx) => {
-            console.log(
-              "CNCK:------------------------------------------",
-              transactionID,
-              " ::::4"
-            );
             dayPlannerAPI.setLastChunk({
               ...newTessChunk,
               encryptedContent: JSON.stringify([newDay]),
@@ -124,11 +109,6 @@ function DayPlannerMain({ navigation }) {
             });
           },
           (e) => {
-            console.log(
-              "CNCK:------------------------------------------",
-              transactionID,
-              " ::::5"
-            );
             console.log(e, "e");
           }
         );
@@ -201,7 +181,9 @@ function DayPlannerMain({ navigation }) {
     }
   }
 
-  return (
+  return tessFeatureConfig !== null &&
+    dayPlannerAPI.hasLoadedData === true &&
+    dayPlannerAPI.days !== null ? (
     <EmptyView navigation={navigation} showMenu={true}>
       <RLabel
         align="left"
@@ -267,6 +249,8 @@ function DayPlannerMain({ navigation }) {
         </RBox>
       </RButton>
     </EmptyView>
+  ) : (
+    <DayPlannerLoadingScreen></DayPlannerLoadingScreen>
   );
 }
 

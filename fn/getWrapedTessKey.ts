@@ -179,7 +179,6 @@ async function wrapCryptoKey(keyToWrap, password) {
                     getNewSymmetricKey().then(tess_simkey => {
                         wrapCryptoKey(tess_simkey, '\`${createConfirmPIN}\`')
                             .then((res) => {
-                                console.log(res);
                                 const payload = {
 									key: stringToCharCodeArray(ab2str(res.wrappedKey)),
 									salt: stringToCharCodeArray(ab2str(res.salt)),
