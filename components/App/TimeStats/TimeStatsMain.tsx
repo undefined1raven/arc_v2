@@ -162,7 +162,7 @@ export default function TimeStatsMain({ navigation }) {
                 height: "50%",
               }}
             >
-              <HalfDonutChart></HalfDonutChart>
+              {/* <HalfDonutChart></HalfDonutChart> */}
             </View>
           </RBox>
         </RButton>

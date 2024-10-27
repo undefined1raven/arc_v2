@@ -138,7 +138,6 @@ function InitializeApp({ navigation }) {
           <SingleDecrypt
             encryptedObj={arcEncryptedFeatureConfig}
             onDecrypted={(e) => {
-              console.log("decrypted", e);
               setArcFeatureConfig(
                 JSON.parse(format.default(e, { json: true }))
               );

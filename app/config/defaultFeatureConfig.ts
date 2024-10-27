@@ -347,7 +347,7 @@ const tessDefaultConfig: FeatureConfigTessType = {
       version: '0.1.1',
       dayClassID: "DCID-000000-0000-0000-000003",
       label: "Failed",
-      threshold: 0.75,
+      threshold: 0,
       colors: {
         light: {
           color: themeColors.light.errorColor,

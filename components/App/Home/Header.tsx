@@ -18,7 +18,6 @@ const Header = (props: HeaderProps) => {
   const statusIndicatorsAPI = useStatusIndicatorsStore();
   const [showActual, setShowActual] = useState(false);
   useEffect(() => {
-    console.log(props.show);
     setShowActual(getVal(props.show, true));
   }, [props.show]);
 

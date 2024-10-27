@@ -19,7 +19,6 @@ function symmetricEncrypt(
       if (response !== null && response !== undefined) {
         if (typeof transactionID === "string") {
           if (response.transactionID === transactionID) {
-            console.log("got a match using transactionID", transactionID);
             processResponse(response);
           }
         } else {

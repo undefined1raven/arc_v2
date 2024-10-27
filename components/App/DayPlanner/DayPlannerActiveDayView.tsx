@@ -69,6 +69,7 @@ function DayPlannerActiveDayView({ navigation }) {
       >
         <RButton
           borderColor={statusColors.color}
+          androidRippleColor={statusColors.color + "40"}
           onClick={() => {
             activeDayAPI.setSelectedTask(item);
             navigation.navigate("dayPlannerTaskEditor");
@@ -131,21 +132,10 @@ function DayPlannerActiveDayView({ navigation }) {
         text="Day Planner / Today"
       ></RLabel>
       <RButton
-        figmaImport={{ mobile: { left: 277, width: 81, height: 26, top: 29 } }}
-      >
-        <RLabel
-          text="End Day"
-          width="100%"
-          height="100%"
-          fontSize={globalStyle.mediumMobileFont}
-          verticalAlign="center"
-        ></RLabel>
-      </RButton>
-      <RButton
         onClick={() => {
           navigation.navigate("dayPlannerSettings");
         }}
-        figmaImport={{ mobile: { left: 213, width: 59, height: 26, top: 29 } }}
+        figmaImport={{ mobile: { left: 299, width: 59, height: 26, top: 29 } }}
       >
         <RBox width="100%" height="100%">
           <EditDeco width="75%"></EditDeco>

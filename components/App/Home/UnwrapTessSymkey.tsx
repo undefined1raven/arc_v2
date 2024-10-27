@@ -40,7 +40,6 @@ function UnwrapTessSymkey(props: {
             jsesc.default(res?.PIKBackup, { json: true })
           ) as object;
           const encryptedKey = JSON.stringify(JSON.parse(JSON.parse(parsed)));
-          console.log(encryptedKey);
           setEncryptedKey(encryptedKey);
         })
         .catch((e) => {

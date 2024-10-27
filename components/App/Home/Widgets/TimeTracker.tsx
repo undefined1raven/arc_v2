@@ -153,7 +153,6 @@ export default function TimeTracker({ navigation }) {
   useEffect(() => {
     if (encryptedData === null) return;
     if (dataToEncrypt === null) return;
-    console.log("saving chunk started");
     const encryptedPayload = encryptedData;
     const newChunk = {
       ...currentArcActivitiesAPI.lastChunk,
@@ -170,10 +169,8 @@ export default function TimeTracker({ navigation }) {
       ]
     )
       .then((r) => {
-        console.log(r, "saved chunk");
       })
       .catch((e) => {
-        console.log(e, "error while saving");
       });
     setEncryptedData(null);
     setDataToEncrypt(null);
@@ -190,7 +187,6 @@ export default function TimeTracker({ navigation }) {
         );
         const prevActivities: ArcTaskLogType[] = previousActivitiesTask.tasks;
         if (prevActivities.length + 1 > MaxActivitiesInArcChunk) {
-          console.log("make new chunk");
           const newPlainPayload = JSON.stringify({ tasks: [newActivity] });
           currentArcActivitiesAPI.setLastChunk({
             id: newChunkID(),
@@ -209,10 +205,8 @@ export default function TimeTracker({ navigation }) {
             encryptedContent: newPlainPayload,
           });
           setDataToEncrypt(newPlainPayload);
-          console.log("update existing chunk");
         }
       } else {
-        console.log("make new chunk [null case]");
         const newPlainPayload = JSON.stringify({ tasks: [newActivity] });
         currentArcActivitiesAPI.setLastChunk({
           id: newChunkID(),

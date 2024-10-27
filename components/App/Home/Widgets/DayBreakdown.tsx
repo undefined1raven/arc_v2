@@ -212,7 +212,6 @@ export default function DayBreakdown({ navigation }) {
     });
 
     setData(data.sort((a, b) => b.percentage - a.percentage));
-    console.log(data.length);
   }, [currentArcActivitiesAPI.currentActivities, arcFeatureConfig]);
 
   return (
