@@ -8,11 +8,22 @@ import { indexAnimationDelay } from "@/constants/indexAnimationDelay";
 import RButton from "@/components/common/RButton";
 import { TessStatusType } from "@/app/config/commonTypes";
 import { LinearGradient } from "react-native-svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { BackHandler } from "react-native";
 
 function DayPlannerStatusSettings({ navigation }) {
   const tessFeatureConfig = useTessFeatureConfigStore().tessFeatureConfig;
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
+
+  // useEffect(() => {
+  //   BackHandler.addEventListener("hardwareBackPress", () => {
+  //     if (isEditingStatus) {
+  //       setIsEditingStatus(false);
+  //       return true;
+  //     }
+  //     return false;
+  //   });
+  // }, []);
 
   const [isEditingStatus, setIsEditingStatus] = useState<boolean>(false);
   const [statusToEdit, setStatusToEdit] = useState<TessStatusType | null>(null);

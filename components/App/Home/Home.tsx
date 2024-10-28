@@ -20,6 +20,7 @@ import { ArcFeatureConfigWatcher } from "../stateWatchers/ArcFeatureConfigWather
 import { useHasLoadedUserDataStore } from "./hasLoadedUserData";
 import DayBreakdown from "./Widgets/DayBreakdown";
 import { BridgeServer } from "react-native-http-bridge-refurbished";
+import { ColorPicker, TriangleColorPicker } from "react-native-color-picker";
 
 type HomeProps = { onRequestUserIDs: Function };
 export default function Home({ navigation, onRequestUserIDs }) {
@@ -39,19 +40,6 @@ export default function Home({ navigation, onRequestUserIDs }) {
     setTimeout(() => {
       hasLoadedUserDataAPI.setHasLoadedUserData(true);
     }, 2000);
-  }, []);
-
-  useEffect(() => {
-    const server = new BridgeServer("http_service", true);
-    // server.get("/", async (req, res) => {
-    //   // do something
-    //   return { message: "OK" }; // or res.json({message: 'OK'});
-    // });
-    // server.listen(3215);
-
-    // return () => {
-    //   server.stop();
-    // };
   }, []);
 
   return (

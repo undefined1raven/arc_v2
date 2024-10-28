@@ -19,17 +19,20 @@ function DayPlannerSettings({ navigation }) {
   );
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const listItemConfig = { containerHeight: 120, containerWidth: 356 };
+  const [selectedKey, setSelectedKey] = React.useState(null);
   const settingsList = [
     {
       key: "statusPicker",
       label: "Status Picker",
       description: "Add or remove statuses from the status picker",
       deco: TessStatusDeco,
+      data: tessFeatureConfig?.statusArray,
       navRedirect: "dayPlannerStatusSettings",
     },
     {
       key: "tags",
       label: "Tags",
+      data: tessFeatureConfig?.labelArray,
       description: "Edit tags for tasks",
       deco: TessTagsDeco,
       navRedirect: "Home",
@@ -37,6 +40,7 @@ function DayPlannerSettings({ navigation }) {
     {
       key: "dayClassifer",
       label: "Day Classifier",
+      data: tessFeatureConfig?.dayClassifier,
       description: "Edit the day classifier",
       deco: TessDayClassifierDeco,
       navRedirect: "Home",

@@ -54,12 +54,6 @@ function InitializeApp({ navigation }) {
   const arcFeatureConfig = useArcFeatureConfigStore(
     (store) => store.arcFeatureConfig
   );
-  const activeDayAPI = useActiveDayStore();
-  const dayPlannerAPI = useDayPlannerStore();
-  useEffect(() => {
-    console.log("activeDayAPI", activeDayAPI.activeDay);
-    console.log("last chunk", dayPlannerAPI.lastChunk);
-  }, [activeDayAPI]);
 
   useEffect(() => {
     checkTables()

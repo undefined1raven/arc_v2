@@ -17,6 +17,7 @@ import RTextInput from "@/components/common/RTextInput";
 import { LinearGradient } from "expo-linear-gradient";
 import { ArrowDeco } from "@/components/common/deco/ArrowDeco";
 import { TessStatusType, TessTaskType } from "@/app/config/commonTypes";
+import { TriangleColorPicker } from "react-native-color-picker";
 
 function DayPlannerTaskEditor({ navigation }) {
   const activeDayAPI = useActiveDayStore();
@@ -248,7 +249,7 @@ function DayPlannerTaskEditor({ navigation }) {
             onInput={(e) => {
               setNewDescription(e);
             }}
-            defaultValue={activeDayAPI.selectedTask?.name}
+            defaultValue={activeDayAPI.selectedTask?.description}
             figmaImport={{
               mobile: {
                 left: 2,
@@ -258,6 +259,23 @@ function DayPlannerTaskEditor({ navigation }) {
               },
             }}
           ></RTextInput>
+          {/* <RBox top="20%" width="50%" height="20%">
+            <Animated.View
+              style={{
+                top: 0,
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              <TriangleColorPicker
+                oldColor="#000"
+                onColorChange={(color) => {
+                  console.log(color, "color");
+                }}
+                style={{ flex: 1 }}
+              ></TriangleColorPicker>
+            </Animated.View>
+          </RBox> */}
           <RButton
             onClick={() => {
               if (
@@ -266,7 +284,7 @@ function DayPlannerTaskEditor({ navigation }) {
               ) {
                 const newTask = activeDayAPI.selectedTask as TessTaskType;
                 newTask.name = newName;
-                newTask.description = newDescription;
+                // newTask.description = newDescription;
                 const taskIndex = activeDayAPI.activeDay?.tasks.findIndex(
                   (task) => task.TTID === newTask.TTID
                 );
@@ -319,6 +337,7 @@ function DayPlannerTaskEditor({ navigation }) {
               },
             }}
           ></RFlatList>
+
           <RButton
             onClick={() => {
               setIsPickingStatus(false);
