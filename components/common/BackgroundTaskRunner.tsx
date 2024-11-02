@@ -19,7 +19,13 @@ function BackgroundTaskRunner(props: BackgroundTaskRunnerProps) {
       worker.current.injectJavaScript(getVal(props.triggeredCode, ""));
     }
   }, [props.tx]);
-
+  const html = `
+  <html>
+  <head>
+  </head>
+  <body>
+  </body>
+  `;
   return (
     <WebView
       ref={worker}
@@ -31,7 +37,9 @@ function BackgroundTaskRunner(props: BackgroundTaskRunnerProps) {
         props.messageHandler(e);
       }}
       source={{
-        uri: "https://blank-pi-seven.vercel.app/",
+        html: html,
+        mixedContentMode: "never",
+        baseUrl: "https://localhost",
       }}
     ></WebView>
   );
