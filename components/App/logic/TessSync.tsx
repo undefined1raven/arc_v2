@@ -203,4 +203,4 @@ async function updateTessFeatureConfig() {
     });
 }
 
-export { TessSync };
+export { TessSync, updateTessFeatureConfig };
