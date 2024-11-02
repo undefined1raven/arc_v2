@@ -50,7 +50,6 @@ function DayPlannerMain({ navigation }) {
     const currentDayIndex = dayPlannerAPI.days?.findIndex((day) => {
       return day.day === new Date().toDateString();
     });
-    console.log("currentDayIndex", dayPlannerAPI.days);
     const newHasOngoingDays = currentDayIndex === -1 ? false : true;
     setHasOngoingDay(newHasOngoingDays);
     activeDayAPI.setActiveDay(dayPlannerAPI.days[currentDayIndex]);

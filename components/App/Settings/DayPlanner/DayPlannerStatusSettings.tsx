@@ -15,6 +15,10 @@ import RBox from "@/components/common/RBox";
 import RTextInput from "@/components/common/RTextInput";
 import { TriangleColorPicker } from "react-native-color-picker";
 import { ArrowDeco } from "@/components/common/deco/ArrowDeco";
+import { updateTessFeatureConfig } from "../../logic/TessSync";
+import { AddIcon } from "@/components/common/deco/AddIcon";
+import { randomUUID } from "expo-crypto";
+import themeColors from "@/app/config/colors";
 
 function DayPlannerStatusSettings({ navigation }) {
   const tessFeatureConfig = useTessFeatureConfigStore().tessFeatureConfig;
@@ -33,6 +37,8 @@ function DayPlannerStatusSettings({ navigation }) {
   const [isEditingStatus, setIsEditingStatus] = useState<boolean>(false);
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [colorEditingKey, setColorEditingKey] = useState<string | null>(null);
+  const [newCompletionEffect, setNewCompletionEffect] = useState<number>(0);
+  const [newStatusName, setNewStatusName] = useState<string>("");
   const [statusToEdit, setStatusToEdit] = useState<TessStatusType | null>(null);
   const renderItem = ({ item, index }: { item: TessStatusType }) => {
     const color = item.colors[globalStyle.theme].color;
@@ -55,6 +61,7 @@ function DayPlannerStatusSettings({ navigation }) {
         <RButton
           onClick={() => {
             setIsEditingStatus(true);
+            setNewCompletionEffect(item.completionEffect);
             setStatusToEdit(item);
           }}
           androidRippleColor={color + "30"}
@@ -118,7 +125,9 @@ function DayPlannerStatusSettings({ navigation }) {
             }}
           ></RLabel>
           <RTextInput
-            onInput={() => {}}
+            onInput={(e) => {
+              setNewStatusName(e);
+            }}
             align="left"
             defaultValue={statusToEdit?.name}
             fontSize={globalStyle.mediumMobileFont}
@@ -146,6 +155,60 @@ function DayPlannerStatusSettings({ navigation }) {
               },
             }}
           ></RLabel>
+          <RLabel
+            align="left"
+            text={`Score`}
+            verticalAlign="center"
+            backgroundColor={globalStyle.color + "20"}
+            figmaImport={{
+              mobile: {
+                left: 2,
+                width: 105,
+                height: 39,
+                top: 187,
+              },
+            }}
+          ></RLabel>
+          <RLabel
+            align="left"
+            fontSize={globalStyle.smallMobileFont}
+            text={`A value from 0 to 1 where 1 is completed and 0 is no progress`}
+            verticalAlign="center"
+            backgroundColor={globalStyle.color + "20"}
+            figmaImport={{
+              mobile: {
+                left: 112,
+                width: 166,
+                height: 39,
+                top: 187,
+              },
+            }}
+          ></RLabel>
+          <RTextInput
+            onInput={(e) => {
+              const parsedScore = parseFloat(e);
+              if (
+                isNaN(parsedScore) === false &&
+                parsedScore >= 0 &&
+                parsedScore <= 1
+              ) {
+                setNewCompletionEffect(parsedScore);
+              }
+            }}
+            align="left"
+            keyboardType="numeric"
+            defaultValue={statusToEdit?.completionEffect.toString()}
+            fontSize={globalStyle.mediumMobileFont}
+            alignPadding={10}
+            figmaImport={{
+              mobile: {
+                left: 283,
+                width: 74,
+                height: 39,
+                top: 187,
+              },
+            }}
+          ></RTextInput>
           <RButton
             onClick={() => {
               setColorEditingKey("color");
@@ -260,6 +323,40 @@ function DayPlannerStatusSettings({ navigation }) {
               if (statusToEdit === null) return;
               if (colorEditingKey === null) {
                 // Save
+                const currentName = statusToEdit.name;
+                const newName = newStatusName;
+                if (
+                  (currentName !== newName && newName.length > 0) ||
+                  newCompletionEffect !== statusToEdit.completionEffect
+                ) {
+                  const newStatus: TessStatusType = statusToEdit;
+                  if (currentName !== newName && newName.length > 0) {
+                    newStatus.name = newName;
+                  }
+                  if (newCompletionEffect !== statusToEdit.completionEffect) {
+                    newStatus.completionEffect = newCompletionEffect;
+                  }
+                  const statusIndex = tessFeatureConfig?.statusArray.findIndex(
+                    (status) => status.statusID === newStatus.statusID
+                  );
+                  if (statusIndex === -1) {
+                    return;
+                  }
+                  const newTessFeatureConfig = tessFeatureConfig;
+                  newTessFeatureConfig.statusArray[statusIndex] = newStatus;
+                  useTessFeatureConfigStore
+                    .getState()
+                    .setTessFeatureConfig(newTessFeatureConfig);
+                  setTimeout(() => {
+                    try {
+                      updateTessFeatureConfig();
+                    } catch (e) {}
+                  }, 50);
+                  setStatusToEdit(newStatus);
+                  setIsEditingStatus(false);
+                } else {
+                  setIsEditingStatus(false);
+                }
               } else {
                 if (colorEditingKey === "color") {
                   // Save new color
@@ -278,11 +375,21 @@ function DayPlannerStatusSettings({ navigation }) {
                   }
                   const newTessFeatureConfig = tessFeatureConfig;
                   newTessFeatureConfig.statusArray[statusIndex] = newStatus;
+
+                  console.log("newTessFeatureConfig", newTessFeatureConfig);
+
                   useTessFeatureConfigStore
                     .getState()
                     .setTessFeatureConfig(newTessFeatureConfig);
+
+                  setTimeout(() => {
+                    try {
+                      updateTessFeatureConfig();
+                    } catch (e) {}
+                  }, 50);
                   setStatusToEdit(newStatus);
                   colorEditingKey === null;
+                  setColorEditingKey(null);
                 } else if (colorEditingKey === "textColor") {
                   // Save new text color
                   const newStatus: TessStatusType = statusToEdit;
@@ -304,8 +411,14 @@ function DayPlannerStatusSettings({ navigation }) {
                   useTessFeatureConfigStore
                     .getState()
                     .setTessFeatureConfig(newTessFeatureConfig);
+                  setTimeout(() => {
+                    try {
+                      updateTessFeatureConfig();
+                    } catch (e) {}
+                  }, 50);
                   setStatusToEdit(newStatus);
                   colorEditingKey === null;
+                  setColorEditingKey(null);
                 }
               }
             }}
@@ -352,18 +465,114 @@ function DayPlannerStatusSettings({ navigation }) {
         </>
       )}
       {!isEditingStatus ? (
-        <RFlatList
-          renderItem={renderItem}
-          data={tessFeatureConfig?.statusArray}
-          figmaImport={{
-            mobile: {
-              left: 2,
-              width: 356,
-              height: 524,
-              top: 62,
-            },
-          }}
-        ></RFlatList>
+        <>
+          <RFlatList
+            renderItem={renderItem}
+            data={tessFeatureConfig?.statusArray}
+            figmaImport={{
+              mobile: {
+                left: 2,
+                width: 356,
+                height: 524,
+                top: 62,
+              },
+            }}
+          ></RFlatList>
+          <RBox
+            figmaImport={{
+              mobile: { left: 2, width: 356, height: 48, top: 589 },
+            }}
+          >
+            <Animated.View
+              entering={FadeInDown.duration(150).damping(15)}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              <RButton
+                onClick={() => {
+                  navigation.navigate("dayPlanner");
+                }}
+                figmaImportConfig={{ containerHeight: 48, containerWidth: 356 }}
+                figmaImport={{
+                  mobile: { left: 183, width: 174, height: 48, top: "0" },
+                }}
+              >
+                <RLabel
+                  text="Back"
+                  width="80%"
+                  height="100%"
+                  left="2%"
+                  align="left"
+                  verticalAlign="center"
+                ></RLabel>
+                <RBox width="50%" height="100%" left="60%">
+                  <ArrowDeco width="50%" height="70%"></ArrowDeco>
+                </RBox>
+              </RButton>
+              <RButton
+                onClick={() => {
+                  const newStatus: TessStatusType = {
+                    statusID: `SID-${randomUUID()}`,
+                    name: "New Task " + Date.now().toString().slice(-4),
+                    colors: {
+                      dark: {
+                        color: themeColors.dark.color,
+                        textColor: themeColors.dark.textColor,
+                      },
+                      light: {
+                        color: themeColors.light.color,
+                        textColor: themeColors.light.textColor,
+                      },
+                    },
+                    completionEffect: 0,
+                    version: "0.1.1",
+                    deleted: false,
+                  };
+                  const newTessFeatureConfig = tessFeatureConfig;
+                  newTessFeatureConfig.statusArray.push(newStatus);
+                  useTessFeatureConfigStore
+                    .getState()
+                    .setTessFeatureConfig(newTessFeatureConfig);
+                  setTimeout(() => {
+                    try {
+                      updateTessFeatureConfig();
+                    } catch (e) {}
+                  }, 50);
+                }}
+                figmaImportConfig={{ containerHeight: 48, containerWidth: 356 }}
+                figmaImport={{
+                  mobile: { left: 2, width: 174, height: 48, top: "0" },
+                }}
+              >
+                <RLabel
+                  text="Add Status"
+                  width="58%"
+                  height="100%"
+                  left="40%"
+                  align="right"
+                  verticalAlign="center"
+                ></RLabel>
+                <RBox
+                  width="42%"
+                  height="100%"
+                  style={{ transform: "rotate(180deg)" }}
+                  left="0%"
+                >
+                  <AddIcon
+                    style={{ left: "25%" }}
+                    width="60%"
+                    height="40%"
+                  ></AddIcon>
+                </RBox>
+              </RButton>
+            </Animated.View>
+          </RBox>
+        </>
       ) : (
         <></>
       )}

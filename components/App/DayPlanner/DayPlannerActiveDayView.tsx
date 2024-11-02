@@ -198,10 +198,17 @@ function DayPlannerActiveDayView({ navigation }) {
                 deleted: false,
                 version: "0.1.0",
               };
-              activeDayAPI.setActiveDay({
-                ...activeDayAPI.activeDay,
-                tasks: activeDayAPI.activeDay.tasks.concat([newTask]),
-              });
+              if (typeof activeDayAPI?.activeDay?.tasks.length !== "number") {
+                activeDayAPI.setActiveDay({
+                  day: new Date().toDateString(),
+                  tasks: [newTask],
+                });
+              } else {
+                activeDayAPI.setActiveDay({
+                  ...activeDayAPI.activeDay,
+                  tasks: activeDayAPI?.activeDay?.tasks.concat(newTask),
+                });
+              }
             }}
             figmaImportConfig={{ containerHeight: 48, containerWidth: 356 }}
             figmaImport={{

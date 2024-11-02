@@ -12,6 +12,7 @@ import { useTessFeatureConfigStore } from "../DayPlanner/tessFeatureConfigStore"
 import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 import { getInsertStringFromObject } from "@/fn/dbUtils";
 import { newChunkID } from "@/fn/newChunkID";
+import * as SQLite from "expo-sqlite";
 
 function TessSync() {
   const localUsersAPI = useLocalUserIDsStore();
@@ -115,6 +116,7 @@ function TessSync() {
     if (tessFeatureConfigAPI.tessFeatureConfig === null) {
       return;
     }
+    console.log("tess update triggered");
     statusIndicatorsAPI.setEncrypting(true);
     const tid = randomUUID();
     symmetricEncrypt(
@@ -151,9 +153,54 @@ function TessSync() {
       .catch((e) => {
         statusIndicatorsAPI.setEncrypting(false);
       });
-  }, [tessFeatureConfigAPI.tessFeatureConfig]);
+  }, [tessFeatureConfigAPI]);
 
   return null;
+}
+
+async function updateTessFeatureConfig() {
+  const tessFeatureConfigAPI = useTessFeatureConfigStore.getState();
+  const statusIndicatorsAPI = useStatusIndicatorsStore.getState();
+  const localUsersAPI = useLocalUserIDsStore.getState();
+  const db = await SQLite.openDatabaseAsync("localCache");
+
+  if (tessFeatureConfigAPI.tessFeatureConfig === null) {
+    return;
+  }
+  console.log("tess update triggered");
+  statusIndicatorsAPI.setEncrypting(true);
+  const tid = randomUUID();
+  symmetricEncrypt(JSON.stringify(tessFeatureConfigAPI.tessFeatureConfig), tid)
+    .then((encryptedData) => {
+      db.getFirstAsync(`SELECT * FROM users WHERE id = ?`, [
+        localUsersAPI.getActiveUserID(),
+      ])
+        .then((rx) => {
+          const userData = rx;
+          if (userData === null) {
+            return;
+          }
+          userData["tessFeatureConfig"] = encryptedData;
+          const insertString = getInsertStringFromObject(userData);
+          db.runAsync(
+            `INSERT OR REPLACE INTO users ${insertString.queryString}`,
+            insertString.values
+          )
+            .then((rr) => {
+              console.log(rr, "from tess update");
+              statusIndicatorsAPI.setEncrypting(false);
+            })
+            .catch((e) => {
+              statusIndicatorsAPI.setEncrypting(false);
+            });
+        })
+        .catch((e) => {
+          statusIndicatorsAPI.setEncrypting(false);
+        });
+    })
+    .catch((e) => {
+      statusIndicatorsAPI.setEncrypting(false);
+    });
 }
 
 export { TessSync };
