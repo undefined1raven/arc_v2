@@ -89,7 +89,7 @@ function LoadSIDData() {
               : `${activeUserID}-tess-symkey`
           )}
           onError={(e) => {
-            console.log("error decrypting sid data", e);
+            console.log("error decrypting sid data [notes]", e);
           }}
           encryptedObj={JSON.stringify(encryptedChunkContents)}
           onDecrypted={(res) => {
@@ -103,10 +103,15 @@ function LoadSIDData() {
               });
             }
             try {
-              let allNotes: SIDNoteType[] = [];
+              let allNotes: { note: SIDNoteType; chunkID: string }[] = [];
               for (let ix = 0; ix < decryptedChunks.length; ix++) {
                 const na = decryptedChunks[ix].encryptedContent;
-                allNotes = [...allNotes, ...na];
+                for (let idx = 0; idx < na.length; idx++) {
+                  allNotes.push({
+                    note: na[idx],
+                    chunkID: decryptedChunks[ix].id,
+                  });
+                }
               }
               const lastDecryptedChunk = {
                 ...encryptedSIDFullChunks[0],
@@ -128,7 +133,7 @@ function LoadSIDData() {
               : `${activeUserID}-tess-symkey`
           )}
           onError={(e) => {
-            console.log("error decrypting sid data", e);
+            console.log("error decrypting sid data [groups]", e);
           }}
           encryptedObj={JSON.stringify(encryptedGroupsContents)}
           onDecrypted={(res) => {

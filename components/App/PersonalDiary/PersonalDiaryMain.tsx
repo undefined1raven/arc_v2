@@ -17,7 +17,7 @@ import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { emptyRenderItem } from "@/components/common/EmptyListItem";
 import { randomUUID } from "expo-crypto";
 
-function PersonalDiaryMain() {
+function PersonalDiaryMain({ navigation }) {
   const diaryAPI = useDiaryStore();
   const localUsersAPI = useLocalUserIDsStore();
   const [ready, setReady] = useState(false);
@@ -47,6 +47,14 @@ function PersonalDiaryMain() {
         }}
       >
         <RButton
+          onClick={(e) => {
+            diaryAPI.setSelectedGroup(item);
+            setTimeout(() => {
+              navigation.navigate("diaryGroupView", {
+                name: "diaryGroupView",
+              });
+            }, 50);
+          }}
           label={item.name}
           width="100%"
           height="100%"
@@ -87,6 +95,7 @@ function PersonalDiaryMain() {
     if (diaryAPI.groups?.length === 0) {
       const newGroupContent: SIDGroupType[] = [
         {
+          version: "0.1.1",
           groupID: `SGID-${randomUUID()}`,
           type: "person",
           name: "New Group " + Date.now().toString().slice(-3),
@@ -121,9 +130,10 @@ function PersonalDiaryMain() {
           const lastState = JSON.parse(
             diaryAPI.lastGroupsChunk.encryptedContent
           );
-          const newGroup = {
+          const newGroup: SIDGroupType = {
             groupID: `SGID-${randomUUID()}`,
             type: "person",
+            version: "0.1.1",
             name: "New Group " + Date.now().toString().slice(-3),
             metadata: {
               ring: 0,

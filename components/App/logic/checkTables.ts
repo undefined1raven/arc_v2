@@ -56,6 +56,8 @@ async function checkTables(): Promise<CheckTablesReturnSig> {
   // db.runAsync("DROP TABLE userData");
   // db.runAsync("DROP TABLE arcChunks");
   // db.runAsync("DROP TABLE tessChunks");
+  // db.runAsync("DROP TABLE sidChunks");
+  // db.runAsync("DROP TABLE sidGroups");
 
   return checkTablesActual() //do some manual recursion since for some reason creating the tables doens't work the first time (after a fresh install)
     .then((res) => {

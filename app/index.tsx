@@ -33,6 +33,8 @@ import LoginMain from "@/components/Login/LoginMain";
 import LoginOffline from "@/components/Login/LoginOffline";
 import { DayPlannerStatusSettings } from "@/components/App/Settings/DayPlanner/DayPlannerStatusSettings";
 import { PersonalDiaryMain } from "@/components/App/PersonalDiary/PersonalDiaryMain";
+import { PersonalDiaryGroupView } from "@/components/App/PersonalDiary/PersonalDiaryGroupView";
+import { PersonalDiaryNoteView } from "@/components/App/PersonalDiary/PersonalDiaryNoteView";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -145,8 +147,16 @@ export default function App() {
           name="dayPlannerStatusSettings"
           component={DayPlannerStatusSettings}
         ></Stack.Screen>
-        <Stack.Screen name="loginMain" component={LoginMain}></Stack.Screen>
+        <Stack.Screen
+          name="diaryGroupView"
+          component={PersonalDiaryGroupView}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="diaryNoteView"
+          component={PersonalDiaryNoteView}
+        ></Stack.Screen>
 
+        <Stack.Screen name="loginMain" component={LoginMain}></Stack.Screen>
         {/* <Stack.Screen
           name="SettingsMain"
           component={SettingsMainMenu}

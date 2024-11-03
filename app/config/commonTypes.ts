@@ -169,6 +169,7 @@ type SIDGroupType = {
   groupID: string;
   name: string;
   type: "person";
+  version: "0.1.1";
   metadata: {
     ring: number;
     alias: string;
@@ -178,8 +179,13 @@ type SIDGroupType = {
 
 type SIDNoteType = {
   noteID: string;
+  groupID: string;
+  version: "0.1.1";
   metadata: {
     readOnly: boolean;
+    title: string;
+    createdAt: number;
+    updatedAt: number;
     content: string;
   };
 };
