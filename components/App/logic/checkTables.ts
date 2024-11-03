@@ -29,6 +29,10 @@ async function checkTablesActual(): Promise<CheckTablesReturnSig> {
     "CREATE TABLE IF NOT EXISTS sidChunks (id TEXT NOT NULL PRIMARY KEY, userID TEXT NOT NULL, encryptedContent TEXT NOT NULL, tx NUMBER NOT NULL, version TEXT NOT NULL);"
   );
   promiseArray.push(SIDChunksTablePromise);
+  const SIDGruopsChunksTablePromise = db.runAsync(
+    "CREATE TABLE IF NOT EXISTS sidGroups (id TEXT NOT NULL PRIMARY KEY, userID TEXT NOT NULL, encryptedContent TEXT NOT NULL, tx NUMBER NOT NULL, version TEXT NOT NULL);"
+  );
+  promiseArray.push(SIDGruopsChunksTablePromise);
   return Promise.all(promiseArray)
     .then(() => {
       return db

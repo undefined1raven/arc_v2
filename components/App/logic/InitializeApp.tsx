@@ -25,6 +25,7 @@ import { useDayPlannerStore } from "../DayPlanner/daysStore";
 import { TessSync } from "./TessSync";
 import { migrateTessFeatureConfigFromv010Tov011 } from "./featureConfigVersionMigrations";
 import { symmetricEncrypt } from "../encryptors/symmetricEncrypt";
+import { LoadSIDData } from "./LoadSIDData";
 function InitializeApp({ navigation }) {
   const db = useSQLiteContext();
   const decryptionAPI = useDecryptionStore();
@@ -225,6 +226,7 @@ function InitializeApp({ navigation }) {
       )}
       {hasUsers === false && <AsyncGenNewAccountInfo></AsyncGenNewAccountInfo>}
       <LoadUserData navigation={navigation}></LoadUserData>
+      <LoadSIDData></LoadSIDData>
       <LoadTessData></LoadTessData>
     </>
   );

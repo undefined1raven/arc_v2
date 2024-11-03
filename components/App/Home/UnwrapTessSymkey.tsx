@@ -49,7 +49,6 @@ function UnwrapTessSymkey(props: {
   }, [props.pin]);
 
   function handleWrappedKeys(e) {
-    console.log(e.nativeEvent.data);
     if (codeTrigger !== "" && props.pin !== null) {
       const eventResponse: UnwrapKeysType = JSON.parse(e.nativeEvent.data);
       if (

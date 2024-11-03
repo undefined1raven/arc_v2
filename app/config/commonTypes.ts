@@ -86,7 +86,6 @@ type DayClassifierType = {
   version: "0.1.1";
 };
 
-
 type FeatureConfigTessType = {
   statusArray: TessStatusType[];
   labelArray: TessLabelType[];
@@ -158,14 +157,45 @@ type SID_ChunksType = {
   version: "0.1.1";
 };
 
+type SIDGroups_ChunksType = {
+  id: string;
+  userID: string;
+  encryptedContent: string;
+  tx: number;
+  version: "0.1.1";
+};
+
+type SIDGroupType = {
+  groupID: string;
+  name: string;
+  type: "person";
+  metadata: {
+    ring: number;
+    alias: string;
+    SID: string;
+  };
+};
+
+type SIDNoteType = {
+  noteID: string;
+  metadata: {
+    readOnly: boolean;
+    content: string;
+  };
+};
+
 export type {
   ARCTasksType,
   ARCCategoryType,
   TessStatusType,
+  SIDNoteType,
   TessLabelType,
   TessDayLogType,
   SIDMoodType,
+  SID_ChunksType,
   Tess_ChunksType,
+  SIDGroupType,
+  SIDGroups_ChunksType,
   ARC_ChunksType,
   FeatureConfigType,
   UserData,
