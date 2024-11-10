@@ -17,7 +17,7 @@ import RTextInput from "@/components/common/RTextInput";
 import { LinearGradient } from "expo-linear-gradient";
 import { ArrowDeco } from "@/components/common/deco/ArrowDeco";
 import { TessStatusType, TessTaskType } from "@/app/config/commonTypes";
-import { TriangleColorPicker } from "react-native-color-picker";
+import { newLineReplacement } from "@/app/config/constants";
 
 function DayPlannerTaskEditor({ navigation }) {
   const activeDayAPI = useActiveDayStore();
@@ -247,9 +247,12 @@ function DayPlannerTaskEditor({ navigation }) {
             fontSize={globalStyle.regularMobileFont}
             alignPadding={"2%"}
             onInput={(e) => {
-              setNewDescription(e);
+              setNewDescription(e.replaceAll("\n", newLineReplacement));
             }}
-            defaultValue={activeDayAPI.selectedTask?.description}
+            defaultValue={activeDayAPI.selectedTask?.description.replaceAll(
+              newLineReplacement,
+              "\n"
+            )}
             figmaImport={{
               mobile: {
                 left: 2,
@@ -278,13 +281,17 @@ function DayPlannerTaskEditor({ navigation }) {
           </RBox> */}
           <RButton
             onClick={() => {
+              const parsedDecription = newDescription?.replaceAll(
+                "\n",
+                newLineReplacement
+              );
               if (
                 newName !== activeDayAPI.selectedTask?.name ||
-                newDescription !== activeDayAPI.selectedTask?.description
+                parsedDecription !== activeDayAPI.selectedTask?.description
               ) {
                 const newTask = activeDayAPI.selectedTask as TessTaskType;
                 newTask.name = newName;
-                // newTask.description = newDescription;
+                newTask.description = parsedDecription;
                 const taskIndex = activeDayAPI.activeDay?.tasks.findIndex(
                   (task) => task.TTID === newTask.TTID
                 );

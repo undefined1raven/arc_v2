@@ -26,7 +26,7 @@ import { ArrowDeco } from "@/components/common/deco/ArrowDeco";
 import RLabel from "@/components/common/RLabel";
 import RTextInput from "@/components/common/RTextInput";
 import useStatusIndicatorsStore from "@/stores/statusIndicators";
-
+import { newLineReplacement } from "@/app/config/constants";
 function PersonalDiaryNoteView({ navigation }) {
   const diaryAPI = useDiaryStore();
   const localUsersAPI = useLocalUserIDsStore();
@@ -55,8 +55,9 @@ function PersonalDiaryNoteView({ navigation }) {
 
   function saveNewNoteChunk(
     newNoteChunk: SID_ChunksType,
-    updatedNote: SIDNoteType
+    updatedNote: { note: SIDNoteType; chunkID: string }
   ) {
+    console.log(newNoteChunk, "new note chunk");
     db.runAsync(`INSERT OR REPLACE INTO sidChunks VALUES (?, ?, ?, ?, ?)`, [
       newNoteChunk.id,
       newNoteChunk.userID,
@@ -68,17 +69,28 @@ function PersonalDiaryNoteView({ navigation }) {
         if (diaryAPI.notes === null) {
           return;
         }
+        console.log("dxiswo ---- 32 392 920");
         console.log(diaryAPI.notes, "Xx;s----------------------");
         const updatedNoteIndex = diaryAPI.notes?.findIndex(
-          (noteGPair) => noteGPair.note.noteID === updatedNote.noteID
+          (noteGPair) => noteGPair.note.noteID === updatedNote.note.noteID
         );
         if (updatedNoteIndex === -1) {
           console.log("failed to find updated note index");
           return;
         }
         const newNotes = diaryAPI.notes;
-        newNotes[updatedNoteIndex].note = updatedNote;
+        newNotes[updatedNoteIndex].note = updatedNote.note;
         diaryAPI.setNotes(newNotes);
+        console.log("nnx i notes", newNotes);
+        const newNotesInChunk = diaryAPI.notes.filter(
+          (note) => note.chunkID === newNoteChunk.id
+        );
+        const newLastNotesChunk: SID_ChunksType = {
+          ...newNoteChunk,
+          encryptedContent: JSON.stringify(newNotesInChunk),
+        };
+        diaryAPI.setLastNotesChunk(newLastNotesChunk);
+        console.log("done all of it", newNotesInChunk);
         statusIndicatorAPI.setEncrypting(false);
         navigation.goBack();
       })
@@ -108,6 +120,7 @@ function PersonalDiaryNoteView({ navigation }) {
       const allNotesInChunk = diaryAPI.notes.filter(
         (noteChunkPair) => noteChunkPair.chunkID === chunkID
       );
+      console.log(allNotesInChunk, "all notes in chunk");
       const updatedNoteIndex = allNotesInChunk.findIndex(
         (noteChunkPair) =>
           noteChunkPair.note.noteID === diaryAPI.selectedNote?.note?.noteID
@@ -116,12 +129,16 @@ function PersonalDiaryNoteView({ navigation }) {
         console.log("failed to find updated note index");
         return;
       }
+      console.log(updatedNoteIndex, "UNI");
       allNotesInChunk[updatedNoteIndex].note.metadata.title = newTitle;
-      allNotesInChunk[updatedNoteIndex].note.metadata.content = newContent;
+      allNotesInChunk[updatedNoteIndex].note.metadata.content =
+        newContent.replaceAll("\n", newLineReplacement);
       allNotesInChunk[updatedNoteIndex].note.metadata.updatedAt = Date.now();
       const mappedNotes = allNotesInChunk.map((noteChunkPair) => {
-        noteChunkPair.note;
+        return noteChunkPair.note;
       });
+      console.log(allNotesInChunk, "all notes in chunk");
+      console.log("mapped", mappedNotes);
       const transactionID = newChunkID("TXID");
       symmetricEncrypt(JSON.stringify(mappedNotes), transactionID)
         .then((updatedEncryptedContent) => {
@@ -175,7 +192,7 @@ function PersonalDiaryNoteView({ navigation }) {
         }}
       ></RTextInput>
       <RTextInput
-        defaultValue={newContent}
+        defaultValue={newContent.replaceAll(newLineReplacement, "\n")}
         align="left"
         multiline={true}
         onInput={(e) => {

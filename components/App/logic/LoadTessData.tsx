@@ -80,6 +80,7 @@ function LoadTessData() {
         }}
         encryptedObj={JSON.stringify(encryptedContents)}
         onDecrypted={(res) => {
+          console.log(res, "decrypted tess data");
           const decryptedChunks: Tess_ChunksType[] = [];
           const results = JSON.parse(jsesc.default(res, { json: true }));
           for (let ix = 0; ix < results.length; ix++) {
@@ -89,6 +90,7 @@ function LoadTessData() {
               encryptedContent: days,
             });
           }
+          console.log("got here", "DSDEDI3J9");
           try {
             let allDays: TessDayLogType[] = [];
             for (let ix = 0; ix < decryptedChunks.length; ix++) {

@@ -93,6 +93,7 @@ function LoadSIDData() {
           }}
           encryptedObj={JSON.stringify(encryptedChunkContents)}
           onDecrypted={(res) => {
+            console.log(res, "decrypted chunks");
             const decryptedChunks: SID_ChunksType[] = [];
             const results = JSON.parse(jsesc.default(res, { json: true }));
             for (let ix = 0; ix < results.length; ix++) {
