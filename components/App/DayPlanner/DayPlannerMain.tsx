@@ -44,9 +44,14 @@ function DayPlannerMain({ navigation }) {
   const activeUserID = useLocalUserIDsStore((store) => store.getActiveUserID());
   const dayPlannerAPI = useDayPlannerStore();
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
-  const [hasOngoingDay, setHasOngoingDay] = useState<boolean>(false);
+  const [hasOngoingDay, setHasOngoingDay] = useState<boolean | null>(null);
   useEffect(() => {
-    if (dayPlannerAPI.days === null) return;
+    if (
+      dayPlannerAPI.days === null ||
+      typeof dayPlannerAPI.days?.length !== "number"
+    ) {
+      return;
+    }
     const currentDayIndex = dayPlannerAPI.days?.findIndex((day) => {
       return day.day === new Date().toDateString();
     });
@@ -274,6 +279,12 @@ function DayPlannerMain({ navigation }) {
               ...newTessChunk,
               encryptedContent: JSON.stringify([newDay]),
             });
+            if (
+              typeof dayPlannerAPI.days === "object" &&
+              dayPlannerAPI.days !== null
+            ) {
+              dayPlannerAPI.setDays(...dayPlannerAPI.days, newDay);
+            }
             setHasOngoingDay(true);
             navigation.navigate("dayPlannerActiveDayView", {
               name: "dayPlannerActiveDayView",
@@ -330,6 +341,12 @@ function DayPlannerMain({ navigation }) {
                     ...updatedTessChunk,
                     encryptedContent: JSON.stringify(newDays),
                   });
+                  if (
+                    typeof dayPlannerAPI.days === "object" &&
+                    dayPlannerAPI.days !== null
+                  ) {
+                    dayPlannerAPI.setDays(...dayPlannerAPI.days, newDay);
+                  }
                   navigation.navigate("dayPlannerActiveDayView", {
                     name: "dayPlannerActiveDayView",
                   });
@@ -354,7 +371,8 @@ function DayPlannerMain({ navigation }) {
 
   return tessFeatureConfig !== null &&
     dayPlannerAPI.hasLoadedData === true &&
-    dayPlannerAPI.days !== null ? (
+    dayPlannerAPI.days !== null &&
+    hasOngoingDay !== null ? (
     <EmptyView navigation={navigation} showMenu={true}>
       <RLabel
         align="left"

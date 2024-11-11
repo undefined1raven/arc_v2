@@ -90,7 +90,6 @@ function LoadTessData() {
               encryptedContent: days,
             });
           }
-          console.log("got here", "DSDEDI3J9");
           try {
             let allDays: TessDayLogType[] = [];
             for (let ix = 0; ix < decryptedChunks.length; ix++) {
