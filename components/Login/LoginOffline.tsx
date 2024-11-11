@@ -165,6 +165,24 @@ export default function LoginOffline({ navigation }) {
       });
     }
 
+    const SIDGroups = fileJson.SIDGroups;
+    if (
+      restorePersonalDiary === true &&
+      SIDGroups !== null &&
+      typeof SIDGroups?.length === "number"
+    ) {
+      SIDGroups.forEach((chunk) => {
+        promiseArray.push(
+          db.runAsync(
+            `INSERT OR REPLACE INTO sidGroups ${
+              getInsertStringFromObject(chunk).queryString
+            }`,
+            getInsertStringFromObject(chunk).values
+          )
+        );
+      });
+    }
+
     promiseArray.push(
       SecureStore.setItemAsync(`${userData.id}-pk`, fileJson.pk)
     );

@@ -71,20 +71,31 @@ export default function MenuMain() {
     const SIDData = await db.getAllAsync(
       `SELECT * FROM sidChunks WHERE userID = '${activeUserID}'`
     );
+    const SIDGroups = await db.getAllAsync(
+      `SELECT * FROM sidGroups WHERE userID = '${activeUserID}'`
+    );
     const tessData = await db.getAllAsync(
       `SELECT * FROM tessChunks WHERE userID = '${activeUserID}'`
     );
     const pk = await SecureStore.getItemAsync(`${activeUserID}-pk`);
     const symkey = await SecureStore.getItemAsync(`${activeUserID}-symsk`);
     console.log("here");
-    let accountBackup = { userData, arcData, SIDData, tessData, pk, symkey };
+    let accountBackup = {
+      userData,
+      arcData,
+      SIDData,
+      SIDGroups,
+      tessData,
+      pk,
+      symkey,
+    };
 
     function getUTC() {
       const date = new Date();
-      return date.toLocaleString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
+      return date.toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
       });
     }
 

@@ -300,7 +300,6 @@ function DayPlannerTaskEditor({ navigation }) {
                   newTasks[taskIndex] = newTask;
                   const newActiveDay = activeDayAPI.activeDay;
                   newActiveDay.tasks = newTasks;
-                  console.log("newActiveDay", newActiveDay);
                   activeDayAPI.setActiveDay(newActiveDay);
                   navigation.goBack();
                 }

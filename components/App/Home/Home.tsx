@@ -21,20 +21,13 @@ import { useHasLoadedUserDataStore } from "./hasLoadedUserData";
 import DayBreakdown from "./Widgets/DayBreakdown";
 import { BridgeServer } from "react-native-http-bridge-refurbished";
 import { ColorPicker, TriangleColorPicker } from "react-native-color-picker";
+import { randomUUID } from "expo-crypto";
 
 type HomeProps = { onRequestUserIDs: Function };
 export default function Home({ navigation, onRequestUserIDs }) {
   const currentActivitiesAPI = useArcCurrentActivitiesStore();
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const hasLoadedUserDataAPI = useHasLoadedUserDataStore();
-  useEffect(() => {
-    console.log(
-      currentActivitiesAPI.currentActivities.map((activity) =>
-        activity.start.toString().slice(-3)
-      ),
-      "currentActivities"
-    );
-  }, [currentActivitiesAPI.currentActivities]);
 
   useEffect(() => {
     setTimeout(() => {

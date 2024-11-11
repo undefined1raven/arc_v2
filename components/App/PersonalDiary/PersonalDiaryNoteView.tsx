@@ -69,8 +69,6 @@ function PersonalDiaryNoteView({ navigation }) {
         if (diaryAPI.notes === null) {
           return;
         }
-        console.log("dxiswo ---- 32 392 920");
-        console.log(diaryAPI.notes, "Xx;s----------------------");
         const updatedNoteIndex = diaryAPI.notes?.findIndex(
           (noteGPair) => noteGPair.note.noteID === updatedNote.note.noteID
         );
@@ -81,7 +79,6 @@ function PersonalDiaryNoteView({ navigation }) {
         const newNotes = diaryAPI.notes;
         newNotes[updatedNoteIndex].note = updatedNote.note;
         diaryAPI.setNotes(newNotes);
-        console.log("nnx i notes", newNotes);
         const newNotesInChunk = diaryAPI.notes.filter(
           (note) => note.chunkID === newNoteChunk.id
         );
@@ -90,7 +87,6 @@ function PersonalDiaryNoteView({ navigation }) {
           encryptedContent: JSON.stringify(newNotesInChunk),
         };
         diaryAPI.setLastNotesChunk(newLastNotesChunk);
-        console.log("done all of it", newNotesInChunk);
         statusIndicatorAPI.setEncrypting(false);
         navigation.goBack();
       })
@@ -120,7 +116,6 @@ function PersonalDiaryNoteView({ navigation }) {
       const allNotesInChunk = diaryAPI.notes.filter(
         (noteChunkPair) => noteChunkPair.chunkID === chunkID
       );
-      console.log(allNotesInChunk, "all notes in chunk");
       const updatedNoteIndex = allNotesInChunk.findIndex(
         (noteChunkPair) =>
           noteChunkPair.note.noteID === diaryAPI.selectedNote?.note?.noteID
@@ -129,7 +124,6 @@ function PersonalDiaryNoteView({ navigation }) {
         console.log("failed to find updated note index");
         return;
       }
-      console.log(updatedNoteIndex, "UNI");
       allNotesInChunk[updatedNoteIndex].note.metadata.title = newTitle;
       allNotesInChunk[updatedNoteIndex].note.metadata.content =
         newContent.replaceAll("\n", newLineReplacement);
@@ -137,8 +131,6 @@ function PersonalDiaryNoteView({ navigation }) {
       const mappedNotes = allNotesInChunk.map((noteChunkPair) => {
         return noteChunkPair.note;
       });
-      console.log(allNotesInChunk, "all notes in chunk");
-      console.log("mapped", mappedNotes);
       const transactionID = newChunkID("TXID");
       symmetricEncrypt(JSON.stringify(mappedNotes), transactionID)
         .then((updatedEncryptedContent) => {

@@ -12,10 +12,15 @@ import { useLocalUserIDsStore } from "@/stores/localUserIDsActual";
 import { useSQLiteContext } from "expo-sqlite";
 import RFlatList from "@/components/common/RFlatList";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import * as SecureStore from "expo-secure-store";
 import { indexAnimationDelay } from "@/constants/indexAnimationDelay";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import { emptyRenderItem } from "@/components/common/EmptyListItem";
 import { randomUUID } from "expo-crypto";
+import { SingleEncrypt } from "@/components/common/crypto/SingleEncrypt";
+import { useHasLoadedUserDataStore } from "../Home/hasLoadedUserData";
+import { getInsertStringFromObject } from "@/fn/dbUtils";
+import useStatusIndicatorsStore from "@/stores/statusIndicators";
 
 function PersonalDiaryMain({ navigation }) {
   const diaryAPI = useDiaryStore();
@@ -23,6 +28,9 @@ function PersonalDiaryMain({ navigation }) {
   const [ready, setReady] = useState(false);
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const db = useSQLiteContext();
+  const hasLoadedUserDataAPI = useHasLoadedUserDataStore();
+  const localUserIDs = useLocalUserIDsStore();
+  const statusIndicatorAPI = useStatusIndicatorsStore();
   useEffect(() => {
     if (diaryAPI.groups === null || diaryAPI.notes === null) {
       setReady(false);
@@ -77,6 +85,7 @@ function PersonalDiaryMain({ navigation }) {
       newGroupChunk.version,
     ])
       .then((r) => {
+        statusIndicatorAPI.setEncrypting(false);
         diaryAPI.setGroups(newGroupContent);
         diaryAPI.setLastGroupsChunk({
           ...newGroupChunk,
@@ -92,6 +101,7 @@ function PersonalDiaryMain({ navigation }) {
     if (diaryAPI.groups === null || localUsersAPI.getActiveUserID() === null) {
       return;
     }
+    statusIndicatorAPI.setEncrypting(true);
     if (diaryAPI.groups?.length === 0) {
       const newGroupContent: SIDGroupType[] = [
         {

@@ -17,7 +17,6 @@ function CryptoMain() {
       return { plain: encryptionAPI.plain[key], transactionID: key };
     });
     setEncryptionQueue(queue);
-    console.log(queue, "queue", activeUserID);
   }, [encryptionAPI.plain]);
 
   useEffect(() => {
@@ -27,13 +26,11 @@ function CryptoMain() {
   return encryptionLen > 0 ? (
     <>
       {encryptionQueue.forEach((item) => {
-        console.log(item, "item");
         <SingleEncrypt
           key={item.transactionID}
           plainText={item.plain}
           symsk={SecureStore.getItem(`${activeUserID}-symsk`)}
           onEncrypted={(e) => {
-            console.log(e, " for ", item.transactionID);
             encryptionAPI.setEncryptedData({ [item.transactionID]: e });
           }}
           onError={() => {
