@@ -208,7 +208,9 @@ export default function DayBreakdown({ navigation }) {
     }
     data.push({
       label: "Time left today",
-      percentage: 100 - data.reduce((acc, val) => acc + val.percentage, 0),
+      percentage: parseInt(
+        (100 - data.reduce((acc, val) => acc + val.percentage, 0)).toFixed(0)
+      ),
     });
 
     setData(data.sort((a, b) => b.percentage - a.percentage));
