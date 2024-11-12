@@ -14,4 +14,12 @@ function stringToCharCodeArray(str: string): number[] {
   return charCodeArray;
 }
 
-export { stringToCharCodeArray };
+function charCodeArrayToString(charCodeArray: number[]): string {
+  let str = "";
+  for (let i = 0; i < charCodeArray.length; i++) {
+    str += String.fromCharCode(charCodeArray[i]);
+  }
+  return str;
+}
+
+export { stringToCharCodeArray, charCodeArrayToString };

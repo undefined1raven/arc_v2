@@ -314,10 +314,7 @@ function DayPlannerMain({ navigation }) {
         );
         activeDayAPI.setActiveDay(newDay);
         const transactionID = randomUUID();
-        const newDay: TessDayLogType = {
-          day: new Date().toDateString(),
-          tasks: [],
-        };
+
         const currentDayFromLastChunk = lastChunkData.indexOf(
           (day) => day.day === newDay.day
         );

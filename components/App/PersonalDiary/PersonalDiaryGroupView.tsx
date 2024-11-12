@@ -23,6 +23,7 @@ import { emptyRenderItem } from "@/components/common/EmptyListItem";
 import { randomUUID } from "expo-crypto";
 import { MaxSIDNotesInChunk } from "@/app/config/chunking";
 import useStatusIndicatorsStore from "@/stores/statusIndicators";
+import { stringToCharCodeArray } from "@/fn/stringToCharCode";
 
 function PersonalDiaryGroupView({ navigation }) {
   const diaryAPI = useDiaryStore();
@@ -137,7 +138,7 @@ function PersonalDiaryGroupView({ navigation }) {
         title: "New Note " + Date.now().toString().slice(-4),
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        content: "Write your note here...",
+        content: JSON.stringify(stringToCharCodeArray("Write your note here...")),
       },
       version: "0.1.1",
       groupID: diaryAPI.selectedGroup.groupID,
@@ -190,7 +191,7 @@ function PersonalDiaryGroupView({ navigation }) {
               title: "New Note " + Date.now().toString().slice(-4),
               createdAt: Date.now(),
               updatedAt: Date.now(),
-              content: "Write your note here...",
+              content: JSON.stringify(stringToCharCodeArray("Write your note here...")),
             },
             version: "0.1.1",
             groupID: diaryAPI.selectedGroup.groupID,

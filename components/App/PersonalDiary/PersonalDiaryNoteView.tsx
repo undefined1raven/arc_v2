@@ -27,6 +27,10 @@ import RLabel from "@/components/common/RLabel";
 import RTextInput from "@/components/common/RTextInput";
 import useStatusIndicatorsStore from "@/stores/statusIndicators";
 import { newLineReplacement } from "@/app/config/constants";
+import {
+  charCodeArrayToString,
+  stringToCharCodeArray,
+} from "@/fn/stringToCharCode";
 function PersonalDiaryNoteView({ navigation }) {
   const diaryAPI = useDiaryStore();
   const localUsersAPI = useLocalUserIDsStore();
@@ -35,9 +39,7 @@ function PersonalDiaryNoteView({ navigation }) {
   const [newTitle, setNewTitle] = useState(
     diaryAPI.selectedNote?.note?.metadata?.title || ""
   );
-  const [newContent, setNewContent] = useState(
-    diaryAPI.selectedNote?.note?.metadata?.content || ""
-  );
+  const [newContent, setNewContent] = useState("");
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const db = useSQLiteContext();
   useEffect(() => {
@@ -52,6 +54,13 @@ function PersonalDiaryNoteView({ navigation }) {
       }
     }
   }, [diaryAPI.groups, diaryAPI.notes, diaryAPI.selectedNote]);
+
+  useEffect(() => {
+    const encoded = JSON.parse(
+      diaryAPI.selectedNote?.note?.metadata?.content || ""
+    );
+    setNewContent(charCodeArrayToString(encoded));
+  }, [diaryAPI.selectedNote]);
 
   function saveNewNoteChunk(
     newNoteChunk: SID_ChunksType,
@@ -106,7 +115,8 @@ function PersonalDiaryNoteView({ navigation }) {
     }
     if (
       newTitle === diaryAPI.selectedNote.note.metadata.title &&
-      newContent === diaryAPI.selectedNote.note.metadata.content
+      JSON.stringify(stringToCharCodeArray(newContent)) ===
+        diaryAPI.selectedNote.note.metadata.content
     ) {
       navigation.goBack();
       return;
@@ -125,8 +135,9 @@ function PersonalDiaryNoteView({ navigation }) {
         return;
       }
       allNotesInChunk[updatedNoteIndex].note.metadata.title = newTitle;
-      allNotesInChunk[updatedNoteIndex].note.metadata.content =
-        newContent.replaceAll("\n", newLineReplacement);
+      allNotesInChunk[updatedNoteIndex].note.metadata.content = JSON.stringify(
+        stringToCharCodeArray(newContent)
+      );
       allNotesInChunk[updatedNoteIndex].note.metadata.updatedAt = Date.now();
       const mappedNotes = allNotesInChunk.map((noteChunkPair) => {
         return noteChunkPair.note;
@@ -175,6 +186,7 @@ function PersonalDiaryNoteView({ navigation }) {
       <RTextInput
         align="left"
         defaultValue={newTitle}
+        value={newTitle}
         onInput={(e) => {
           setNewTitle(e);
         }}
@@ -184,7 +196,7 @@ function PersonalDiaryNoteView({ navigation }) {
         }}
       ></RTextInput>
       <RTextInput
-        defaultValue={newContent.replaceAll(newLineReplacement, "\n")}
+        value={newContent}
         align="left"
         multiline={true}
         onInput={(e) => {

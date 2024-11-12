@@ -76,6 +76,7 @@ type RButtonProps = {
   hoverOpacityMin?: string;
   horizontalCenter?: boolean;
   verticalCenter?: boolean;
+  value?: string;
   figmaImportConfig?: object;
   mouseEnter?: Function;
   mouseLeave?: Function;
@@ -98,40 +99,11 @@ export default function RTextInput(props: RButtonProps) {
     : globalStyle.color;
   const [backgroundOpacityActual, setBackgroundOpacityActual] =
     useState(hoverOpacityMin);
+  const [valueActual, setValueActual] = useState(props.defaultValue);
 
-  function parsePresetTop() {
-    if (props.figmaImport) {
-      const figmaTop = props.figmaImport?.mobile?.top;
-      if (figmaTop !== undefined) {
-        const figmaTopNumber = parseFloat(figmaTop);
-        const figmaTopStr = figmaTop.toString();
-        if (isNaN(figmaTopNumber) === false) {
-          const strLen = figmaTopStr.length;
-          if (figmaTopStr[strLen - 1] === "%") {
-            return parseFloat(((figmaTopNumber * 100) / height).toFixed(2));
-          } else {
-            return figmaTopNumber;
-          }
-        }
-      }
-    }
-    const manualTop = props.top;
-    if (manualTop) {
-      const manualTopStr = manualTop.toString();
-      const manualTopNumber = parseFloat(manualTopStr);
-      if (isNaN(manualTopNumber) === false) {
-        const strLen = manualTopStr.length;
-        if (manualTopStr[strLen - 1] === "%") {
-          return parseFloat(((manualTopNumber * 100) / height).toFixed(2));
-        } else {
-          return manualTopNumber;
-        }
-      }
-    }
-    return 0;
-  }
-
-  const xx = useSharedValue(parsePresetTop() - 10);
+  useEffect(() => {
+    setValueActual(props.value);
+  }, [props.value]);
 
   function getVal(value: any, defaultVal: any) {
     if (value !== undefined) {
@@ -160,15 +132,6 @@ export default function RTextInput(props: RButtonProps) {
   }
 
   const buttonRef = useRef(null);
-
-  useEffect(() => {
-    const buttonTop = buttonRef.current.measure((w, h, px, py, fx, fy) => {
-      xx.value = withTiming(fy + 10, {
-        easing: Easing.out(Easing.quad),
-        duration: 200,
-      });
-    });
-  }, [buttonRef]);
 
   return (
     <Animated.View
@@ -209,6 +172,7 @@ export default function RTextInput(props: RButtonProps) {
               props.placeholderTextColor,
               globalStyle.colorInactive
             )}
+            value={getVal(valueActual, "")}
             onFocus={() => {
               setBackgroundOpacityActual(hoverOpacityMax);
             }}
@@ -222,6 +186,7 @@ export default function RTextInput(props: RButtonProps) {
             textAlignVertical={getVal(props.textAlignVertical, "center")}
             cursorColor={getVal(props.cursorColor, globalStyle.textColor)}
             onChangeText={(e) => {
+              setValueActual(e);
               getVal(props.onInput(e), () => {});
             }}
             autoFocus={getVal(props.autoFocus, false)}
