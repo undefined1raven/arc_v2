@@ -31,6 +31,7 @@ import {
   charCodeArrayToString,
   stringToCharCodeArray,
 } from "@/fn/stringToCharCode";
+import { RToggle } from "@/components/common/RToggle";
 function PersonalDiaryNoteView({ navigation }) {
   const diaryAPI = useDiaryStore();
   const localUsersAPI = useLocalUserIDsStore();
@@ -40,6 +41,9 @@ function PersonalDiaryNoteView({ navigation }) {
     diaryAPI.selectedNote?.note?.metadata?.title || ""
   );
   const [newContent, setNewContent] = useState("");
+  const [newReadOnly, setNewReadOnly] = useState(
+    diaryAPI.selectedNote?.note?.metadata?.readOnly || false
+  );
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const db = useSQLiteContext();
   useEffect(() => {
@@ -50,6 +54,7 @@ function PersonalDiaryNoteView({ navigation }) {
       } else {
         setNewContent(diaryAPI.selectedNote.note.metadata.content);
         setNewTitle(diaryAPI.selectedNote.note.metadata.title);
+        setNewReadOnly(diaryAPI.selectedNote.note.metadata.readOnly);
         setReady(true);
       }
     }
@@ -115,7 +120,8 @@ function PersonalDiaryNoteView({ navigation }) {
     if (
       newTitle === diaryAPI.selectedNote.note.metadata.title &&
       JSON.stringify(stringToCharCodeArray(newContent)) ===
-        diaryAPI.selectedNote.note.metadata.content
+        diaryAPI.selectedNote.note.metadata.content &&
+      newReadOnly === diaryAPI.selectedNote.note.metadata.readOnly
     ) {
       navigation.goBack();
       return;
@@ -138,6 +144,7 @@ function PersonalDiaryNoteView({ navigation }) {
       allNotesInChunk[updatedNoteIndex].note.metadata.content = JSON.stringify(
         stringToCharCodeArray(newContent)
       );
+      allNotesInChunk[updatedNoteIndex].note.metadata.readOnly = newReadOnly;
       allNotesInChunk[updatedNoteIndex].note.metadata.updatedAt = Date.now();
       const mappedNotes = allNotesInChunk.map((noteChunkPair) => {
         return noteChunkPair.note;
@@ -187,6 +194,7 @@ function PersonalDiaryNoteView({ navigation }) {
         align="left"
         defaultValue={newTitle}
         value={newTitle}
+        readOnly={newReadOnly}
         onInput={(e) => {
           setNewTitle(e);
         }}
@@ -199,6 +207,7 @@ function PersonalDiaryNoteView({ navigation }) {
         value={newContent}
         align="left"
         multiline={true}
+        readOnly={newReadOnly}
         onInput={(e) => {
           setNewContent(e);
         }}
@@ -207,6 +216,21 @@ function PersonalDiaryNoteView({ navigation }) {
           mobile: { top: 114, left: 3, width: 354, height: 420 },
         }}
       ></RTextInput>
+      <RLabel
+        backgroundColor={globalStyle.color + "20"}
+        text="Read-only"
+        align="left"
+        verticalAlign="center"
+        alignPadding={3}
+        figmaImport={{ mobile: { left: 3, width: 354, height: 39, top: 541 } }}
+      ></RLabel>
+      <RToggle
+        value={newReadOnly}
+        onToggle={(e) => {
+          setNewReadOnly(e);
+        }}
+        figmaImport={{ mobile: { left: 298, width: 52, height: 22, top: 550 } }}
+      ></RToggle>
       <RButton
         alignPadding="2%"
         align="left"
