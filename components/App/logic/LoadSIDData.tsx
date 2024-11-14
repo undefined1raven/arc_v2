@@ -140,6 +140,7 @@ function LoadSIDData() {
           onDecrypted={(res) => {
             const decryptedChunks: SIDGroups_ChunksType[] = [];
             const results = JSON.parse(jsesc.default(res, { json: true }));
+            console.log(results, "decrypted groups chunks");
             for (let ix = 0; ix < results.length; ix++) {
               const groups = JSON.parse(results[ix]);
               decryptedChunks.push({

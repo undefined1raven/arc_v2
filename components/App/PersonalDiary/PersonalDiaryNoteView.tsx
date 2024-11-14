@@ -105,7 +105,6 @@ function PersonalDiaryNoteView({ navigation }) {
   }
 
   function saveNoteState() {
-    statusIndicatorAPI.setEncrypting(true);
     if (
       diaryAPI.selectedGroup === null ||
       diaryAPI.notes === null ||
@@ -121,6 +120,7 @@ function PersonalDiaryNoteView({ navigation }) {
       navigation.goBack();
       return;
     }
+    statusIndicatorAPI.setEncrypting(true);
     try {
       const chunkID = diaryAPI.selectedNote.chunkID;
       const allNotesInChunk = diaryAPI.notes.filter(

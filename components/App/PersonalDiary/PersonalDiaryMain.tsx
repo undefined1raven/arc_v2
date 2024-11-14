@@ -177,7 +177,7 @@ function PersonalDiaryMain({ navigation }) {
   }
 
   return ready ? (
-    <EmptyView showHeader={true} showMenu={true}>
+    <EmptyView navigation={navigation} showHeader={true} showMenu={true}>
       <RFlatList
         renderItem={renderItem}
         emptyComponent={emptyRenderItem(globalStyle, "No notes groups found")}
