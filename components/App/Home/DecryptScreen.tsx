@@ -24,6 +24,7 @@ function DecryptionScreen() {
   const hasLoadedUserDataAPI = useHasLoadedUserDataStore();
   const tessKeyBioFlag = SecureStore.getItem("tess_symkey_pin_no_bio");
   const [isPinValid, setIsPinValid] = useState(false);
+  const [isUnwarpping, setIsUnwarpping] = useState(false);
   const [usePinInsteadMode, setUsePinInsteadMode] = useState(false);
   const [pinFromInput, setPinFromInput] = useState<string>("");
   const [finalTessPin, setFinalTessPin] = useState<string | null>(null);
@@ -116,6 +117,12 @@ function DecryptionScreen() {
     }
   }, []);
 
+  useEffect(() => {
+    if (finalTessPin !== null) {
+      setIsUnwarpping(true);
+    }
+  }, [finalTessPin]);
+
   return (
     <EmptyView
       showHeader={false}
@@ -132,7 +139,11 @@ function DecryptionScreen() {
             <UnwrapTessSymkey
               onSuccess={async () => {
                 if (finalTessPin === null) return;
-                if (tessKeyBioFlag === null || tessKeyBioFlag === undefined || tessKeyBioFlag === "true") {
+                if (
+                  tessKeyBioFlag === null ||
+                  tessKeyBioFlag === undefined ||
+                  tessKeyBioFlag === "true"
+                ) {
                   await SecureStore.setItemAsync(
                     "tess_symkey_pin",
                     finalTessPin,
@@ -158,144 +169,174 @@ function DecryptionScreen() {
                 hasLoadedUserDataAPI.setHasTessKey(true);
               }}
               onError={(e) => {
+                setIsUnwarpping(false);
                 console.log(e);
               }}
               pin={finalTessPin}
             ></UnwrapTessSymkey>
           )}
-          {tessKeyBioFlag === "false" && usePinInsteadMode === false ? (
+          {isUnwarpping === false ? (
             <>
-              <RLabel
-                text="Use biometrics to decrypt your data"
-                figmaImport={{
-                  mobile: {
-                    left: "0",
-                    width: "100%",
-                    height: 19,
-                    top: 300,
-                  },
-                }}
-              ></RLabel>
-              <RBox
-                figmaImport={{
-                  mobile: {
-                    left: 163,
-                    width: 35,
-                    height: 35,
-                    top: 245,
-                  },
-                }}
-              >
-                <FingerprintDeco
-                  color={globalStyle.color}
-                  width="100%"
-                  height="100%"
-                ></FingerprintDeco>
-              </RBox>
-              <RButton
-                onClick={() => {
-                  setUsePinInsteadMode(true);
-                }}
-                figmaImport={{
-                  mobile: { top: 358, left: 49, width: 262, height: 37 },
-                }}
-                label="Use your PIN instead"
-              ></RButton>
+              {tessKeyBioFlag === "false" && usePinInsteadMode === false ? (
+                <>
+                  <RLabel
+                    text="Use biometrics to decrypt your data"
+                    figmaImport={{
+                      mobile: {
+                        left: "0",
+                        width: "100%",
+                        height: 19,
+                        top: 300,
+                      },
+                    }}
+                  ></RLabel>
+                  <RBox
+                    figmaImport={{
+                      mobile: {
+                        left: 163,
+                        width: 35,
+                        height: 35,
+                        top: 245,
+                      },
+                    }}
+                  >
+                    <FingerprintDeco
+                      color={globalStyle.color}
+                      width="100%"
+                      height="100%"
+                    ></FingerprintDeco>
+                  </RBox>
+                  <RButton
+                    onClick={() => {
+                      setUsePinInsteadMode(true);
+                    }}
+                    figmaImport={{
+                      mobile: { top: 358, left: 49, width: 262, height: 37 },
+                    }}
+                    label="Use your PIN instead"
+                  ></RButton>
+                </>
+              ) : (
+                <>
+                  <RLabel
+                    align="left"
+                    text="Enter your PIN"
+                    figmaImport={{
+                      mobile: {
+                        left: 27,
+                        top: 243,
+                        height: 19,
+                        width: 289,
+                      },
+                    }}
+                  ></RLabel>
+                  <RTextInput
+                    secureTextEntry={true}
+                    onInput={(e) => {
+                      setPinFromInput(e);
+                    }}
+                    autoFocus={true}
+                    borderColor={
+                      pinFromInput.length === 0
+                        ? globalStyle.color
+                        : isPinValid
+                        ? globalStyle.successColor
+                        : globalStyle.errorColor
+                    }
+                    backgroundColor={
+                      pinFromInput.length === 0
+                        ? globalStyle.color
+                        : isPinValid
+                        ? globalStyle.successColor
+                        : globalStyle.errorColor
+                    }
+                    fontSize={globalStyle.largeMobileFont}
+                    placeholderTextColor={globalStyle.textColorInactive}
+                    placeholder="Enter your PIN"
+                    alignPadding={"2%"}
+                    align="left"
+                    keyboardType="number-pad"
+                    figmaImport={{
+                      mobile: {
+                        left: 27,
+                        top: 269,
+                        height: 44,
+                        width: 289,
+                      },
+                    }}
+                  ></RTextInput>
+                  <RLabel
+                    align="left"
+                    fontSize={globalStyle.mediumMobileFont}
+                    text="Your PIN is required to decrypt your data"
+                    figmaImport={{
+                      mobile: {
+                        left: 23,
+                        top: 324,
+                        height: 19,
+                        width: 289,
+                      },
+                    }}
+                  ></RLabel>
+                  <RButton
+                    onClick={() => {
+                      if (isPinValid) {
+                        setFinalTessPin(pinFromInput);
+                      }
+                    }}
+                    label="Enter"
+                    figmaImport={{
+                      mobile: {
+                        left: 27,
+                        top: 367,
+                        height: 44,
+                        width: 289,
+                      },
+                    }}
+                  ></RButton>
+                  {usePinInsteadMode === true && (
+                    <RButton
+                      onClick={() => {
+                        requestPinFromStorage();
+                      }}
+                      figmaImport={{
+                        mobile: {
+                          left: 27,
+                          top: 420,
+                          height: 44,
+                          width: 289,
+                        },
+                      }}
+                      label="Retry with biometrics"
+                    ></RButton>
+                  )}
+                </>
+              )}
             </>
           ) : (
             <>
+              <RBox
+                figmaImport={{
+                  mobile: { left: 155, width: 50, height: 50, top: 264 },
+                }}
+              >
+                <ARCLogoMini width="100%" height="100%"></ARCLogoMini>
+              </RBox>
               <RLabel
-                align="left"
-                text="Enter your PIN"
                 figmaImport={{
-                  mobile: {
-                    left: 27,
-                    top: 243,
-                    height: 19,
-                    width: 289,
-                  },
+                  mobile: { left: 0, width: "100%", height: 50, top: 330 },
                 }}
+                text="Decrypting Keys"
               ></RLabel>
-              <RTextInput
-                secureTextEntry={true}
-                onInput={(e) => {
-                  setPinFromInput(e);
-                }}
-                autoFocus={true}
-                borderColor={
-                  pinFromInput.length === 0
-                    ? globalStyle.color
-                    : isPinValid
-                    ? globalStyle.successColor
-                    : globalStyle.errorColor
-                }
-                backgroundColor={
-                  pinFromInput.length === 0
-                    ? globalStyle.color
-                    : isPinValid
-                    ? globalStyle.successColor
-                    : globalStyle.errorColor
-                }
-                fontSize={globalStyle.largeMobileFont}
-                placeholderTextColor={globalStyle.textColorInactive}
-                placeholder="Enter your PIN"
-                alignPadding={"2%"}
-                align="left"
-                keyboardType="number-pad"
+              <RBox
                 figmaImport={{
-                  mobile: {
-                    left: 27,
-                    top: 269,
-                    height: 44,
-                    width: 289,
-                  },
+                  mobile: { left: 155, width: 50, height: 50, top: 340 },
                 }}
-              ></RTextInput>
-              <RLabel
-                align="left"
-                fontSize={globalStyle.mediumMobileFont}
-                text="Your PIN is required to decrypt your data"
-                figmaImport={{
-                  mobile: {
-                    left: 23,
-                    top: 324,
-                    height: 19,
-                    width: 289,
-                  },
-                }}
-              ></RLabel>
-              <RButton
-                onClick={() => {
-                  if (isPinValid) {
-                    setFinalTessPin(pinFromInput);
-                  }
-                }}
-                label="Enter"
-                figmaImport={{
-                  mobile: {
-                    left: 27,
-                    top: 367,
-                    height: 44,
-                    width: 289,
-                  },
-                }}
-              ></RButton>
-              {usePinInsteadMode === true && (
-                <RButton
-                  onClick={() => {
-                    requestPinFromStorage();
-                  }}
-                  figmaImport={{
-                    mobile: {
-                      left: 27,
-                      top: 420,
-                      height: 44,
-                      width: 289,
-                    },
-                  }}
-                  label="Retry with biometrics"
-                ></RButton>
-              )}
+              >
+                <ActivityIndicator
+                  color={globalStyle.color}
+                ></ActivityIndicator>
+              </RBox>
             </>
           )}
         </>
