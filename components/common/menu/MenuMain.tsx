@@ -148,7 +148,9 @@ export default function MenuMain() {
             // }
           }}
           onClick={async () => {
-            await saveFile();
+            if (navigator !== null) {
+              navigator.navigate("SettingsMain", { name: "SettingsMain" });
+            }
           }}
           figmaImportConfig={containerConfig}
           figmaImport={{

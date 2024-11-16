@@ -521,12 +521,12 @@ function DayPlannerStatusSettings({ navigation }) {
                     name: "New Task " + Date.now().toString().slice(-4),
                     colors: {
                       dark: {
-                        color: themeColors.dark.color,
-                        textColor: themeColors.dark.textColor,
+                        color: themeColors.cloudy.dark.color,
+                        textColor: themeColors.cloudy.dark.textColor,
                       },
                       light: {
-                        color: themeColors.light.color,
-                        textColor: themeColors.light.textColor,
+                        color: themeColors.cloudy.light.color,
+                        textColor: themeColors.cloudy.light.textColor,
                       },
                     },
                     completionEffect: 0,

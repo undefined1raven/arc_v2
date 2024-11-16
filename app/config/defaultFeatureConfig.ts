@@ -167,12 +167,12 @@ const tessDefaultConfig: FeatureConfigTessType = {
       deleted: false,
       colors: {
         light: {
-          color: themeColors.light.color,
-          textColor: themeColors.light.textColor,
+          color: themeColors.cloudy.light.color,
+          textColor: themeColors.cloudy.light.textColor,
         },
         dark: {
-          color: themeColors.dark.color,
-          textColor: themeColors.dark.textColor,
+          color: themeColors.cloudy.dark.color,
+          textColor: themeColors.cloudy.dark.textColor,
         },
       },
     },
@@ -184,12 +184,12 @@ const tessDefaultConfig: FeatureConfigTessType = {
       deleted: false,
       colors: {
         light: {
-          color: themeColors.light.successColor,
-          textColor: themeColors.light.successTextColor,
+          color: themeColors.cloudy.light.successColor,
+          textColor: themeColors.cloudy.light.successTextColor,
         },
         dark: {
-          color: themeColors.dark.successColor,
-          textColor: themeColors.dark.successTextColor,
+          color: themeColors.cloudy.dark.successColor,
+          textColor: themeColors.cloudy.dark.successTextColor,
         },
       },
     },
@@ -220,12 +220,12 @@ const tessDefaultConfig: FeatureConfigTessType = {
       deleted: false,
       colors: {
         light: {
-          color: themeColors.light.errorColor,
-          textColor: themeColors.light.errorTextColor,
+          color: themeColors.cloudy.light.errorColor,
+          textColor: themeColors.cloudy.light.errorTextColor,
         },
         dark: {
-          color: themeColors.dark.errorColor,
-          textColor: themeColors.dark.errorTextColor,
+          color: themeColors.cloudy.dark.errorColor,
+          textColor: themeColors.cloudy.dark.errorTextColor,
         },
       },
     },
@@ -295,12 +295,12 @@ const tessDefaultConfig: FeatureConfigTessType = {
       name: "Normaal",
       colors: {
         light: {
-          color: themeColors.light.color,
-          textColor: themeColors.light.textColor,
+          color: themeColors.cloudy.light.color,
+          textColor: themeColors.cloudy.light.textColor,
         },
         dark: {
-          color: themeColors.dark.color,
-          textColor: themeColors.dark.textColor,
+          color: themeColors.cloudy.dark.color,
+          textColor: themeColors.cloudy.dark.textColor,
         },
       },
       version: "0.1.1",
@@ -312,23 +312,23 @@ const tessDefaultConfig: FeatureConfigTessType = {
   ],
   dayClassifier: [
     {
-      version: '0.1.1',
+      version: "0.1.1",
       dayClassID: "DCID-000000-0000-0000-000001",
       label: "Completed",
       threshold: 0.75,
       colors: {
         light: {
-          color: themeColors.light.successColor,
-          textColor: themeColors.light.successTextColor,
+          color: themeColors.cloudy.light.successColor,
+          textColor: themeColors.cloudy.light.successTextColor,
         },
         dark: {
-          color: themeColors.dark.successColor,
-          textColor: themeColors.dark.successTextColor,
+          color: themeColors.cloudy.dark.successColor,
+          textColor: themeColors.cloudy.dark.successTextColor,
         },
       },
     },
     {
-      version: '0.1.1',
+      version: "0.1.1",
       dayClassID: "DCID-000000-0000-0000-000002",
       label: "Incomplete",
       threshold: 0.25,
@@ -344,18 +344,18 @@ const tessDefaultConfig: FeatureConfigTessType = {
       },
     },
     {
-      version: '0.1.1',
+      version: "0.1.1",
       dayClassID: "DCID-000000-0000-0000-000003",
       label: "Failed",
       threshold: 0,
       colors: {
         light: {
-          color: themeColors.light.errorColor,
-          textColor: themeColors.light.errorTextColor,
+          color: themeColors.cloudy.light.errorColor,
+          textColor: themeColors.cloudy.light.errorTextColor,
         },
         dark: {
-          color: themeColors.dark.errorColor,
-          textColor: themeColors.dark.errorTextColor,
+          color: themeColors.cloudy.dark.errorColor,
+          textColor: themeColors.cloudy.dark.errorTextColor,
         },
       },
     },

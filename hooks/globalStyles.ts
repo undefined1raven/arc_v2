@@ -69,7 +69,7 @@ const globalStyle = createSlice({
     smallMobileFont: 10,
     footnoteMobileFont: 8,
     theme: "light",
-    ...themeColors.light,
+    ...themeColors.cloudy.light,
   },
   reducers: {
     updateGlobalStyle: (state, action) => {

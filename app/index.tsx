@@ -36,6 +36,9 @@ import { PersonalDiaryMain } from "@/components/App/PersonalDiary/PersonalDiaryM
 import { PersonalDiaryGroupView } from "@/components/App/PersonalDiary/PersonalDiaryGroupView";
 import { PersonalDiaryNoteView } from "@/components/App/PersonalDiary/PersonalDiaryNoteView";
 import { PersonalDiaryGroupSettings } from "@/components/App/PersonalDiary/PersonalDiaryGroupSettings";
+import * as SecureStore from "expo-secure-store";
+import SettingsMainMenu from "@/components/App/Settings/SettingsMainMenu";
+import { ThemeSettings } from "@/components/App/Settings/Account/ThemeSettings";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -59,7 +62,22 @@ export default function App() {
   let colorScheme = useColorScheme();
 
   React.useEffect(() => {
-    updateGlobalStyle({ ...themeColors[colorScheme] });
+    SecureStore.getItemAsync("theme")
+      .then((theme) => {
+        if (theme === null) {
+          SecureStore.setItemAsync("theme", "cloudy");
+          updateGlobalStyle({ ...themeColors["cloudy"][colorScheme] });
+        } else {
+          if (Object.keys(themeColors).includes(theme)) {
+            updateGlobalStyle({ ...themeColors[theme][colorScheme] });
+          } else {
+            updateGlobalStyle({ ...themeColors["cloudy"][colorScheme] });
+          }
+        }
+      })
+      .catch((err) => {
+        updateGlobalStyle({ ...themeColors["cloudy"][colorScheme] });
+      });
   }, []);
 
   return (
@@ -156,15 +174,20 @@ export default function App() {
           name="personalDiaryGroupSettings"
           component={PersonalDiaryGroupSettings}
         ></Stack.Screen>
+
         <Stack.Screen
           name="diaryNoteView"
           component={PersonalDiaryNoteView}
         ></Stack.Screen>
+        <Stack.Screen
+          name="themeSettings"
+          component={ThemeSettings}
+        ></Stack.Screen>
         <Stack.Screen name="loginMain" component={LoginMain}></Stack.Screen>
-        {/* <Stack.Screen
+        <Stack.Screen
           name="SettingsMain"
           component={SettingsMainMenu}
-        ></Stack.Screen> */}
+        ></Stack.Screen>
       </Stack.Navigator>
     </SQLiteProvider>
   );
