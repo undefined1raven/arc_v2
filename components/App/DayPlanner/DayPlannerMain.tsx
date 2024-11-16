@@ -159,7 +159,7 @@ function DayPlannerMain({ navigation }) {
       );
     };
 
-    return (
+    return currentDayClass?.label !== undefined ? (
       <Animated.View
         entering={FadeInDown.duration(75)
           .damping(30)
@@ -225,7 +225,7 @@ function DayPlannerMain({ navigation }) {
           </RBox>
         </RButton>
       </Animated.View>
-    );
+    ) : null;
   };
 
   function updateTessChunk(
