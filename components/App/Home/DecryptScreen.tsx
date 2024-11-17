@@ -26,6 +26,7 @@ function DecryptionScreen() {
   const [isPinValid, setIsPinValid] = useState(false);
   const [isUnwarpping, setIsUnwarpping] = useState(false);
   const [usePinInsteadMode, setUsePinInsteadMode] = useState(false);
+  const [errorCallbackCount, setErrorCallbackCount] = useState(0);
   const [pinFromInput, setPinFromInput] = useState<string>("");
   const [finalTessPin, setFinalTessPin] = useState<string | null>(null);
   function ChunksDecryptingLoadingDeco(props: { top: number }) {
@@ -123,6 +124,15 @@ function DecryptionScreen() {
     }
   }, [finalTessPin]);
 
+  useEffect(() => {
+    if (errorCallbackCount === 1 && isUnwarpping === true) {
+      setTimeout(() => {
+        setErrorCallbackCount(0);
+        setIsUnwarpping(false);
+      }, 200);
+    }
+  }, [errorCallbackCount, isUnwarpping]);
+
   return (
     <EmptyView
       showHeader={false}
@@ -139,6 +149,7 @@ function DecryptionScreen() {
             <UnwrapTessSymkey
               onSuccess={async () => {
                 if (finalTessPin === null) return;
+                setIsUnwarpping(true);
                 if (
                   tessKeyBioFlag === null ||
                   tessKeyBioFlag === undefined ||
@@ -169,7 +180,15 @@ function DecryptionScreen() {
                 hasLoadedUserDataAPI.setHasTessKey(true);
               }}
               onError={(e) => {
-                setIsUnwarpping(false);
+                if (errorCallbackCount === 0) {
+                  setErrorCallbackCount(1);
+                }
+                if (errorCallbackCount === 1) {
+                  setErrorCallbackCount(0);
+                  setTimeout(() => {
+                    setIsUnwarpping(false);
+                  }, 100);
+                }
                 console.log(e);
               }}
               pin={finalTessPin}
