@@ -21,7 +21,6 @@ function MultiDecrypt(props: SingleDecryptProps) {
     ) {
       setIsReady(true);
     }
-    console.log("heree  multi ")
   }, [props.encryptedObj, props.symsk]);
 
   return isReady ? (

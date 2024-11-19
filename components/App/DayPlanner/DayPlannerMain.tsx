@@ -283,7 +283,7 @@ function DayPlannerMain({ navigation }) {
               typeof dayPlannerAPI.days === "object" &&
               dayPlannerAPI.days !== null
             ) {
-              dayPlannerAPI.setDays(...dayPlannerAPI.days, newDay);
+              dayPlannerAPI.setDays([...dayPlannerAPI.days, newDay]);
             }
             setHasOngoingDay(true);
             navigation.navigate("dayPlannerActiveDayView", {
@@ -342,7 +342,7 @@ function DayPlannerMain({ navigation }) {
                     typeof dayPlannerAPI.days === "object" &&
                     dayPlannerAPI.days !== null
                   ) {
-                    dayPlannerAPI.setDays(...dayPlannerAPI.days, newDay);
+                    dayPlannerAPI.setDays([...dayPlannerAPI.days, newDay]);
                   }
                   navigation.navigate("dayPlannerActiveDayView", {
                     name: "dayPlannerActiveDayView",
