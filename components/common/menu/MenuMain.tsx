@@ -139,13 +139,7 @@ export default function MenuMain() {
       >
         <RButton
           onLongPress={() => {
-            // console.log("xx");
-            // db.runAsync("DROP TABLE users");
-            // db.runAsync("DROP TABLE userData");
-            // db.runAsync("DROP TABLE arcChunks");
-            // if (navigator !== null) {
-            //   // navigator.navigate("SettingsMain", { name: "SettingsMain" });
-            // }
+            saveFile();
           }}
           onClick={async () => {
             if (navigator !== null) {
