@@ -415,7 +415,9 @@ function DayPlannerMain({ navigation }) {
       <RFlatList
         emptyComponent={emptyRenderItem(globalStyle, "No daily logs to show")}
         renderItem={renderItem}
-        data={dayPlannerAPI.days}
+        data={dayPlannerAPI.days.sort(
+          (a, b) => new Date(b.day).getTime() - new Date(a.day).getTime()
+        )}
         figmaImport={{
           mobile: {
             left: 2,
