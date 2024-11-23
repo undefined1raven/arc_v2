@@ -167,6 +167,7 @@ function DayPlannerTaskEditor({ navigation }) {
             onInput={(e) => {
               setNewName(e);
             }}
+            value={activeDayAPI.selectedTask?.name}
             defaultValue={activeDayAPI.selectedTask?.name}
             figmaImport={{
               mobile: {
@@ -249,6 +250,10 @@ function DayPlannerTaskEditor({ navigation }) {
             onInput={(e) => {
               setNewDescription(e.replaceAll("\n", newLineReplacement));
             }}
+            value={activeDayAPI.selectedTask?.description.replaceAll(
+              newLineReplacement,
+              "\n"
+            )}
             defaultValue={activeDayAPI.selectedTask?.description.replaceAll(
               newLineReplacement,
               "\n"
