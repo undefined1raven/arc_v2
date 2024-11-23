@@ -11,8 +11,9 @@ import { useTessFeatureConfigStore } from "./tessFeatureConfigStore";
 import { ActivityIndicator } from "react-native";
 import { useEffect, useState } from "react";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
-import { useDayPlannerStore } from "./daysStore";
+import { DerivedDaysScoreType, useDayPlannerStore } from "./daysStore";
 import {
+  DayClassifierType,
   Tess_ChunksType,
   TessDayLogType,
   TessTaskType,
@@ -60,61 +61,111 @@ function DayPlannerMain({ navigation }) {
     activeDayAPI.setActiveDay(dayPlannerAPI.days[currentDayIndex]);
   }, [tessFeatureConfig, dayPlannerAPI.days]);
 
-  const renderItem = ({ item, index }: { item: TessDayLogType }) => {
-    const thresholds = defaultFeatureConfig.tess?.dayClassifier.sort(
-      (a, b) => a.threshold - b.threshold
-    );
-    const tasks: TessTaskType[] = item.tasks;
-    let completionScore = 0;
-    for (let ix = 0; ix < tasks.length; ix++) {
-      const task = tasks[ix];
-      const labels = task.labels;
-      const status = tessFeatureConfig?.statusArray.find(
-        (status) => status.statusID === task.statusID
+  //////Days deriverer
+  useEffect(() => {
+    if (dayPlannerAPI.days === null || tessFeatureConfig === null) {
+      return;
+    }
+    if (dayPlannerAPI.derivedDays.completionScore !== undefined) {
+      return;
+    }
+
+    const daysByMonth: { [key: string]: (TessDayLogType | null)[] } = {};
+
+    dayPlannerAPI.days.forEach((dayLog) => {
+      const date = new Date(dayLog.day);
+      const monthKey = `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}`;
+
+      if (!daysByMonth[monthKey]) {
+        const daysInMonth = new Date(
+          date.getUTCFullYear(),
+          date.getUTCMonth() + 1,
+          0
+        ).getUTCDate();
+        daysByMonth[monthKey] = Array.from({ length: daysInMonth }, () => null);
+      }
+
+      daysByMonth[monthKey][date.getUTCDate() - 1] = dayLog;
+    });
+
+    const scores: DerivedDaysScoreType = {};
+
+    for (let ix = 0; ix < dayPlannerAPI.days.length; ix++) {
+      const item = dayPlannerAPI.days[ix];
+      const thresholds = defaultFeatureConfig.tess?.dayClassifier.sort(
+        (a, b) => a.threshold - b.threshold
       );
-      if (status !== undefined) {
-        if (labels.length === 0) {
-          completionScore += status.completionEffect;
-        } else {
-          let newCompletionEffect = 0;
-          for (let jx = 0; jx < labels.length; jx++) {
-            const label = labels[jx];
-            const labelConfig = tessFeatureConfig?.labelArray.find(
-              (labelConfig) => labelConfig.labelID === label
-            );
-            if (labelConfig !== undefined) {
-              newCompletionEffect = labelConfig.completionMultiplier(
-                status.completionEffect
+      const tasks: TessTaskType[] = item.tasks;
+      let completionScore = 0;
+      for (let ix = 0; ix < tasks.length; ix++) {
+        const task = tasks[ix];
+        const labels = task.labels;
+        const status = tessFeatureConfig?.statusArray.find(
+          (status) => status.statusID === task.statusID
+        );
+        if (status !== undefined) {
+          if (labels.length === 0) {
+            completionScore += status.completionEffect;
+          } else {
+            let newCompletionEffect = 0;
+            for (let jx = 0; jx < labels.length; jx++) {
+              const label = labels[jx];
+              const labelConfig = tessFeatureConfig?.labelArray.find(
+                (labelConfig) => labelConfig.labelID === label
               );
+              if (labelConfig !== undefined) {
+                newCompletionEffect = labelConfig.completionMultiplier(
+                  status.completionEffect
+                );
+              }
             }
+            completionScore += newCompletionEffect;
           }
-          completionScore += newCompletionEffect;
         }
       }
-    }
-    const completionPercentage = (
-      (completionScore / tasks.length) *
-      100
-    ).toFixed(0);
-    let currentDayClass = null;
-    for (let ix = 0; ix < thresholds.length; ix++) {
-      const threshold = thresholds[ix];
-      if (parseInt(completionPercentage) >= threshold.threshold * 100) {
-        currentDayClass = threshold;
+      const completionPercentage = (
+        (completionScore / tasks.length) *
+        100
+      ).toFixed(0);
+      let currentDayClass = null;
+      for (let ix = 0; ix < thresholds.length; ix++) {
+        const threshold = thresholds[ix];
+        if (parseInt(completionPercentage) >= threshold.threshold * 100) {
+          currentDayClass = threshold;
+        }
       }
+      scores[item.day] = {
+        completionPercentage: parseInt(completionPercentage),
+        currentDayClass,
+      };
+    }
+    dayPlannerAPI.setDerivedDays({ completionScore: scores });
+  }, [dayPlannerAPI.days, tessFeatureConfig]);
+
+  const renderItem = ({ item, index }: { item: TessDayLogType }) => {
+    //@ts-ignore
+    const completionPercentage = dayPlannerAPI.derivedDays.completionScore[
+      item.day
+    ]?.completionPercentage as number | undefined;
+
+    //@ts-ignore
+    const currentDayClass = dayPlannerAPI.derivedDays.completionScore[item.day]
+      ?.currentDayClass as DayClassifierType | undefined;
+
+    if (completionPercentage === undefined || currentDayClass === undefined) {
+      return;
     }
 
     const HalfDonutChart = () => {
-      const parsedCompletionPercentage = parseInt(completionPercentage);
       const data = [
         {
           label: "",
-          value: parsedCompletionPercentage,
+          value: completionPercentage,
           color: currentDayClass?.colors[globalStyle.theme].color as string,
         },
       ];
-      if (parsedCompletionPercentage < 100) {
-        if (parsedCompletionPercentage === 0) {
+      if (completionPercentage < 100) {
+        if (completionPercentage === 0) {
           data.splice(0, 1);
           data.push({
             label: "",
@@ -124,7 +175,7 @@ function DayPlannerMain({ navigation }) {
         }
         data.push({
           label: "",
-          value: 100 - parsedCompletionPercentage,
+          value: 100 - completionPercentage,
           color: currentDayClass?.colors[globalStyle.theme].color + "40",
         });
       }
@@ -384,6 +435,11 @@ function DayPlannerMain({ navigation }) {
         text="Day Planner"
       ></RLabel>
       <RButton
+        onClick={() => {
+          navigation.navigate("dayPlannerStatsMain", {
+            name: "dayPlannerStatsMain",
+          });
+        }}
         figmaImport={{
           mobile: {
             left: 234,

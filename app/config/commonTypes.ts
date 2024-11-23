@@ -211,5 +211,6 @@ export type {
   UserDataKeys,
   TessTaskType,
   ArcTaskLogType,
+  DayClassifierType,
   UserDataValues,
 };

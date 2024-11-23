@@ -39,6 +39,7 @@ import { PersonalDiaryGroupSettings } from "@/components/App/PersonalDiary/Perso
 import * as SecureStore from "expo-secure-store";
 import SettingsMainMenu from "@/components/App/Settings/SettingsMainMenu";
 import { ThemeSettings } from "@/components/App/Settings/Account/ThemeSettings";
+import { DayPlannerStatsMain } from "@/components/App/DayPlanner/DayPlannerStatsMain";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -174,7 +175,10 @@ export default function App() {
           name="personalDiaryGroupSettings"
           component={PersonalDiaryGroupSettings}
         ></Stack.Screen>
-
+        <Stack.Screen
+          name="dayPlannerStatsMain"
+          component={DayPlannerStatsMain}
+        ></Stack.Screen>
         <Stack.Screen
           name="diaryNoteView"
           component={PersonalDiaryNoteView}
