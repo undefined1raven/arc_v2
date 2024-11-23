@@ -10,6 +10,7 @@ import {
 } from "react-native-gesture-handler";
 import { useColorScheme } from "react-native";
 import RLabel from "@/components/common/RLabel";
+import RButton from "@/components/common/RButton";
 
 function DayPlannerHeatmapStatsView() {
   const [heatmapColumns, setHeatmapColumns] = useState([]);
@@ -90,31 +91,34 @@ function DayPlannerHeatmapStatsView() {
     );
   };
   return (
-    <RBox
-      figmaImport={{
-        mobile: {
-          left: 3,
-          top: 70,
-          width: 308,
-          height: 516,
-        },
-      }}
-    >
-      {heatmapColumns.map((month, index) => {
-        return (
-          <>
-            <RFlatList
-              width="100%"
-              height="100%"
-              key={month}
-              left={index * 55}
-              renderItem={renderItem}
-              data={heatmapColumns[index]}
-            ></RFlatList>
-          </>
-        );
-      })}
-    </RBox>
+    <>
+      <RBox
+        figmaImport={{
+          mobile: {
+            left: 3,
+            top: 70,
+            width: 308,
+            height: 516,
+          },
+        }}
+      >
+        {heatmapColumns.map((month, index) => {
+          return (
+            <>
+              <RFlatList
+                width="100%"
+                height="100%"
+                key={month}
+                left={index * 55}
+                renderItem={renderItem}
+                data={heatmapColumns[index]}
+              ></RFlatList>
+            </>
+          );
+        })}
+      </RBox>
+     
+    </>
   );
 }
 
