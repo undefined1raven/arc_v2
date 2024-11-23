@@ -66,7 +66,7 @@ export default function SettingsMainMenu({ navigation }) {
       label: "Account Settings",
       description: "Theme, Security, and General Settings",
       icon: SettingdIcon,
-      screenName: "themeSettings",
+      screenName: "settingsCommonMenu",
     },
   ];
 

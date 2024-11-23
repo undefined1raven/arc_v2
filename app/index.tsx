@@ -40,6 +40,7 @@ import * as SecureStore from "expo-secure-store";
 import SettingsMainMenu from "@/components/App/Settings/SettingsMainMenu";
 import { ThemeSettings } from "@/components/App/Settings/Account/ThemeSettings";
 import { DayPlannerStatsMain } from "@/components/App/DayPlanner/DayPlannerStatsMain";
+import { SettingsCommonMenu } from "@/components/App/Settings/SettingsCommonMenu";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -182,6 +183,10 @@ export default function App() {
         <Stack.Screen
           name="diaryNoteView"
           component={PersonalDiaryNoteView}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="settingsCommonMenu"
+          component={SettingsCommonMenu}
         ></Stack.Screen>
         <Stack.Screen
           name="themeSettings"
