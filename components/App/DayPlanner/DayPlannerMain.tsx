@@ -66,26 +66,29 @@ function DayPlannerMain({ navigation }) {
     if (dayPlannerAPI.days === null || tessFeatureConfig === null) {
       return;
     }
-    if (dayPlannerAPI.derivedDays.completionScore !== undefined) {
-      return;
-    }
-
     const daysByMonth: { [key: string]: (TessDayLogType | null)[] } = {};
 
+    const allDaysInMonth = (year: number, month: number) => {
+      const days = [];
+      for (let i = 1; i <= 31; i++) {
+        days.push(new Date(Date.UTC(year, month, i)).toUTCString());
+      }
+      return days;
+    };
     dayPlannerAPI.days.forEach((dayLog) => {
       const date = new Date(dayLog.day);
       const monthKey = `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}`;
 
       if (!daysByMonth[monthKey]) {
-        const daysInMonth = new Date(
+        const daysInMonth = allDaysInMonth(
           date.getUTCFullYear(),
-          date.getUTCMonth() + 1,
-          0
-        ).getUTCDate();
-        daysByMonth[monthKey] = Array.from({ length: daysInMonth }, () => null);
+          date.getUTCMonth()
+        );
+        daysByMonth[monthKey] = daysInMonth.map((day) => null);
       }
 
-      daysByMonth[monthKey][date.getUTCDate() - 1] = dayLog;
+      const dayIndex = new Date(dayLog.day).getUTCDate();
+      daysByMonth[monthKey][dayIndex] = dayLog;
     });
 
     const scores: DerivedDaysScoreType = {};
@@ -134,21 +137,21 @@ function DayPlannerMain({ navigation }) {
           currentDayClass = threshold;
         }
       }
-      scores[item.day] = {
-        completionPercentage: parseInt(completionPercentage),
-        currentDayClass,
-      };
+      if (isNaN(parseInt(completionPercentage)) === false) {
+        scores[item.day] = {
+          completionPercentage: parseInt(completionPercentage),
+          currentDayClass,
+        };
+      }
     }
-    dayPlannerAPI.setDerivedDays({ completionScore: scores });
+    dayPlannerAPI.setDerivedDays({ completionScore: scores, daysByMonth });
   }, [dayPlannerAPI.days, tessFeatureConfig]);
 
   const renderItem = ({ item, index }: { item: TessDayLogType }) => {
-    //@ts-ignore
     const completionPercentage = dayPlannerAPI.derivedDays.completionScore[
       item.day
     ]?.completionPercentage as number | undefined;
 
-    //@ts-ignore
     const currentDayClass = dayPlannerAPI.derivedDays.completionScore[item.day]
       ?.currentDayClass as DayClassifierType | undefined;
 

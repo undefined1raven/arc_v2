@@ -18,8 +18,14 @@ export interface DayPlannerStore {
   setHasLoadedData: (hasLoadedData: boolean) => void;
   setDays: (days: TessDayLogType[] | null) => void;
   lastChunk: Tess_ChunksType | null;
-  derivedDays: DerivedDaysScoreType
-  setDerivedDays: (newDerivedDays: DerivedDaysScoreType) => void;
+  derivedDays: {
+    completionScore: DerivedDaysScoreType;
+    daysByMonth: object;
+  };
+  setDerivedDays: (newDerivedDays: {
+    completionScore: DerivedDaysScoreType;
+    daysByMonth: object;
+  }) => void;
   setLastChunk: (lastChunk: Tess_ChunksType | null) => void;
 }
 
@@ -28,7 +34,7 @@ const useDayPlannerStore = create<DayPlannerStore>((set, get) => ({
   lastChunk: null,
   setLastChunk: (lastChunk) => set({ lastChunk }),
   hasLoadedData: false,
-  derivedDays: { completionScore: {} },
+  derivedDays: { completionScore: {}, daysByMonth: {} },
   setDerivedDays: (newDerivedDays) => set({ derivedDays: newDerivedDays }),
   setHasLoadedData: (hasLoadedData) => set({ hasLoadedData }),
   setDays: (days) => set({ days }),

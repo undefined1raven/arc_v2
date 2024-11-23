@@ -19,6 +19,10 @@ import store from "@/app/store";
 import globalStyles, { GlobalStyleType } from "@/hooks/globalStyles";
 import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
+import {
+  GestureHandlerRootView,
+  ScrollView,
+} from "react-native-gesture-handler";
 
 type RButtonProps = {
   id?: string;
@@ -140,15 +144,6 @@ export default function RBox(props: RButtonProps) {
   }
 
   const buttonRef = useRef(null);
-
-  useEffect(() => {
-    const buttonTop = buttonRef.current.measure((w, h, px, py, fx, fy) => {
-      xx.value = withTiming(fy + 10, {
-        easing: Easing.out(Easing.quad),
-        duration: 200,
-      });
-    });
-  }, [buttonRef]);
 
   return (
     <Animated.View
