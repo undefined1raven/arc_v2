@@ -134,12 +134,6 @@ function DayPlannerMain({ navigation }) {
       for (let ix = 0; ix < thresholds.length; ix++) {
         const threshold = thresholds[ix];
         if (parseInt(completionPercentage) >= threshold.threshold * 100) {
-          console.log(
-            threshold.label,
-            threshold.threshold,
-            "threshold",
-            completionPercentage
-          );
           currentDayClass = threshold;
         }
       }
