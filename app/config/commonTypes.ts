@@ -76,7 +76,7 @@ type TessLabelType = {
   version: "0.1.1";
   completionMultiplier: Function;
 };
-type DayClassifierType = {
+export type DayClassifierType = {
   dayClassID: string;
   threshold: number;
   colors: {

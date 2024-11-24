@@ -23,6 +23,7 @@ function DayPlannerStatsMain({ navigation }) {
         <DayPlannerLineChartView></DayPlannerLineChartView>
       )}
       <RButton
+        onClick={() => navigation.goBack()}
         label="Back"
         figmaImport={{ mobile: { left: 3, width: 354, height: 48, top: 589 } }}
       ></RButton>

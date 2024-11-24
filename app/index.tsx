@@ -42,6 +42,7 @@ import { ThemeSettings } from "@/components/App/Settings/Account/ThemeSettings";
 import { DayPlannerStatsMain } from "@/components/App/DayPlanner/DayPlannerStatsMain";
 import { SettingsCommonMenu } from "@/components/App/Settings/SettingsCommonMenu";
 import { AccountType } from "@/components/App/Settings/Account/AccoutType";
+import { DayPlannerDayClassifierSettings } from "@/components/App/Settings/DayPlanner/DayPlannerDayClassifierSettings";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -168,6 +169,10 @@ export default function App() {
         <Stack.Screen
           name="dayPlannerStatusSettings"
           component={DayPlannerStatusSettings}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="dayPlannerDayClassifierSettings"
+          component={DayPlannerDayClassifierSettings}
         ></Stack.Screen>
         <Stack.Screen
           name="diaryGroupView"

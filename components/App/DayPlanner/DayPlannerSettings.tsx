@@ -43,7 +43,7 @@ function DayPlannerSettings({ navigation }) {
       data: tessFeatureConfig?.dayClassifier,
       description: "Edit the day classifier",
       deco: TessDayClassifierDeco,
-      navRedirect: "Home",
+      navRedirect: "dayPlannerDayClassifierSettings",
     },
   ];
 

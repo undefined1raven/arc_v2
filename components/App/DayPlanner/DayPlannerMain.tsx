@@ -95,7 +95,7 @@ function DayPlannerMain({ navigation }) {
 
     for (let ix = 0; ix < dayPlannerAPI.days.length; ix++) {
       const item = dayPlannerAPI.days[ix];
-      const thresholds = defaultFeatureConfig.tess?.dayClassifier.sort(
+      const thresholds = tessFeatureConfig.dayClassifier.sort(
         (a, b) => a.threshold - b.threshold
       );
       const tasks: TessTaskType[] = item.tasks;
@@ -134,6 +134,12 @@ function DayPlannerMain({ navigation }) {
       for (let ix = 0; ix < thresholds.length; ix++) {
         const threshold = thresholds[ix];
         if (parseInt(completionPercentage) >= threshold.threshold * 100) {
+          console.log(
+            threshold.label,
+            threshold.threshold,
+            "threshold",
+            completionPercentage
+          );
           currentDayClass = threshold;
         }
       }
