@@ -16,7 +16,7 @@ import { useTessFeatureConfigStore } from "./tessFeatureConfigStore";
 
 function DayPlannerPieChartView() {
   const [data, setData] = useState<
-    { label: string; color: string; value: number }[]
+    { label: string; color: string; value: number; percentage?: number }[]
   >([]);
   const dayPlannerAPI = useDayPlannerStore();
   const globalStyles = useGlobalStyleStore().globalStyle;
@@ -62,8 +62,57 @@ function DayPlannerPieChartView() {
         color: dayClass?.colors[colorScheme].color || globalStyles.color,
       });
     }
+
+    const totalCount = newData.reduce((acc, val) => acc + val.value, 0);
+
+    for (let ix = 0; ix < newData.length; ix++) {
+      newData[ix].percentage = Math.round(
+        (newData[ix].value / totalCount) * 100
+      );
+    }
     setData(newData);
   }, [dayPlannerAPI.derivedDays]);
+
+  const renderItem = ({
+    item,
+    index,
+  }: {
+    item: { label: string; color: string; value: number };
+  }) => {
+    if ((item === undefined) | (item.percentage === undefined)) {
+      return;
+    }
+    return (
+      <Animated.View
+        style={{
+          position: "relative",
+          paddingBottom: "1%",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          left: 0,
+          height: 50,
+        }}
+      >
+        <RBox
+          width="20%"
+          top="20%"
+          height="20%"
+          backgroundColor={item.color}
+        ></RBox>
+        <RLabel
+          height="100%"
+          verticalAlign="start"
+          left="21%"
+          width="75%"
+          align="left"
+          text={
+            item.label + " | " + item.percentage + "%" + " (" + item.value + ")"
+          }
+        ></RLabel>
+      </Animated.View>
+    );
+  };
 
   const HalfDonutChart = () => {
     return (
@@ -107,8 +156,15 @@ function DayPlannerPieChartView() {
         },
       }}
     >
-      <Animated.View style={{ height: "100%", width: "100%" }}>
+      <Animated.View style={{ height: "100%", width: "80%" }}>
         <HalfDonutChart></HalfDonutChart>
+        <RFlatList
+          renderItem={renderItem}
+          data={data}
+          figmaImport={{
+            mobile: { left: 0, width: "100%", height: 170, top: 465 },
+          }}
+        ></RFlatList>
       </Animated.View>
     </RBox>
   );

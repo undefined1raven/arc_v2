@@ -90,8 +90,6 @@ try {
     const jwk = JSON.parse(\`${symsk}\`);
     const charArray = JSON.parse(\`${payload}\`);
     const {iv, cipher} = JSON.parse(charCodeArrayToString(charArray));
-    console.log(iv, "iv");
-    console.log(cipher, "cipher");
     importSymmetricKey(jwk)
       .then((key) => {
         symmetricDecrypt(key, cipher, iv)
