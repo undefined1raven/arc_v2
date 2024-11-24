@@ -34,7 +34,6 @@ function DayPlannerLineChartView() {
       newData.push({ x: ix, y: completion });
     }
     setData(newData);
-    console.log(newData);
   }, [dayPlannerAPI.derivedDays]);
 
   function DashEffect() {

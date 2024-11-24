@@ -84,21 +84,16 @@ function encode(str) {
   return JSON.stringify(enc);
 }
 console.log("[Decryption] string payload present: ", \`${payload?.length}\`);
-console.log(window.crypto.subtle, " | subtle");
-console.log(crypto.subtle, " | subtle 2");
-console.log(window.isSecureContext, " | is secure");
 try {
   if (crypto.subtle !== undefined) {
     const jwk = JSON.parse(\`${symsk}\`);
     const chunks = JSON.parse(\`${payload}\`);
     const readyChunks = [];
-    console.log(chunks, "chunks");
     for(let ix = 0; ix < chunks.length; ix++){
       const charArray = JSON.parse(chunks[ix]);
       const {iv, cipher} = JSON.parse(charCodeArrayToString(charArray));
       readyChunks.push({iv, cipher});
     }
-    console.log(readyChunks, "readyChunks");
     importSymmetricKey(jwk)
       .then((key) => {
         const promiseArray = [];

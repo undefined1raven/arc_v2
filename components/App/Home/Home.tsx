@@ -86,7 +86,6 @@ export default function Home({ navigation, onRequestUserIDs }) {
               buttonID: "cancel",
               label: "x",
               onClick: () => {
-                console.log("cancel");
               },
             },
             {

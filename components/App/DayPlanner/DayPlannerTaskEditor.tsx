@@ -278,7 +278,6 @@ function DayPlannerTaskEditor({ navigation }) {
               <TriangleColorPicker
                 oldColor="#000"
                 onColorChange={(color) => {
-                  console.log(color, "color");
                 }}
                 style={{ flex: 1 }}
               ></TriangleColorPicker>

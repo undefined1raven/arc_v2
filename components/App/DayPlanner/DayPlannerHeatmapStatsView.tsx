@@ -44,9 +44,6 @@ function DayPlannerHeatmapStatsView() {
     setHeatmapColumns(actual);
   }, [dayPlannerAPI.derivedDays]);
 
-  useEffect(() => {
-    console.log(heatmapColumns);
-  }, [heatmapColumns]);
 
   const renderItem = ({ item, index }: { item: any }) => {
     if (item === undefined) {

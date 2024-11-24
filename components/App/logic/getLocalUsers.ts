@@ -25,7 +25,6 @@ async function getLocalUsers(): Promise<GetLocalUsersSig> {
       for (let ix = 0; ix < result.length; ix++) {
         const userID = result[ix].id;
         const hasTessKey = result[ix].PIKBackup !== null;
-        console.log(result[ix].PIKBackup !== null, " PINIXIN");
         if (userID === "temp") {
           continue;
         }

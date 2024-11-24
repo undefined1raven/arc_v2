@@ -139,7 +139,6 @@ export default function CreateAccountOnlineEmail({ navigation }) {
                     emailInput
                   )
                     .then((res) => {
-                      console.log(res);
                       navigation.navigate("OTSOne", { name: "OTSOne" });
                       setHasConfirmedAccountInfo(false);
                     })

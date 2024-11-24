@@ -218,7 +218,6 @@ function ActivitiesSettingsMain({ navigation }) {
                   tasks: newTasks,
                 });
               }
-              console.log("delete");
             }}
             width="15%"
             height="100%"

@@ -169,7 +169,6 @@ export default function OTSThree({ navigation }) {
             console.log(e, "XNX-221");
           });
       }
-      console.log(wrappedKeysStorage, "wraped symkey");
     }
   }, [wrappedKeysStorage]);
 
@@ -201,7 +200,6 @@ export default function OTSThree({ navigation }) {
       const eventResponse: WrapKeysWithPasswordCodeReturnType = JSON.parse(
         e.nativeEvent.data
       );
-      console.log(eventResponse, "from wrapped keys");
       if (
         eventResponse.status === "success" &&
         eventResponse.payload !== undefined &&

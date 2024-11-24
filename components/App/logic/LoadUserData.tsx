@@ -41,7 +41,6 @@ function LoadUserData({ navigation }) {
     setHasArcChunks(arcChunks !== null);
   }, [arcChunks]);
   useEffect(() => {
-    console.log(currentActivities.ini, "currentActivities.ini");
     if (
       arcFeatureConfig !== null &&
       currentActivities.ini === true &&
@@ -59,12 +58,10 @@ function LoadUserData({ navigation }) {
   useEffect(() => {
     if (activeUserID !== null) {
       hasLoadedUserDataAPI.setHasStartedDecryption(true);
-      console.log(getActiveUserID(), "activeUserID here");
       db.getAllAsync(
         `SELECT * FROM arcChunks WHERE userID=? ORDER BY tx DESC LIMIT 6`,
         [activeUserID]
       ).then((recentChunks) => {
-        console.log(hasLoadedUserDataAPI.keyType, "keyType");
         if (
           hasLoadedUserDataAPI.keyType === "simple" ||
           (hasLoadedUserDataAPI.keyType === "double" &&
@@ -81,7 +78,6 @@ function LoadUserData({ navigation }) {
               .then((res) => {
                 const decryptedChunks: ARC_ChunksType[] = [];
                 const results = JSON.parse(jsesc.default(res, { json: true }));
-                console.log(results.length, "results len");
                 for (let ix = 0; ix < results.length; ix++) {
                   const tasks = JSON.parse(results[ix]);
                   decryptedChunks.push({

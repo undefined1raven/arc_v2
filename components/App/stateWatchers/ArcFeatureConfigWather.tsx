@@ -27,14 +27,12 @@ function ArcFeatureConfigWatcher() {
         statusIndicatorsAPI.setEncrypting(true);
         symmetricEncrypt(JSON.stringify(arcFeatureConfig), tid)
           .then((e) => {
-            console.log("encrypted AFCW");
             db.runAsync(`UPDATE users SET arcFeatureConfig = ? WHERE id = ?`, [
               e,
               activeUserID,
             ])
               .then((e) => {
                 statusIndicatorsAPI.setEncrypting(false);
-                console.log("updated AFCW");
               })
               .catch((e) => {
                 statusIndicatorsAPI.setEncrypting(false);

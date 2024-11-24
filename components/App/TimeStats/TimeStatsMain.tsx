@@ -217,7 +217,6 @@ export default function TimeStatsMain({ navigation }) {
             mobileFontSize={globalStyle.mediumMobileFont}
             label="1w ago"
             onClick={() => {
-              console.log("clicked");
             }}
             figmaImport={{
               mobile: { left: 98, width: 84, height: 29, top: 28 },
@@ -234,7 +233,6 @@ export default function TimeStatsMain({ navigation }) {
             mobileFontSize={globalStyle.mediumMobileFont}
             label="now"
             onClick={() => {
-              console.log("clicked");
             }}
             figmaImport={{
               mobile: { left: 200, width: 84, height: 29, top: 28 },

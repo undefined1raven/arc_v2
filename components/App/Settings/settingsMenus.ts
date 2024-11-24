@@ -42,10 +42,10 @@ export const useSettingsMenus = create<SettingsMenus>((set, get) => ({
         },
         {
           label: "Switch Account Type",
-          name: "switchAccountType",
+          name: "accountType",
           showIcon: false,
           icon: null,
-          screenName: "switchAccountType",
+          screenName: "accountType",
           description: "Tap to learn more",
         },
         {

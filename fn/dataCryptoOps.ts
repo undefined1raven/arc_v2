@@ -59,7 +59,6 @@ async function symmetricDecrypt(cipher, key, iv) {
  }
 
 function decode(str){
-    console.log('before decode: ', str);
     let utf8decoder = new TextDecoder();
     const originalObj = JSON.parse(str);
     const outArray = [];
@@ -71,7 +70,6 @@ function decode(str){
     return utf8decoder.decode(uint);
 }
 
-console.log('debugging active')
 console.log('json present: ', \`${payload}\`)
  try {
      if (crypto.subtle !== undefined) {
@@ -90,9 +88,7 @@ console.log('json present: ', \`${payload}\`)
                     const payloadA = '${payload}';
                     const rawIV = payloadA.split('^')[0];
                     const rawCipher = payloadA.split('^')[1];
-                    console.log(decode(rawCipher));
                     symmetricDecrypt(decode(rawCipher), key, decode(rawIV)).then(res => {
-                        console.log(res, 'decrypted');
                         sendMessage(JSON.stringify({taskID: 'dataDecryption', error: null, status: 'success', payload: JSON.stringify(res)}));
                     }).catch(e => {
                         console.log('error: ', e);

@@ -328,7 +328,6 @@ export default function LoginOffline({ navigation }) {
                 height="100%"
                 androidRippleEnabled={false}
                 onClick={() => {
-                  console.log("here");
                   setRestoreTimeTracking(!restoreTimeTracking);
                 }}
                 borderColor="#00000000"

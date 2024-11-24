@@ -65,7 +65,6 @@ const useStore = create<arcChunkStore>((set) => ({
   ) =>
     set((state) => {
       const newArcChunks = state.arcChunks.map((arcChunk) => {
-        console.log(activity, "activity");
         if (arcChunk.id === id) {
           return {
             ...arcChunk,

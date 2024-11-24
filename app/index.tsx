@@ -41,6 +41,7 @@ import SettingsMainMenu from "@/components/App/Settings/SettingsMainMenu";
 import { ThemeSettings } from "@/components/App/Settings/Account/ThemeSettings";
 import { DayPlannerStatsMain } from "@/components/App/DayPlanner/DayPlannerStatsMain";
 import { SettingsCommonMenu } from "@/components/App/Settings/SettingsCommonMenu";
+import { AccountType } from "@/components/App/Settings/Account/AccoutType";
 const Stack = createNativeStackNavigator();
 
 type handleAccountInfoEventReturnSig = {
@@ -188,10 +189,12 @@ export default function App() {
           name="settingsCommonMenu"
           component={SettingsCommonMenu}
         ></Stack.Screen>
+
         <Stack.Screen
           name="themeSettings"
           component={ThemeSettings}
         ></Stack.Screen>
+        <Stack.Screen name="accountType" component={AccountType}></Stack.Screen>
         <Stack.Screen name="loginMain" component={LoginMain}></Stack.Screen>
         <Stack.Screen
           name="SettingsMain"

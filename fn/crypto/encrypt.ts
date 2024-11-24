@@ -75,21 +75,15 @@ function encode(str) {
   console.log('[Encryption] string payload present: ', \`${payload}\`, " | Tid: ",\`${transactionID}\`)
    try {
        if (crypto.subtle !== undefined) {
-        console.log("1")
           const jwk = JSON.parse('${symsk}');
           importSymmetricKey(jwk).then(key => {
-          console.log("2")
            symmetricEncrypt('${payload}', key).then(res => {
-           console.log("300")
            const stringifiedRes = JSON.stringify(res);
-           console.log("305")
             window.ReactNativeWebView.postMessage(JSON.stringify({taskID: 'encrypt', status: 'success', error: null, payload: stringifiedRes, transactionID: '${transactionID}'}));
                     }).catch(e => {
-           console.log("315")
                         window.ReactNativeWebView.postMessage(JSON.stringify({taskID: 'dataEncryption', error: 'Encryption error', status: 'failed'}));
                     })
           }).catch(e => {
-          console.log("3")
               sendMessage(JSON.stringify({
                taskID: 'dataEncryption',
                error: 'Key import failed',
@@ -99,7 +93,6 @@ function encode(str) {
   
           })
        } else {
-          console.log("4")
           sendMessage(JSON.stringify({
                taskID: 'dataEncryption',
                error: 'Subtle Crypto INOP',
@@ -108,7 +101,6 @@ function encode(str) {
             return;
        }
    } catch (e) {
-          console.log("5")
        sendMessage(JSON.stringify({
            taskID: 'dataEncryption',
            error: e,

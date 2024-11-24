@@ -60,7 +60,6 @@ export default function MenuMain() {
       console.log("Permission denied");
       return;
     }
-    console.log("here 2");
 
     const userData = await db.getFirstAsync(
       `SELECT * FROM users WHERE id = '${activeUserID}'`
@@ -79,7 +78,6 @@ export default function MenuMain() {
     );
     const pk = await SecureStore.getItemAsync(`${activeUserID}-pk`);
     const symkey = await SecureStore.getItemAsync(`${activeUserID}-symsk`);
-    console.log("here");
     let accountBackup = {
       userData,
       arcData,

@@ -71,7 +71,6 @@ function PersonalDiaryNoteView({ navigation }) {
     newNoteChunk: SID_ChunksType,
     updatedNote: { note: SIDNoteType; chunkID: string }
   ) {
-    console.log(newNoteChunk, "new note chunk");
     db.runAsync(`INSERT OR REPLACE INTO sidChunks VALUES (?, ?, ?, ?, ?)`, [
       newNoteChunk.id,
       newNoteChunk.userID,

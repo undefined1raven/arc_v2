@@ -126,7 +126,6 @@ function stringToCharCodeArray(str) {
                 importPrivateKey(privateKeyJWK).then(pkActual => {
                   importSymmetricKey(secretSymmetricKeyJWK).then(symskActual => {
                     const recoveryCodes = JSON.parse('${password}');
-                    console.log(recoveryCodes);
 
                     const promiseArrayPk = [];
                     const promiseArraySYMSK = [];
@@ -137,9 +136,7 @@ function stringToCharCodeArray(str) {
                     }
 
                     Promise.all(promiseArrayPk).then(wrapedPkKeys => {
-                      console.log(wrapedPkKeys);
                       Promise.all(promiseArraySYMSK).then(wrapedSymKeys => {
-                        console.log(wrapedSymKeys);
                         if(wrapedPkKeys.length === wrapedSymKeys.length){
                             const keyExport = [];
                             for(let ix = 0; ix < wrapedPkKeys.length; ix++){

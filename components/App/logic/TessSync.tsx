@@ -139,7 +139,6 @@ function TessSync() {
               insertString.values
             )
               .then((rr) => {
-                console.log(rr, "from tess update");
                 statusIndicatorsAPI.setEncrypting(false);
               })
               .catch((e) => {
@@ -187,7 +186,6 @@ async function updateTessFeatureConfig() {
             insertString.values
           )
             .then((rr) => {
-              console.log(rr, "from tess update");
               statusIndicatorsAPI.setEncrypting(false);
             })
             .catch((e) => {

@@ -206,18 +206,13 @@ async function wrapCryptoKey(keyToWrap, password) {
                             const encryptedKey = processedEncryptedKey.key;
                             const salt = processedEncryptedKey.salt;
                             const iv = processedEncryptedKey.iv;
-                            console.log("here w", iv, salt, encryptedKey, pinActual);
                             unwrapKey(encryptedKey, pinActual, salt, iv).then(unwrapedKey => {
-                                console.log("the fucking hell")
                                 exportCryptoKey(unwrapedKey).then(jwk => {
-                                console.log("the fucking hell 2", jwk)
-
                                     sendMessage(JSON.stringify({taskID: 'tessSymkeyUnwrappingSuccess', status: 'success', payload: jwk}));
                                     }).catch(e => {
                                         sendMessage(JSON.stringify({taskID: 'tessSymkeyUnwrappingFailed', status: 'failed', error: e}));
                             })
                         }).catch(e => {
-                        console.log("we might be fucked")
                             sendMessage(JSON.stringify({taskID: 'tessSymkeyUnwrappingFailed', status: 'failed', error: e}));
                         })
                     }catch(e){

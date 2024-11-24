@@ -67,7 +67,6 @@ function InitializeApp({ navigation }) {
             } else {
               getLocalUsers()
                 .then((res) => {
-                  console.log(res, "checkTables");
                   if (
                     res.status === "success" &&
                     res.error === null &&
@@ -214,7 +213,6 @@ function InitializeApp({ navigation }) {
               transactionID: e.transactionID,
               encryptedData: e.payload,
             });
-            console.log("encrypted watching", e);
           }}
           transactionID={encryptionAPI.transactionID}
           symsk={SecureStore.getItem(

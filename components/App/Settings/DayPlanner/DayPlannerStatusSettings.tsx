@@ -376,8 +376,6 @@ function DayPlannerStatusSettings({ navigation }) {
                   const newTessFeatureConfig = tessFeatureConfig;
                   newTessFeatureConfig.statusArray[statusIndex] = newStatus;
 
-                  console.log("newTessFeatureConfig", newTessFeatureConfig);
-
                   useTessFeatureConfigStore
                     .getState()
                     .setTessFeatureConfig(newTessFeatureConfig);
@@ -407,7 +405,6 @@ function DayPlannerStatusSettings({ navigation }) {
                   }
                   const newTessFeatureConfig = tessFeatureConfig;
                   newTessFeatureConfig.statusArray[statusIndex] = newStatus;
-                  console.log(newTessFeatureConfig);
                   useTessFeatureConfigStore
                     .getState()
                     .setTessFeatureConfig(newTessFeatureConfig);
