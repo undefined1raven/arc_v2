@@ -131,7 +131,8 @@ function EditActivities({ navigation }) {
                 const newName = e;
                 setNewName(newName);
               }}
-              defaultValue={selectedObjectsAPI.selectedActivity?.name}
+              value={newName}
+              defaultValue={newName}
               figmaImport={{
                 mobile: {
                   left: 112,

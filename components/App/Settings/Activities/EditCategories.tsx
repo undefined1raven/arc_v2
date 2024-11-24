@@ -56,7 +56,10 @@ function EditCategories({ navigation }) {
           onInput={(e) => {
             setNewName(e);
           }}
-          defaultValue={selectedObjectsAPI.selectedCategory?.name}
+          align="left"
+          alignPadding={5}
+          value={newName}
+          defaultValue={newName}
           figmaImport={{
             mobile: {
               left: 112,
@@ -71,7 +74,7 @@ function EditCategories({ navigation }) {
             if (
               selectedObjectsAPI.selectedCategory === null ||
               selectedObjectsAPI.selectedCategory.name === newName
-            ){
+            ) {
               navigation.goBack();
               return;
             }
