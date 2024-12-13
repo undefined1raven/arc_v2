@@ -229,7 +229,7 @@ export default function QuickNavMain(props: QuickNavMainProps) {
 
   return (
     <RBox
-      backgroundColor="#20202020"
+      backgroundColor={isHovering ? "#00000000" : "#00000000"}
       figmaImport={{
         mobile: { ...containerProps },
       }}
@@ -238,9 +238,11 @@ export default function QuickNavMain(props: QuickNavMainProps) {
         <GestureHandlerRootView>
           {isHovering ? (
             <RBox
+              opacity={0}
               figmaImport={{
                 mobile: { left: "0", top: "2%", width: 150, height: "100%" },
               }}
+              backgroundColor="#00000000"
               figmaImportConfig={{
                 containerHeight: containerProps.height,
                 containerWidth: containerProps.width,
@@ -264,6 +266,7 @@ export default function QuickNavMain(props: QuickNavMainProps) {
           <RButton
             androidRippleEnabled={false}
             hoverOpacityMax="00"
+            backgroundColor="#00000000"
             hoverOpacityMin="00"
             opacity={0}
             onTouchMove={(e) => {
@@ -274,18 +277,11 @@ export default function QuickNavMain(props: QuickNavMainProps) {
                   return elm.startBound < absY && elm.endBound > absY;
                 }
               });
-              // if (
 
-              // ) {
-              //   // setActiveButtonID(null);
-              //   // setIsHovering(false);
-              // }
               if (newActiveButton === undefined) {
-                // setActiveButtonID(null);
               } else {
                 setActiveButtonID(newActiveButton.buttonID);
               }
-              //   setIsHovering(false);
             }}
             slopHit={hitSlop}
             mouseLeave={() => {
@@ -333,50 +329,43 @@ export default function QuickNavMain(props: QuickNavMainProps) {
               borderColor={globalStyle.color + "00"}
               androidRippleEnabled={false}
               width="80%"
+              backgroundColor="#00000000"
               height="100%"
               left="20%"
               top="0%"
             >
-              <>
-                <RBox
-                  left={"98%"}
-                  width={1}
-                  height="20%"
-                  top="0%"
-                  backgroundColor={globalStyle.color}
-                ></RBox>
-                <RBox
-                  left={"98%"}
-                  width={1}
-                  height="20%"
-                  top="25%"
-                  backgroundColor={globalStyle.color}
-                ></RBox>
-                <RBox
-                  left={"98%"}
-                  width={1}
-                  height="20%"
-                  top="50%"
-                  backgroundColor={globalStyle.color}
-                ></RBox>
-                <RBox
-                  left={"98%"}
-                  width={1}
-                  height="20%"
-                  top="75%"
-                  backgroundColor={globalStyle.color}
-                ></RBox>
-                {isHovering ? (
+              {!isHovering && (
+                <>
                   <RBox
-                    width={1}
-                    height={"100%"}
                     left={"98%"}
+                    width={1}
+                    height="20%"
+                    top="0%"
                     backgroundColor={globalStyle.color}
                   ></RBox>
-                ) : (
-                  <RBox></RBox>
-                )}
-              </>
+                  <RBox
+                    left={"98%"}
+                    width={1}
+                    height="20%"
+                    top="25%"
+                    backgroundColor={globalStyle.color}
+                  ></RBox>
+                  <RBox
+                    left={"98%"}
+                    width={1}
+                    height="20%"
+                    top="50%"
+                    backgroundColor={globalStyle.color}
+                  ></RBox>
+                  <RBox
+                    left={"98%"}
+                    width={1}
+                    height="20%"
+                    top="75%"
+                    backgroundColor={globalStyle.color}
+                  ></RBox>
+                </>
+              )}
             </RButton>
           </RButton>
         </GestureHandlerRootView>
