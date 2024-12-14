@@ -15,6 +15,8 @@ export type DerivedDaysScoreType = {
 export interface DayPlannerStore {
   days: TessDayLogType[] | null;
   hasLoadedData: boolean;
+  historicalDayView: TessDayLogType | null;
+  setHistoricalDayView: (historicalDayView: TessDayLogType | null) => void;
   setHasLoadedData: (hasLoadedData: boolean) => void;
   setDays: (days: TessDayLogType[] | null) => void;
   lastChunk: Tess_ChunksType | null;
@@ -31,6 +33,8 @@ export interface DayPlannerStore {
 
 const useDayPlannerStore = create<DayPlannerStore>((set, get) => ({
   days: null,
+  historicalDayView: null,
+  setHistoricalDayView: (historicalDayView) => set({ historicalDayView }),
   lastChunk: null,
   setLastChunk: (lastChunk) => set({ lastChunk }),
   hasLoadedData: false,

@@ -84,8 +84,9 @@ export default function Home({ navigation, onRequestUserIDs }) {
           navMenuItems={[
             {
               buttonID: "cancel",
-              label: "x",
+              label: "Personal Diary",
               onClick: () => {
+                navigation.navigate("diaryMain", { name: "diaryMain" });
               },
             },
             {

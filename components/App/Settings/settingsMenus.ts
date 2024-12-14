@@ -9,7 +9,7 @@ export interface IMenu {
     showIcon: boolean;
     description: string;
     icon: null | React.FC;
-    screenName: string;
+    screenName: string | null;
   }[];
 }
 
@@ -32,6 +32,15 @@ export const useSettingsMenus = create<SettingsMenus>((set, get) => ({
       title: "Config / Account Settings",
       id: "account",
       options: [
+        {
+          label: "Log out",
+          name: "logout",
+          showIcon: false,
+          icon: null,
+          screenName: null,
+          description: "Log out of your account",
+        },
+
         {
           label: "Themes",
           name: "themes",

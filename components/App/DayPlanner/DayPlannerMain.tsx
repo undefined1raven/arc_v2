@@ -233,6 +233,14 @@ function DayPlannerMain({ navigation }) {
           androidRippleColor={
             currentDayClass?.colors[globalStyle.theme].color + "20"
           }
+          onClick={() => {
+            dayPlannerAPI.setHistoricalDayView(item);
+            setTimeout(() => {
+              navigation.navigate("dayPlannerDayView", {
+                name: "dayPlannerDayView",
+              });
+            }, 50);
+          }}
           height="100%"
           style={{ overflow: "hidden" }}
           verticalAlign="center"
