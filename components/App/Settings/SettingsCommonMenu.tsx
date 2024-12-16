@@ -8,7 +8,7 @@ import RButton from "@/components/common/RButton";
 import RBox from "@/components/common/RBox";
 import React from "react";
 import RFlatList from "@/components/common/RFlatList";
-import { act } from "react-test-renderer";
+import { logout } from "@/fn/logout";
 
 function SettingsCommonMenu({ navigation }) {
   const settingsMenuAPI = useSettingsMenus();
@@ -32,10 +32,13 @@ function SettingsCommonMenu({ navigation }) {
       >
         <RButton
           onClick={() => {
-            if (navigation !== null) {
+            if (navigation !== null && item.screenName !== null) {
               navigation.navigate(item.screenName, {
                 name: item.screenName,
               });
+            }
+            if (item.name === "logout") {
+              logout();
             }
           }}
           width="100%"

@@ -216,8 +216,7 @@ export default function TimeStatsMain({ navigation }) {
           <RButton
             mobileFontSize={globalStyle.mediumMobileFont}
             label="1w ago"
-            onClick={() => {
-            }}
+            onClick={() => {}}
             figmaImport={{
               mobile: { left: 98, width: 84, height: 29, top: 28 },
             }}
@@ -232,8 +231,7 @@ export default function TimeStatsMain({ navigation }) {
           <RButton
             mobileFontSize={globalStyle.mediumMobileFont}
             label="now"
-            onClick={() => {
-            }}
+            onClick={() => {}}
             figmaImport={{
               mobile: { left: 200, width: 84, height: 29, top: 28 },
             }}

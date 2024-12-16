@@ -33,15 +33,6 @@ export const useSettingsMenus = create<SettingsMenus>((set, get) => ({
       id: "account",
       options: [
         {
-          label: "Log out",
-          name: "logout",
-          showIcon: false,
-          icon: null,
-          screenName: null,
-          description: "Log out of your account",
-        },
-
-        {
           label: "Themes",
           name: "themes",
           showIcon: false,
@@ -64,6 +55,14 @@ export const useSettingsMenus = create<SettingsMenus>((set, get) => ({
           icon: null,
           screenName: "switchAccountType",
           description: "Security settings",
+        },
+        {
+          label: "Log out",
+          name: "logout",
+          showIcon: false,
+          icon: null,
+          screenName: null,
+          description: "Log out of your account",
         },
       ],
     },

@@ -51,8 +51,7 @@ export default function SettingsMainMenu({ navigation }) {
       id: "dayPlanner",
       label: "Customize Day Planner",
       description: "Change colors, add task categories",
-      icon: DayPlannerIcon,
-      screenName: "dayPlanner",
+      icon: DayPlannerIcon,screenName: "dayPlanner",
     },
     {
       id: "diary",
