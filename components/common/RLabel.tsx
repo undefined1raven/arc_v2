@@ -4,6 +4,7 @@ import {
   Text,
   Button,
   useWindowDimensions,
+  useAnimatedValue,
 } from "react-native";
 import { AlignType, ColorValueHex, FontSize } from "./CommonTypes";
 import { useEffect, useRef, useState } from "react";
@@ -13,6 +14,8 @@ import FigmaImportConfig from "../../fn/FigmaImportConfig";
 import Animated, {
   Easing,
   FadeInDown,
+  interpolateColor,
+  useAnimatedStyle,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
@@ -64,11 +67,48 @@ export default function RLabel(props: RButtonProps) {
   });
   const [currentFontFamiliy, setCurrentFontFamiliy] =
     useState("Oxanium_400Regular");
-  const { height, width } = useWindowDimensions();
-  const p50Width = 0.5 * width;
-  const p50Height = 0.5 * height;
-  store.subscribe(() => {});
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
+  const colorTransitionProgress = useSharedValue(0);
+  const initialColor = useRef<string>(
+    props.color ? props.color : globalStyle.textColor
+  );
+  const [startColor, setStartColor] = useState(
+    getVal(props.color, globalStyle.textColor)
+  );
+  const [endColor, setEndColor] = useState(
+    getVal(props.color, globalStyle.textColor)
+  );
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      color: interpolateColor(
+        colorTransitionProgress.value,
+        [0, 1],
+        [startColor, endColor]
+      ),
+    };
+  });
+
+  useEffect(() => {
+    if (
+      props.color !== initialColor.current &&
+      typeof props.color === "string"
+    ) {
+      setStartColor(initialColor.current);
+      setEndColor(props.color);
+      colorTransitionProgress.value = withTiming(1, {
+        duration: 500,
+        easing: Easing.linear,
+      });
+      setTimeout(() => {
+        //@ts-ignore
+        initialColor.current = props.color;
+        setStartColor(props.color);
+        setEndColor(props.color);
+        colorTransitionProgress.value = 0;
+      }, 600);
+    }
+  }, [props.color]);
 
   const labelRef = useRef(null);
   function getVal(value: any, defaultVal: any) {
@@ -111,6 +151,7 @@ export default function RLabel(props: RButtonProps) {
     }
   }, [fontsLoaded]);
   useEffect(() => {
+    //@ts-ignore
     labelRef.current.measure((width, height, px, py, fx, fy) => {
       setComponentWidth(width);
       setComponentHeight(height);
@@ -156,43 +197,45 @@ export default function RLabel(props: RButtonProps) {
       }}
     >
       {/* <BlurView style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', ...styles.b }} intensity={getVal(props.blur, 0)}> */}
-      <Text
-        style={{
-          display: "flex",
-          position: "absolute",
-          top: 0,
-          left: "auto",
-          width: "100%",
-          height: "100%",
-          textAlignVertical: getVal(props.verticalAlign, "top"),
-          alignItems: "center",
-          color: getVal(props.color, globalStyle.textColor),
-          fontSize: fontController(
-            getVal(props.fontSize, globalStyle.regularMobileFont)
-          ),
-          justifyContent: getVal(props.align, "center"),
-          textAlign: getVal(props.align, "center"),
-          fontFamily: currentFontFamiliy,
-          paddingLeft: getVal(
-            props.align === "left" || props.align === "right"
-              ? props.alignPadding
+      <Animated.Text
+        style={[
+          {
+            display: "flex",
+            position: "absolute",
+            top: 0,
+            left: "auto",
+            width: "100%",
+            height: "100%",
+            textAlignVertical: getVal(props.verticalAlign, "top"),
+            alignItems: "center",
+            fontSize: fontController(
+              getVal(props.fontSize, globalStyle.regularMobileFont)
+            ),
+            justifyContent: getVal(props.align, "center"),
+            textAlign: getVal(props.align, "center"),
+            fontFamily: currentFontFamiliy,
+            paddingLeft: getVal(
+              props.align === "left" || props.align === "right"
                 ? props.alignPadding
-                : "2%"
-              : "0%",
-            "0%"
-          ),
-          paddingRight: getVal(
-            props.align === "right" || props.align === "end"
-              ? props.alignPadding
+                  ? props.alignPadding
+                  : "2%"
+                : "0%",
+              "0%"
+            ),
+            paddingRight: getVal(
+              props.align === "right" || props.align === "end"
                 ? props.alignPadding
-                : "2%"
-              : "0%",
-            "0%"
-          ),
-        }}
+                  ? props.alignPadding
+                  : "2%"
+                : "0%",
+              "0%"
+            ),
+          },
+          animatedStyle,
+        ]}
       >
         {props.text}
-      </Text>
+      </Animated.Text>
       {props.children}
       {/* </BlurView> */}
     </Animated.View>
