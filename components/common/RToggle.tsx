@@ -2,11 +2,18 @@ import FigmaImporter from "../../fn/figmaImporter";
 import FigmaImportConfig from "../../fn/FigmaImportConfig";
 import RBox from "./RBox";
 import { ColorValueHex } from "./CommonTypes";
-import Animated from "react-native-reanimated";
+import Animated, {
+  useAnimatedProps,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { getVal } from "@/app/config/defaultTransitionConfig";
 import { useGlobalStyleStore } from "@/stores/globalStyles";
 import RButton from "./RButton";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { getWithTimingConfig } from "@/constants/animationConfig";
 
 type RToggleProps = {
   id?: string;
@@ -38,7 +45,13 @@ type RToggleProps = {
 function RToggle(props: RToggleProps) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const [toggled, setToggled] = useState(getVal(props.defaultToggled, false));
-
+  const AnimatedBox = Animated.createAnimatedComponent(React.forwardRef(RBox));
+  const animatedLeft = useSharedValue<number>(0);
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      left: animatedLeft.value + "%",
+    };
+  });
   useEffect(() => {
     if (props.value !== undefined) {
       setToggled(props.value);
@@ -96,6 +109,12 @@ function RToggle(props: RToggleProps) {
         <RButton
           onClick={() => {
             setToggled(!toggled);
+            if (!toggled) {
+              animatedLeft.value = withTiming(70, getWithTimingConfig());
+            } else {
+              animatedLeft.value = withTiming(0, getWithTimingConfig());
+            }
+
             if (props.onToggle) {
               props.onToggle(!toggled);
             }
@@ -111,16 +130,22 @@ function RToggle(props: RToggleProps) {
           width="100%"
           height="100%"
         >
-          <RBox
-            width="30%"
-            height="100%"
-            left={toggled ? "70%" : "0%"}
-            backgroundColor={
-              toggled
-                ? getVal(props.thumbColor, globalStyle.color)
-                : getVal(props.thumbColorInactive, globalStyle.color + "60")
-            }
-          ></RBox>
+          <Animated.View
+            style={[
+              {
+                width: "30%",
+                height: "100%",
+                position: "absolute",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: toggled
+                  ? getVal(props.thumbColor, globalStyle.color)
+                  : getVal(props.thumbColorInactive, globalStyle.color + "60"),
+              },
+              animatedStyle,
+            ]}
+          ></Animated.View>
         </RButton>
       </>
     </Animated.View>
