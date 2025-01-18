@@ -32,6 +32,7 @@ import RButton from "@/components/common/RButton";
 import { BlurView } from "expo-blur";
 import { BackHandler, Alert } from "react-native";
 import themeColors from "@/app/config/colors";
+import { FlashList } from "@shopify/flash-list";
 import {
   FlatList,
   GestureHandlerRootView,
@@ -197,29 +198,32 @@ export default function TimeTrackingActivityMenu(
             mobile: { left: 5, width: 350, height: 528, top: 52 },
           }}
         >
-          <FlatList
-            showsVerticalScrollIndicator={false}
-            style={{ ...styles.defaultStyle }}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.taskID}
-            data={arcFeatureConfig?.tasks.filter((task) => {
-              if (task.deleted === true) return false;
-              if (searchInput === "") return true;
-              const searchInputLowerCase = searchInput.toLocaleLowerCase();
-              const filteredTaskCategories =
-                arcFeatureConfig.taskCategories.filter((cat) =>
-                  cat.name.toLocaleLowerCase().includes(searchInputLowerCase)
+          <View style={{ ...styles.defaultStyle }}>
+            <FlashList
+              estimatedItemSize={80}
+              showsVerticalScrollIndicator={false}
+              style={{ ...styles.defaultStyle }}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.taskID}
+              data={arcFeatureConfig?.tasks.filter((task) => {
+                if (task.deleted === true) return false;
+                if (searchInput === "") return true;
+                const searchInputLowerCase = searchInput.toLocaleLowerCase();
+                const filteredTaskCategories =
+                  arcFeatureConfig.taskCategories.filter((cat) =>
+                    cat.name.toLocaleLowerCase().includes(searchInputLowerCase)
+                  );
+                return (
+                  task.name
+                    .toLocaleLowerCase()
+                    .includes(searchInput.toLocaleLowerCase()) ||
+                  filteredTaskCategories.find(
+                    (cat) => cat.categoryID === task.categoryID
+                  )
                 );
-              return (
-                task.name
-                  .toLocaleLowerCase()
-                  .includes(searchInput.toLocaleLowerCase()) ||
-                filteredTaskCategories.find(
-                  (cat) => cat.categoryID === task.categoryID
-                )
-              );
-            })}
-          ></FlatList>
+              })}
+            ></FlashList>
+          </View>
         </RBox>
         <RButton
           onClick={() => {
