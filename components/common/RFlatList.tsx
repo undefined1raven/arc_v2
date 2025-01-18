@@ -28,6 +28,7 @@ import { Oxanium_400Regular } from "@expo-google-fonts/oxanium";
 import { IBMPlexMono_400Regular } from "@expo-google-fonts/ibm-plex-mono";
 import { globalEnteringConfig } from "@/app/config/defaultTransitionConfig";
 import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
+import { FlashList } from "@shopify/flash-list";
 type RFlatListProps = {
   id?: string;
   fontType?: "regular" | "mono";
@@ -61,6 +62,7 @@ type RFlatListProps = {
   verticalAlign?: "top" | "bottom" | "center";
   figmaImportConfig?: object;
   transitions?: string | object;
+  expectedItemHeight?: number;
 };
 
 export default function RFlatList(props: RFlatListProps) {
@@ -143,7 +145,7 @@ export default function RFlatList(props: RFlatListProps) {
         ...props.style,
       }}
     >
-      <FlatList
+      <FlashList
         inverted={getVal(props.inverted, false)}
         showsVerticalScrollIndicator={false}
         style={{
@@ -157,11 +159,12 @@ export default function RFlatList(props: RFlatListProps) {
           borderColor: getVal(props.borderColor, globalStyle.color),
           borderWidth: getVal(props.borderWidth, 0),
         }}
+        estimatedItemSize={getVal(props.expectedItemHeight, 100)}
         renderItem={props.renderItem}
         ListEmptyComponent={props.emptyComponent}
         keyExtractor={props.keyExtractor}
         data={props.data}
-      ></FlatList>
+      ></FlashList>
     </GestureHandlerRootView>
   );
 }

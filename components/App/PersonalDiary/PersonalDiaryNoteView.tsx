@@ -224,6 +224,7 @@ function PersonalDiaryNoteView({ navigation }) {
         figmaImport={{ mobile: { left: 3, width: 354, height: 39, top: 541 } }}
       ></RLabel>
       <RToggle
+        defaultToggled={newReadOnly}
         value={newReadOnly}
         onToggle={(e) => {
           setNewReadOnly(e);

@@ -46,17 +46,24 @@ function RToggle(props: RToggleProps) {
   const globalStyle = useGlobalStyleStore((store) => store.globalStyle);
   const [toggled, setToggled] = useState(getVal(props.defaultToggled, false));
   const AnimatedBox = Animated.createAnimatedComponent(React.forwardRef(RBox));
-  const animatedLeft = useSharedValue<number>(0);
+  const animatedLeft = useSharedValue<number>(
+    getVal(props.defaultToggled, false) ? 70 : 0
+  );
   const animatedStyle = useAnimatedStyle(() => {
     return {
       left: animatedLeft.value + "%",
     };
   });
+
+  useEffect(() => {
+    setToggled(getVal(props.defaultToggled, false));
+  }, []);
+
   useEffect(() => {
     if (props.value !== undefined) {
       setToggled(props.value);
     }
-  }, [props.value]);
+  }, [props.value, props.defaultToggled]);
 
   function getFigmaImportValues() {
     if (props.figmaImport) {

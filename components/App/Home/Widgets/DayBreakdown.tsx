@@ -238,6 +238,7 @@ export default function DayBreakdown({ navigation }) {
           text="Day Breakdown"
         ></RLabel>
         <RFlatList
+          expectedItemHeight={50}
           renderItem={renderItem}
           data={data}
           width={"98%"}
